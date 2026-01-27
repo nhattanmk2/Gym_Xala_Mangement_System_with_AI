@@ -30,8 +30,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 user.getPassword(),
                 user.getRoles().stream()
                         .map(role ->
+                                // ⚠️ KHÔNG thêm ROLE_ nữa
                                 new SimpleGrantedAuthority(
-                                        "ROLE_" + role.getName().name()
+                                        role.getName().name()
                                 )
                         )
                         .collect(Collectors.toSet())

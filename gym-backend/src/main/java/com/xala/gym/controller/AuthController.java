@@ -2,39 +2,34 @@ package com.xala.gym.controller;
 
 import com.xala.gym.dto.request.LoginRequest;
 import com.xala.gym.dto.request.RegisterRequest;
+import com.xala.gym.dto.response.AuthResponse;
 import com.xala.gym.entity.User;
 import com.xala.gym.service.AuthService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "*") // Cho phép React Native/Web gọi API thoải mái
+@CrossOrigin(origins = "*")
+@RequiredArgsConstructor
 public class AuthController {
 
-    @Autowired
-    private AuthService authService;
+    private final AuthService authService;
 
-    // API Đăng ký: POST /api/auth/register
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
-        try {
-            User createdUser = authService.register(request);
-            return ResponseEntity.ok(createdUser);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<?> register(
+            @RequestBody RegisterRequest request
+    ) {
+        User user = authService.register(request);
+        return ResponseEntity.ok(user);
     }
 
-    // API Đăng nhập: POST /api/auth/login
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        try {
-            User user = authService.login(request);
-            return ResponseEntity.ok(user);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<AuthResponse> login(
+            @RequestBody LoginRequest request
+    ) {
+        String token = authService.login(request); // ✅ trả String
+        return ResponseEntity.ok(new AuthResponse(token)); // ✅ bọc DTO
     }
 }

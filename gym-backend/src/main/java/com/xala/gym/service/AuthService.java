@@ -7,86 +7,86 @@ import com.xala.gym.entity.User;
 import com.xala.gym.entity.enums.UserRole;
 import com.xala.gym.repository.RoleRepository;
 import com.xala.gym.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.xala.gym.security.jwt.JwtService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.Set;
 
 @Service
+@RequiredArgsConstructor
 public class AuthService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
+    private final AuthenticationManager authenticationManager;
 
-    @Autowired
-    private RoleRepository roleRepository;
-
+    // ======================= REGISTER =======================
     public User register(RegisterRequest request) {
-        // Kiểm tra username tồn tại
+
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
-            throw new RuntimeException("Lỗi: Username đã tồn tại!");
+            throw new RuntimeException("Username đã tồn tại");
         }
 
-        // Kiểm tra email tồn tại (Giờ đã hoạt động vì đã thêm vào UserRepository)
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Lỗi: Email đã được sử dụng!");
+            throw new RuntimeException("Email đã được sử dụng");
         }
 
-        User newUser = new User();
-        newUser.setUsername(request.getUsername());
-        newUser.setPassword(request.getPassword()); // Lưu ý: Nên mã hóa password (BCrypt)
-        newUser.setEmail(request.getEmail());
-        newUser.setFullName(request.getFullName());
-        newUser.setPhone(request.getPhone());
+        User user = new User();
+        user.setUsername(request.getUsername());
+        user.setPassword(passwordEncoder.encode(request.getPassword())); // ✅ BCrypt
+        user.setEmail(request.getEmail());
+        user.setFullName(request.getFullName());
+        user.setPhone(request.getPhone());
 
-        // --- Dữ liệu AI ---
-        newUser.setHeight(request.getHeight());
-        newUser.setWeight(request.getWeight());
-        newUser.setGoalType(request.getGoalType());
-
-        // Xử lý availabilitySlots
-        // Vì Entity User sử dụng StringListConverter nên có thể nhận trực tiếp List<String>
-        if (request.getAvailabilitySlots() != null && !request.getAvailabilitySlots().isEmpty()) {
-            newUser.setAvailabilitySlots(request.getAvailabilitySlots());
-        }
-
-        newUser.setPtSpecialty(request.getPtSpecialty());
-
-        // --- Role ---
-        Set<Role> roles = new HashSet<>();
-        String strRole = request.getRole();
-        UserRole roleEnum = UserRole.ROLE_MEMBER; // Mặc định là Member
-
-        if (strRole != null) {
-            if ("admin".equalsIgnoreCase(strRole)) {
-                roleEnum = UserRole.ROLE_ADMIN;
-            } else if ("pt".equalsIgnoreCase(strRole)) {
-                roleEnum = UserRole.ROLE_PT;
-            }
+        // ===== ROLE =====
+        UserRole roleEnum = UserRole.ROLE_MEMBER;
+        if ("admin".equalsIgnoreCase(request.getRole())) {
+            roleEnum = UserRole.ROLE_ADMIN;
+        } else if ("pt".equalsIgnoreCase(request.getRole())) {
+            roleEnum = UserRole.ROLE_PT;
         }
 
         UserRole finalRoleEnum = roleEnum;
-        Role userRole = roleRepository.findByName(roleEnum)
+        Role role = roleRepository.findByName(roleEnum)
                 .orElseGet(() -> {
-                    Role newRole = new Role();
-                    newRole.setName(finalRoleEnum);
-                    return roleRepository.save(newRole);
+                    Role r = new Role();
+                    r.setName(finalRoleEnum);
+                    return roleRepository.save(r);
                 });
 
-        roles.add(userRole);
-        newUser.setRoles(roles);
+        Set<Role> roles = new HashSet<>();
+        roles.add(role);
+        user.setRoles(roles);
 
-        return userRepository.save(newUser);
+        return userRepository.save(user);
     }
 
-    public User login(LoginRequest request) {
-        User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new RuntimeException("Lỗi: Không tìm thấy tài khoản!"));
+    // ======================= LOGIN =======================
+    public String login(LoginRequest request) {
 
-        if (!user.getPassword().equals(request.getPassword())) {
-            throw new RuntimeException("Lỗi: Sai mật khẩu!");
-        }
-        return user;
+        // 1️⃣ Xác thực qua Spring Security
+        Authentication authentication =
+                authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(
+                                request.getUsername(),
+                                request.getPassword()
+                        )
+                );
+
+        // 2️⃣ LẤY UserDetails (DÒNG BẠN BỊ THIẾU)
+        UserDetails userDetails =
+                (UserDetails) authentication.getPrincipal();
+
+        // 3️⃣ Tạo JWT
+        return jwtService.generateToken(userDetails);
     }
 }
