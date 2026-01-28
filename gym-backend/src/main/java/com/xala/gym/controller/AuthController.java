@@ -4,7 +4,6 @@ import com.xala.gym.dto.request.LoginRequest;
 import com.xala.gym.dto.request.RegisterRequest;
 import com.xala.gym.dto.response.AuthResponse;
 import com.xala.gym.entity.User;
-import com.xala.gym.security.jwt.JwtService;
 import com.xala.gym.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
-    private final JwtService jwtService;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(
@@ -31,13 +29,6 @@ public class AuthController {
     public ResponseEntity<AuthResponse> login(
             @RequestBody LoginRequest request
     ) {
-        String token = authService.login(request);
-
-        // ✅ Lấy role từ token
-        String role = jwtService.extractRole(token);
-
-        return ResponseEntity.ok(
-                new AuthResponse(token, role)
-        );
+        return ResponseEntity.ok(authService.login(request));
     }
 }

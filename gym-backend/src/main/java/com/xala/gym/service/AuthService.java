@@ -2,6 +2,7 @@ package com.xala.gym.service;
 
 import com.xala.gym.dto.request.LoginRequest;
 import com.xala.gym.dto.request.RegisterRequest;
+import com.xala.gym.dto.response.AuthResponse;
 import com.xala.gym.entity.Role;
 import com.xala.gym.entity.User;
 import com.xala.gym.entity.enums.UserRole;
@@ -17,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -71,7 +73,7 @@ public class AuthService {
     }
 
     // ======================= LOGIN =======================
-    public String login(LoginRequest request) {
+    public AuthResponse login(LoginRequest request) {
 
         // 1️⃣ Authenticate
         Authentication authentication =
@@ -82,22 +84,30 @@ public class AuthService {
                         )
                 );
 
-        // 2️⃣ Lấy UserDetails
+        // 2️⃣ UserDetails
         UserDetails userDetails =
                 (UserDetails) authentication.getPrincipal();
 
-        // 3️⃣ Lấy ROLE từ database (THÊM)
+        // 3️⃣ User từ DB (để lấy role + info)
         User user = userRepository
                 .findByUsername(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        String role = user.getRoles()
+        // 4️⃣ Lấy danh sách role
+        List<String> roles = user.getRoles()
                 .stream()
-                .findFirst()
                 .map(r -> r.getName().name())
-                .orElse(null);
+                .toList();
 
-        // 4️⃣ Generate JWT có ROLE
-        return jwtService.generateToken(userDetails, role);
+        // 5️⃣ Generate JWT (JWT có thể KHÔNG cần nhét role cũng OK)
+        String token = jwtService.generateToken(userDetails);
+
+        // 6️⃣ Trả response chuẩn
+        return new AuthResponse(
+                token,
+                user.getUsername(),
+                user.getEmail(),
+                roles
+        );
     }
 }
