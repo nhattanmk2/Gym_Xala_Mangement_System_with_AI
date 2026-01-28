@@ -22,11 +22,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
 
-    // ✅ BỎ QUA FILTER CHO LOGIN / REGISTER
+    // ✅ BỎ QUA LOGIN / REGISTER
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        String path = request.getServletPath();
-        return path.startsWith("/api/auth/");
+        return request.getServletPath().startsWith("/api/auth/");
     }
 
     @Override
@@ -45,8 +44,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        final String jwt =
-                authHeader.substring(7);
+        final String jwt = authHeader.substring(7);
         final String username =
                 jwtService.extractUsername(jwt);
 
@@ -55,7 +53,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         .getAuthentication() == null) {
 
             UserDetails userDetails =
-                    userDetailsService.loadUserByUsername(username);
+                    userDetailsService
+                            .loadUserByUsername(username);
 
             if (jwtService.isTokenValid(jwt, userDetails)) {
 

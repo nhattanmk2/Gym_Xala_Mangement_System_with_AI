@@ -42,7 +42,7 @@ public class AuthService {
 
         User user = new User();
         user.setUsername(request.getUsername());
-        user.setPassword(passwordEncoder.encode(request.getPassword())); // ✅ BCrypt
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setEmail(request.getEmail());
         user.setFullName(request.getFullName());
         user.setPhone(request.getPhone());
@@ -73,7 +73,7 @@ public class AuthService {
     // ======================= LOGIN =======================
     public String login(LoginRequest request) {
 
-        // 1️⃣ Xác thực qua Spring Security
+        // 1️⃣ Authenticate
         Authentication authentication =
                 authenticationManager.authenticate(
                         new UsernamePasswordAuthenticationToken(
@@ -82,11 +82,22 @@ public class AuthService {
                         )
                 );
 
-        // 2️⃣ LẤY UserDetails (DÒNG BẠN BỊ THIẾU)
+        // 2️⃣ Lấy UserDetails
         UserDetails userDetails =
                 (UserDetails) authentication.getPrincipal();
 
-        // 3️⃣ Tạo JWT
-        return jwtService.generateToken(userDetails);
+        // 3️⃣ Lấy ROLE từ database (THÊM)
+        User user = userRepository
+                .findByUsername(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        String role = user.getRoles()
+                .stream()
+                .findFirst()
+                .map(r -> r.getName().name())
+                .orElse(null);
+
+        // 4️⃣ Generate JWT có ROLE
+        return jwtService.generateToken(userDetails, role);
     }
 }
