@@ -1,14 +1,15 @@
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
-    Alert,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { API_BASE_URL } from "../constants/api";
+import { saveAuth, getToken, getRoles } from "../utils/authStorage";
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -44,7 +45,7 @@ export default function LoginScreen() {
       const data = await response.json();
 
       /**
-       * data trả về ví dụ:
+       * data ví dụ:
        * {
        *   token: "...",
        *   username: "pt01",
@@ -52,7 +53,24 @@ export default function LoginScreen() {
        * }
        */
 
-      const role = data.roles?.[0];
+      const token = data.token;
+      const roles = data.roles;
+
+      if (!token || !roles || roles.length === 0) {
+        throw new Error("Invalid response");
+      }
+
+      // ✅ LƯU JWT + ROLES VÀO ASYNC STORAGE
+      await saveAuth(token, roles);
+
+      // 👇 BẮT BUỘC LOG NGAY
+      const savedToken = await getToken();
+      const savedRoles = await getRoles();
+
+      console.log("✅ TOKEN FROM ASYNC STORAGE:", savedToken);
+      console.log("✅ ROLES FROM ASYNC STORAGE:", savedRoles);
+
+      const role = roles[0];
 
       if (role === "ROLE_MEMBER") {
         Alert.alert("Thành công", "Đăng nhập Member thành công");
@@ -64,6 +82,7 @@ export default function LoginScreen() {
         Alert.alert("Lỗi", "Vai trò không hợp lệ");
       }
     } catch (error) {
+      console.log("LOGIN ERROR:", error);
       Alert.alert("Lỗi", "Sai tài khoản hoặc mật khẩu");
     } finally {
       setLoading(false);
