@@ -17,10 +17,17 @@ const LoginPage = () => {
 
       console.log("LOGIN RESPONSE:", data);
 
-      // ✅ CHECK ROLE ĐÚNG
-      if (!data.roles || !data.roles.includes("ROLE_ADMIN")) {
-        setError("Bạn không có quyền truy cập trang Admin");
-        return;
+      // LẤY ROLE
+      const role = data.roles?.[0];
+
+      if (role === "ROLE_ADMIN") {
+        window.location.href = "/admin/dashboard";
+      } else if (role === "ROLE_PT") {
+        window.location.href = "/pt/dashboard";   
+      } else if (role === "ROLE_MEMBER") {
+        window.location.href = "/member/dashboard";
+      } else {
+        setError("Vai trò không hợp lệ");
       }
 
       // ✅ LƯU TOKEN + INFO
@@ -29,7 +36,7 @@ const LoginPage = () => {
       localStorage.setItem("username", data.username);
       localStorage.setItem("email", data.email);
 
-      alert("Đăng nhập Admin thành công!");
+      alert("Đăng nhập thành công!");
 
       // TODO: redirect dashboard
       // window.location.href = "/dashboard";
@@ -43,7 +50,7 @@ const LoginPage = () => {
   return (
     <div style={styles.container}>
       <form style={styles.form} onSubmit={handleSubmit}>
-        <h2 style={styles.title}>Admin Login</h2>
+        <h2 style={styles.title}>Login</h2>
 
         {error && <p style={styles.error}>{error}</p>}
 

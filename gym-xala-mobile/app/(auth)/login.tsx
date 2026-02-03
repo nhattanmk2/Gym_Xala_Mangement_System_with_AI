@@ -8,8 +8,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { API_BASE_URL } from "../constants/api";
-import { saveAuth, getToken, getRoles } from "../utils/authStorage";
+import { API_BASE_URL } from "../../constants/api";
+import { saveAuth, getToken, getRoles } from "../../utils/authStorage";
 
 export default function LoginScreen() {
   const router = useRouter();
