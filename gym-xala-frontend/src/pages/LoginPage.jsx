@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { login } from "../api/authApi";
+import { useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
   const [username, setUsername] = useState("");
@@ -47,6 +48,8 @@ const LoginPage = () => {
     }
   };
 
+  const navigate = useNavigate();
+
   return (
     <div style={styles.container}>
       <form style={styles.form} onSubmit={handleSubmit}>
@@ -74,6 +77,14 @@ const LoginPage = () => {
 
         <button type="submit" style={styles.button}>
           Đăng nhập
+        </button>
+
+        <button
+          type="button"
+          style={styles.linkBtn}
+          onClick={() => navigate("/register")}
+        >
+          Chưa có tài khoản? Đăng ký
         </button>
       </form>
     </div>
@@ -118,6 +129,15 @@ const styles = {
     borderRadius: "4px",
     fontSize: "16px",
     cursor: "pointer",
+  },
+  linkBtn: {
+    marginTop: 10,
+    width: "100%",
+    background: "none",
+    color: "#1976d2",
+    border: "none",
+    cursor: "pointer",
+    textDecoration: "underline",
   },
   error: {
     color: "red",
