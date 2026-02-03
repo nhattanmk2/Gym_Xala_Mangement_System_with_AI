@@ -21,7 +21,7 @@ public class RegisterRequest {
     private List<String> availabilitySlots;
 
     // Nếu đăng ký làm PT
-    private String ptSpecialty;
-
-    private String role;
+//    private String ptSpecialty;
+//
+//    private String role;
 }

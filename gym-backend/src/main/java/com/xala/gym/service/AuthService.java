@@ -31,17 +31,27 @@ public class AuthService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
-    // ======================= REGISTER =======================
-    public User register(RegisterRequest request) {
+    // ======================= REGISTER MEMBER =======================
+    public User registerMember(RegisterRequest request) {
 
+        // 1️⃣ Check username
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
             throw new RuntimeException("Username đã tồn tại");
         }
 
+        // 2️⃣ Check email
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Email đã được sử dụng");
         }
 
+        // 3️⃣ Lấy ROLE_MEMBER (bắt buộc phải tồn tại)
+        Role memberRole = roleRepository
+                .findByName(UserRole.ROLE_MEMBER)
+                .orElseThrow(() ->
+                        new RuntimeException("ROLE_MEMBER chưa tồn tại")
+                );
+
+        // 4️⃣ Tạo User
         User user = new User();
         user.setUsername(request.getUsername());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
@@ -49,25 +59,14 @@ public class AuthService {
         user.setFullName(request.getFullName());
         user.setPhone(request.getPhone());
 
-        // ===== ROLE =====
-        UserRole roleEnum = UserRole.ROLE_MEMBER;
-        if ("admin".equalsIgnoreCase(request.getRole())) {
-            roleEnum = UserRole.ROLE_ADMIN;
-        } else if ("pt".equalsIgnoreCase(request.getRole())) {
-            roleEnum = UserRole.ROLE_PT;
-        }
+        // ===== AI FIELDS =====
+        user.setHeight(request.getHeight());
+        user.setWeight(request.getWeight());
+        user.setGoalType(request.getGoalType());
+        user.setAvailabilitySlots(request.getAvailabilitySlots());
 
-        UserRole finalRoleEnum = roleEnum;
-        Role role = roleRepository.findByName(roleEnum)
-                .orElseGet(() -> {
-                    Role r = new Role();
-                    r.setName(finalRoleEnum);
-                    return roleRepository.save(r);
-                });
-
-        Set<Role> roles = new HashSet<>();
-        roles.add(role);
-        user.setRoles(roles);
+        // ===== FIXED ROLE =====
+        user.getRoles().add(memberRole);
 
         return userRepository.save(user);
     }
@@ -75,7 +74,6 @@ public class AuthService {
     // ======================= LOGIN =======================
     public AuthResponse login(LoginRequest request) {
 
-        // 1️⃣ Authenticate
         Authentication authentication =
                 authenticationManager.authenticate(
                         new UsernamePasswordAuthenticationToken(
@@ -84,25 +82,20 @@ public class AuthService {
                         )
                 );
 
-        // 2️⃣ UserDetails
         UserDetails userDetails =
                 (UserDetails) authentication.getPrincipal();
 
-        // 3️⃣ User từ DB (để lấy role + info)
         User user = userRepository
                 .findByUsername(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // 4️⃣ Lấy danh sách role
         List<String> roles = user.getRoles()
                 .stream()
                 .map(r -> r.getName().name())
                 .toList();
 
-        // 5️⃣ Generate JWT (JWT có thể KHÔNG cần nhét role cũng OK)
         String token = jwtService.generateToken(userDetails);
 
-        // 6️⃣ Trả response chuẩn
         return new AuthResponse(
                 token,
                 user.getUsername(),
@@ -111,3 +104,4 @@ public class AuthService {
         );
     }
 }
+

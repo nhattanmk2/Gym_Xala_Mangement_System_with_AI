@@ -6,6 +6,7 @@ import com.xala.gym.dto.response.AuthResponse;
 import com.xala.gym.entity.User;
 import com.xala.gym.service.AuthService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,12 +18,14 @@ public class AuthController {
 
     private final AuthService authService;
 
-    @PostMapping("/register")
-    public ResponseEntity<?> register(
+    @PostMapping("/register/member")
+    public ResponseEntity<?> registerMember(
             @RequestBody RegisterRequest request
     ) {
-        User user = authService.register(request);
-        return ResponseEntity.ok(user);
+        authService.registerMember(request);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body("Đăng ký tài khoản học viên thành công");
     }
 
     @PostMapping("/login")
