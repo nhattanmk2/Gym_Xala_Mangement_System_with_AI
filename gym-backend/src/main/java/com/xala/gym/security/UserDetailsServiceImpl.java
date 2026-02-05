@@ -28,12 +28,13 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 user.getPassword(),
+                user.getEnabled(),     // enabled
+                true,                  // accountNonExpired
+                true,                  // credentialsNonExpired
+                true,                  // accountNonLocked
                 user.getRoles().stream()
                         .map(role ->
-                                // ⚠️ KHÔNG thêm ROLE_ nữa
-                                new SimpleGrantedAuthority(
-                                        role.getName().name()
-                                )
+                                new SimpleGrantedAuthority(role.getName().name())
                         )
                         .collect(Collectors.toSet())
         );

@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import RegisterPage from "./pages/RegisterPage";
+import VerifyAccount from "./pages/VerifyAccount";
 import LoginPage from "./pages/LoginPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -13,6 +14,7 @@ function App() {
       <Routes>
         {/* PUBLIC */}
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/verify" element={<VerifyAccount />} />
         <Route path="/login" element={<LoginPage />} />
 
         {/* ADMIN */}
