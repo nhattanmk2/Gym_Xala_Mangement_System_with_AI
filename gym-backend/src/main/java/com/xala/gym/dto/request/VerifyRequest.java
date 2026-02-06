@@ -5,5 +5,5 @@ import lombok.Data;
 @Data
 public class VerifyRequest {
     private String username;
-    private Double verificationCode;
+    private Integer verificationCode;
 }
