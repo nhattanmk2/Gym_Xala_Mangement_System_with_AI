@@ -16,6 +16,10 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -27,26 +31,55 @@ public class SecurityConfig {
     private final UserDetailsServiceImpl userDetailsService;
     private final PasswordEncoder passwordEncoder;
 
-    // ================== SECURITY FILTER CHAIN ==================
+    // ✅ Inject Cors Bean
+    private final CorsConfigurationSource corsConfigurationSource;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http)
             throws Exception {
 
         http
-                .csrf(csrf -> csrf.disable())
-                .cors(cors -> {})
+                .csrf().disable()
+
+                // ✅ CORS FIX FULL
+                .cors(cors -> cors.configurationSource(request -> {
+
+                    CorsConfiguration config = new CorsConfiguration();
+
+                    config.setAllowedOriginPatterns(List.of("http://localhost:3000"));
+
+                    config.setAllowedMethods(List.of(
+                            "GET", "POST", "PUT", "DELETE", "OPTIONS"
+                    ));
+
+                    config.setAllowedHeaders(List.of("*"));
+
+                    config.setAllowCredentials(true);
+
+                    return config;
+                }))
+
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
+
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/auth/**").permitAll()
+                        // ✅ Cho phép preflight request
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                        // ✅ Public API
+                        .requestMatchers("/api/auth/**").permitAll()
+
+                        // Role APIs
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/pt/**").hasRole("PT")
                         .requestMatchers("/api/member/**").hasRole("MEMBER")
+
                         .anyRequest().authenticated()
                 )
+
                 .authenticationProvider(authenticationProvider())
+
                 .addFilterBefore(
                         jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class
@@ -55,17 +88,17 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // ================== AUTHENTICATION PROVIDER ==================
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider =
                 new DaoAuthenticationProvider();
+
         provider.setUserDetailsService(userDetailsService);
         provider.setPasswordEncoder(passwordEncoder);
+
         return provider;
     }
 
-    // ================== AUTHENTICATION MANAGER (🔥 QUAN TRỌNG) ==================
     @Bean
     public AuthenticationManager authenticationManager(
             AuthenticationConfiguration config

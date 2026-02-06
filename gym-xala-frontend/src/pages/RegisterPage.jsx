@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { registerMember } from "../api/authApi";
+import { useNavigate } from "react-router-dom";
 
 const RegisterPage = () => {
   const [form, setForm] = useState({
@@ -55,6 +56,8 @@ const RegisterPage = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const navigate = useNavigate();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage("");
@@ -63,8 +66,9 @@ const RegisterPage = () => {
 
     try {
       await registerMember(form);
-      alert("Đăng ký thành công! Vui lòng đăng nhập");
-      window.location.href = "/login";
+      alert("Đăng ký thành công! Vui lòng nhập mã xác thực");
+      navigate("/verify");
+      
     } catch (err) {
         console.error(err);
       setMessage(

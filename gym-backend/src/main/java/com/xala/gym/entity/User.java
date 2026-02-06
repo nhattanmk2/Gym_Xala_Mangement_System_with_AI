@@ -71,4 +71,11 @@ public class User {
     // Đánh giá trung bình (Input cho thuật toán Scoring)
     @Column(name = "average_rating")
     private Double averageRating;
+
+    @Column(name = "verification_code")
+    private Integer verificationCode;
+
+    @Column(nullable = false)
+    private Boolean enabled = false;
+
 }
