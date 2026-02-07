@@ -1,0 +1,16 @@
+.admin-header {
+  background: white;
+  padding: 15px 25px;
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #ddd;
+}
+
+.admin-header button {
+  padding: 8px 14px;
+  border: none;
+  background: crimson;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+}

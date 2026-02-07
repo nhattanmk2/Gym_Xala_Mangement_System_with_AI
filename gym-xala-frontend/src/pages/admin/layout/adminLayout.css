@@ -1,0 +1,13 @@
+.admin-container {
+  display: flex;
+  height: 100vh;
+}
+
+.admin-main {
+  flex: 1;
+  background: #f5f6fa;
+}
+
+.admin-content {
+  padding: 25px;
+}
