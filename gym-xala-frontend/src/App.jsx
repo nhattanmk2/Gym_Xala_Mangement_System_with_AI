@@ -12,6 +12,12 @@ import AdminMemberManagement from "./pages/admin/MemberManagement";
 import AdminPackageManagement from "./pages/admin/PackageManagement";
 import AdminBookingManagement from "./pages/admin/BookingManagement";
 
+import MemberLayout from "./pages/member/MemberLayout";
+import MemberBooking from "./pages/member/booking/MemberBooking";
+import MemberPackages from "./pages/member/packages/MemberPackages";
+import MemberProfile from "./pages/member/profile/MemberProfile";
+import MemberSchedule from "./pages/member/schedule/MemberSchedule";
+
 
 function App() {
   return (
@@ -71,13 +77,19 @@ function App() {
 
         {/* MEMBER */}
         <Route
-          path="/member/dashboard"
+          path="/member"
           element={
             <ProtectedRoute allowRoles={["ROLE_MEMBER"]}>
-              <MemberDashboard />
+              <MemberLayout />
             </ProtectedRoute>
           }
-        />
+        >
+          <Route path="dashboard" element={<MemberDashboard />} />
+          <Route path="booking" element={<MemberBooking />} />
+          <Route path="packages" element={<MemberPackages />} />
+          <Route path="profile" element={<MemberProfile />} />
+          <Route path="schedule" element={<MemberSchedule />} />
+        </Route>
 
         {/* DEFAULT */}
         <Route path="*" element={<LoginPage />} />
