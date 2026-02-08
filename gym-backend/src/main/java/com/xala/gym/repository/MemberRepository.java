@@ -10,4 +10,6 @@ import java.util.Optional;
 public interface MemberRepository extends JpaRepository<Member, Integer> {
     // Tìm Member dựa trên userId (nếu cần)
     Optional<Member> findByUser_Id(Integer userId);
+
+    Optional<Member> findByUserUsername(String username);
 }

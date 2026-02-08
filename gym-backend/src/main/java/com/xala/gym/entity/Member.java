@@ -49,5 +49,10 @@ public class Member {
     private GoalType goalType; // GIAM_CAN, TANG_CO...
 
     @Column(name = "availability_slots", columnDefinition = "json")
-    private String availabilitySlots; // Lưu JSON lịch rảnh (vd: ["T2_SANG", "T4_CHIEU"])
+    private String availabilitySlots; // Lưu JSON lịch rảnh
+
+    // ✅ Avatar
+    @Lob
+    @Column(name = "avatar", columnDefinition = "LONGBLOB")
+    private byte[] avatar;
 }
