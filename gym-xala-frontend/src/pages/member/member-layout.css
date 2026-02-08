@@ -48,3 +48,11 @@
   font-weight: bold;
   cursor: pointer;
 }
+
+.member-content {
+  flex: 1;
+  padding: 40px;
+  display: flex;
+  justify-content: center; /* căn giữa */
+  align-items: flex-start;
+}
