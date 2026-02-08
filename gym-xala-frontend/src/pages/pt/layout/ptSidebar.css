@@ -1,0 +1,24 @@
+.pt-sidebar {
+  width: 240px;
+  background: #0f172a;
+  color: white;
+  padding: 20px;
+}
+
+.pt-sidebar .logo {
+  font-size: 20px;
+  margin-bottom: 25px;
+}
+
+.pt-sidebar a {
+  display: block;
+  padding: 12px;
+  margin-bottom: 8px;
+  text-decoration: none;
+  color: white;
+  border-radius: 6px;
+}
+
+.pt-sidebar a:hover {
+  background: #1e293b;
+}

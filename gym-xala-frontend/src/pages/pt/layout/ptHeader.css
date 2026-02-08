@@ -1,0 +1,16 @@
+.pt-header {
+  background: white;
+  padding: 15px 25px;
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #ddd;
+}
+
+.pt-header button {
+  padding: 8px 14px;
+  border: none;
+  background: #2563eb;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+}

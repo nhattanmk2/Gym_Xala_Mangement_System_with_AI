@@ -1,0 +1,13 @@
+.pt-container {
+  display: flex;
+  height: 100vh;
+}
+
+.pt-main {
+  flex: 1;
+  background: #f5f6fa;
+}
+
+.pt-content {
+  padding: 25px;
+}

@@ -5,7 +5,7 @@ import LoginPage from "./pages/LoginPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 import AdminDashboard from "./pages/admin/AdminDashboard";
-import PTDashboard from "./pages/pt/PTDashboard";
+import PTDashboard from "./pages/pt/dashboard/PTDashboard";
 import MemberDashboard from "./pages/member/MemberDashboard";
 
 import AdminMemberManagement from "./pages/admin/MemberManagement";
@@ -18,6 +18,9 @@ import MemberPackages from "./pages/member/packages/MemberPackages";
 import MemberProfile from "./pages/member/profile/MemberProfile";
 import MemberSchedule from "./pages/member/schedule/MemberSchedule";
 
+import PTLayout from "./pages/pt/layout/PTLayout";
+import PTMembers from "./pages/pt/members/PTMembers";
+import PTSchedule from "./pages/pt/schedule/PTSchedule";
 
 function App() {
   return (
@@ -67,13 +70,17 @@ function App() {
 
         {/* PT */}
         <Route
-          path="/pt/dashboard"
+          path="/pt"
           element={
             <ProtectedRoute allowRoles={["ROLE_PT"]}>
-              <PTDashboard />
+              <PTLayout />
             </ProtectedRoute>
           }
-        />
+        >
+          <Route path="dashboard" element={<PTDashboard />} />
+          <Route path="members" element={<PTMembers />} />
+          <Route path="schedule" element={<PTSchedule />} />
+        </Route>
 
         {/* MEMBER */}
         <Route
