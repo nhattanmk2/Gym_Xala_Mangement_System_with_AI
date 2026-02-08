@@ -8,8 +8,12 @@ import com.xala.gym.repository.UserRepository;
 import com.xala.gym.service.MemberService;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Base64;
 
 @Service
 @RequiredArgsConstructor
@@ -39,7 +43,14 @@ public class MemberServiceImpl implements MemberService {
                         new RuntimeException("Member profile not found")
                 );
 
-        // ✅ 4. Build Response DTO
+        // ✅ 4. Trả avatar về dạng base64
+        String avatarBase64 = null;
+
+        if (member.getAvatar() != null) {
+            avatarBase64 = Base64.getEncoder().encodeToString(member.getAvatar());
+        }
+
+        // ✅ 5. Build Response DTO
         return MemberProfileResponse.builder()
                 .id(member.getId())
 
@@ -65,6 +76,31 @@ public class MemberServiceImpl implements MemberService {
                                 : null
                 )
 
+                .avatarBase64(avatarBase64)
+
                 .build();
+    }
+
+    @Override
+    public void updateAvatar(MultipartFile file) {
+
+        try {
+            // ✅ Lấy username từ JWT SecurityContext
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            String username = auth.getName();
+
+            // ✅ Tìm Member theo username
+            Member member = memberRepository.findByUserUsername(username)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy Member"));
+
+            // ✅ Convert file -> byte[]
+            member.setAvatar(file.getBytes());
+
+            // ✅ Save DB
+            memberRepository.save(member);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Upload avatar thất bại: " + e.getMessage());
+        }
     }
 }

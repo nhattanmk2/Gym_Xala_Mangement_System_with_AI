@@ -27,4 +27,5 @@ public class MemberProfileResponse {
     private Float bmi;
 
     private String goalType;
+    private String avatarBase64;
 }
