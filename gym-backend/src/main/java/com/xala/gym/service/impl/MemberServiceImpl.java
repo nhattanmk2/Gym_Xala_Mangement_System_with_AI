@@ -34,7 +34,7 @@ public class MemberServiceImpl implements MemberService {
                 );
 
         // ✅ 3. Query Member theo user_id
-        Member member = memberRepository.findByUserId(Math.toIntExact(user.getId()))
+        Member member = memberRepository.findByUser_Id(Math.toIntExact(user.getId()))
                 .orElseThrow(() ->
                         new RuntimeException("Member profile not found")
                 );

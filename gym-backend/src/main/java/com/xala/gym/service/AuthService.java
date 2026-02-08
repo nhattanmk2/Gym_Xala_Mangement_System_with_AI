@@ -4,9 +4,11 @@ import com.xala.gym.dto.request.LoginRequest;
 import com.xala.gym.dto.request.RegisterRequest;
 import com.xala.gym.dto.request.VerifyRequest;
 import com.xala.gym.dto.response.AuthResponse;
+import com.xala.gym.entity.Member;
 import com.xala.gym.entity.Role;
 import com.xala.gym.entity.User;
 import com.xala.gym.entity.enums.UserRole;
+import com.xala.gym.repository.MemberRepository;
 import com.xala.gym.repository.RoleRepository;
 import com.xala.gym.repository.UserRepository;
 import com.xala.gym.security.jwt.JwtService;
@@ -34,6 +36,8 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final MemberRepository memberRepository;
+
 
     // ======================= REGISTER MEMBER =======================
     public User registerMember(RegisterRequest request) {
@@ -103,6 +107,25 @@ public class AuthService {
         user.setVerificationCode(null);
 
         userRepository.save(user);
+
+        // ✅ Tạo Member Profile tự động sau verify
+        Member member = Member.builder()
+                .user(user)
+                .name(user.getFullName())
+                .email(user.getEmail())
+                .phone(user.getPhone())
+                .sex(null)
+                .cccd(null)
+                .status(true)
+
+                // AI fields
+                .height(user.getHeight())
+                .weight(user.getWeight())
+                .goalType(user.getGoalType())
+
+                .build();
+
+        memberRepository.save(member);
     }
 
     // ======================= LOGIN =======================
