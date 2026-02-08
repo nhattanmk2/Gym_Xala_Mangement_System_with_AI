@@ -22,9 +22,11 @@ public class MemberController {
 
     // ✅ API Upload Avatar
     @PutMapping("/avatar")
-    public String uploadAvatar(@RequestParam("file") MultipartFile file) {
-        memberService.updateAvatar(file);
-        return "Upload avatar thành công!";
+    public String updateAvatar(
+            @RequestParam("avatar") MultipartFile avatar
+    ) {
+        memberService.updateAvatar(avatar);
+        return "Upload avatar thành công";
     }
 }
 
