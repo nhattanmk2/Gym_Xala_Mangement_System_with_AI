@@ -129,6 +129,7 @@ CREATE TABLE `member` (
   `name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `phone` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `sex` varchar(10) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `avatar` longblob,
   PRIMARY KEY (`id`),
   UNIQUE KEY `user_id` (`user_id`),
   KEY `membercard_id` (`membercard_id`),
@@ -136,7 +137,7 @@ CREATE TABLE `member` (
   CONSTRAINT `member_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
   CONSTRAINT `member_ibfk_2` FOREIGN KEY (`membercard_id`) REFERENCES `member_card` (`id`),
   CONSTRAINT `member_ibfk_3` FOREIGN KEY (`address_gym_id`) REFERENCES `gym_location` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -145,6 +146,7 @@ CREATE TABLE `member` (
 
 LOCK TABLES `member` WRITE;
 /*!40000 ALTER TABLE `member` DISABLE KEYS */;
+INSERT INTO `member` (`id`, `user_id`, `membercard_id`, `address_gym_id`, `status`, `height`, `weight`, `availability_slots`, `cccd`, `email`, `goal_type`, `name`, `phone`, `sex`, `avatar`) VALUES (1,1017,NULL,NULL,_binary '',NULL,NULL,NULL,NULL,'member14@gmail.com',NULL,'Nguyễn Văn N','0123456014',NULL,NULL);
 /*!40000 ALTER TABLE `member` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -309,7 +311,7 @@ CREATE TABLE `user_role` (
 
 LOCK TABLES `user_role` WRITE;
 /*!40000 ALTER TABLE `user_role` DISABLE KEYS */;
-INSERT INTO `user_role` VALUES (1000,1000),(1002,1000),(1003,1000),(1006,1000),(1007,1000),(1008,1000),(1009,1000),(1010,1000),(1011,1000),(1012,1000),(1013,1000),(1014,1000),(1015,1000),(1001,1001),(1004,1001),(1005,1002);
+INSERT INTO `user_role` VALUES (1000,1000),(1002,1000),(1003,1000),(1006,1000),(1007,1000),(1008,1000),(1009,1000),(1010,1000),(1011,1000),(1012,1000),(1013,1000),(1014,1000),(1015,1000),(1016,1000),(1017,1000),(1001,1001),(1004,1001),(1005,1002);
 /*!40000 ALTER TABLE `user_role` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -339,7 +341,7 @@ CREATE TABLE `users` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=1016 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1018 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -348,7 +350,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (999,'test_fk','$2a$10$9fQofWMwmGkpi36poUcPwuVaWn852JhaI.zzxlqsI3Oax10N.D3im','test_fk@gmail.com',NULL,NULL,NULL,NULL,NULL,NULL,'[]',NULL,NULL,NULL,1),(1000,'tannhat','$2a$10$Ckd4KB4z98m7xjPEYDJpWOC4XvYT2/0vSfW4qjK3kprDVw2ZJPdyu','tan@gmail.com','Le Ngoc Nhat Tan',NULL,NULL,175,70,'TANG_CO','[]',NULL,NULL,NULL,1),(1001,'pt_pro','$2a$10$Cm1Sk/nwGLMiQ/wzXWVQP.XKMlroXvTFyo9vEeL8V5llDlyIPl5TS','pt_pro@example.com','Tran Van Coach','0988777666',NULL,180,85,'TANG_CO','[\"TUE_MORNING\", \"THU_MORNING\"]',NULL,'Yoga, HIIT',NULL,1),(1002,'member01','$2a$10$1F3kRaXR8j7tS5GnvPpqP.YJUXv.IUW.pjdc8Fg9MpUlWPTcvcXBu','member01@example.com','Nguyen Van A','0901234567',NULL,170.5,65,'GIAM_CAN','[\"MON_MORNING\", \"WED_EVENING\"]',NULL,NULL,NULL,1),(1003,'member02','$2a$10$/Ixuhx01nPgfeaslGFTgj.cfrAD.N1yCpJ2zDSCDhQ51vEPuGEKDe','member02@example.com','Nguyen Van B','0901234568',NULL,170.5,65,'TANG_CO','[\"MON_MORNING\", \"WED_EVENING\"]',NULL,NULL,NULL,1),(1004,'pt_pro_02','$2a$10$iwm6ThON1.MlDD.q4Z2S1udg1l.n72J335kWU0xgKDfAGPB5FJ0IG','pt_pro_02@example.com','Tran Van Coach B','0988777667',NULL,180,85,'GIAM_CAN','[\"TUE_MORNING\", \"THU_MORNING\"]',NULL,'Yoga, HIIT',NULL,1),(1005,'admin','$2a$10$YvjTAhs3a2DidCVzy6t7y.Ed0xvdquQgv8sdWIt3zajuHj3R/qH0S','admin@gmail.com',NULL,NULL,NULL,NULL,NULL,NULL,'[]',NULL,NULL,NULL,1),(1006,'member03','$2a$10$7caqjtXqBZURMSLCaFKzPOmhrv6Xzflfpd4yBXPALApmXM.vRfHf6','member03@gmail.com','Nguyễn Văn C','0123456003',NULL,170,65,'GIAM_CAN','[\"MON_MORNING\", \"WED_EVENING\"]',NULL,NULL,NULL,1),(1007,'member04','$2a$10$cWssedq4MXKhy6AhwkB.mu5DSXT8H26nTVVOKz2gz8TfoOtP8yZcC','member04@gmail.com','Nguyễn Văn D','0123456004',NULL,NULL,NULL,NULL,'[]',NULL,NULL,NULL,1),(1008,'member05','$2a$10$u9ZFFZ879AbjjXg34SicZOga/ske4ZmNqw5Io6qH6FkokfIjbrE7K','member05@gmail.com','Nguyễn Văn E','0123456005',NULL,NULL,NULL,NULL,'[]',NULL,NULL,198312,0),(1009,'member06','$2a$10$N./08pfiiUmZ0pr6aRAKOeuHZC1XeUE1a0Tavoge6TQxBktfXG2Be','member06@gmail.com','Nguyễn Văn F','0123456006',NULL,NULL,NULL,NULL,'[]',NULL,NULL,NULL,1),(1010,'member07','$2a$10$Yj1k7H.pjgYHcIJ/Osh1f.MMKfLP5/jIZyO6pAWaYZQ1oV8kK1eNW','member07@gmail.com','Nguyễn Văn G','0123456007',NULL,NULL,NULL,NULL,'[]',NULL,NULL,710464,0),(1011,'member08','$2a$10$lib5usuZLBPj2gNoJgOBKuteGLy1iK6/X4QeMRI06EoI/gFrruxsa','member08@gmail.com','Nguyễn Văn H','0123456008',NULL,NULL,NULL,NULL,'[]',NULL,NULL,920092,0),(1012,'member09','$2a$10$XYuQTQdQCTZpJmCVybAMHOZt4oY7/A.cHbzGfhOOwoYMg0Q9vmy3S','member09@gmail.com','Nguyễn Văn I','0123456009',NULL,NULL,NULL,NULL,'[]',NULL,NULL,484211,0),(1013,'member10','$2a$10$Dolov8USvSZ4UCYfBOyZC.yb93BNlJ5bnSLlLLzKj8Qq4XTsZgvI6','member10@gmail.com','Nguyễn Văn J','0123456010',NULL,NULL,NULL,NULL,'[]',NULL,NULL,384701,0),(1014,'member11','$2a$10$D0ChkZLngIzCLZ5Lpa7fFe4i50cfudUcaZA8cTnA43HVz9Z.JCtXG','member11@gmail.com','Nguyễn Văn K','0123456011',NULL,NULL,NULL,NULL,'[]',NULL,NULL,642526,0),(1015,'member12','$2a$10$uDXolu1buw5VGy8r1SFOEeVuSyEzHrZDslV7kRkXPVK1kRdTmsOS2','member12@gmail.com','Nguyễn Văn L','0123456012',NULL,NULL,NULL,NULL,'[]',NULL,NULL,537195,0);
+INSERT INTO `users` VALUES (999,'test_fk','$2a$10$9fQofWMwmGkpi36poUcPwuVaWn852JhaI.zzxlqsI3Oax10N.D3im','test_fk@gmail.com',NULL,NULL,NULL,NULL,NULL,NULL,'[]',NULL,NULL,NULL,1),(1000,'tannhat','$2a$10$Ckd4KB4z98m7xjPEYDJpWOC4XvYT2/0vSfW4qjK3kprDVw2ZJPdyu','tan@gmail.com','Le Ngoc Nhat Tan',NULL,NULL,175,70,'TANG_CO','[]',NULL,NULL,NULL,1),(1001,'pt_pro','$2a$10$Cm1Sk/nwGLMiQ/wzXWVQP.XKMlroXvTFyo9vEeL8V5llDlyIPl5TS','pt_pro@example.com','Tran Van Coach','0988777666',NULL,180,85,'TANG_CO','[\"TUE_MORNING\", \"THU_MORNING\"]',NULL,'Yoga, HIIT',NULL,1),(1002,'member01','$2a$10$1F3kRaXR8j7tS5GnvPpqP.YJUXv.IUW.pjdc8Fg9MpUlWPTcvcXBu','member01@example.com','Nguyen Van A','0901234567',NULL,170.5,65,'GIAM_CAN','[\"MON_MORNING\", \"WED_EVENING\"]',NULL,NULL,NULL,1),(1003,'member02','$2a$10$/Ixuhx01nPgfeaslGFTgj.cfrAD.N1yCpJ2zDSCDhQ51vEPuGEKDe','member02@example.com','Nguyen Van B','0901234568',NULL,170.5,65,'TANG_CO','[\"MON_MORNING\", \"WED_EVENING\"]',NULL,NULL,NULL,1),(1004,'pt_pro_02','$2a$10$iwm6ThON1.MlDD.q4Z2S1udg1l.n72J335kWU0xgKDfAGPB5FJ0IG','pt_pro_02@example.com','Tran Van Coach B','0988777667',NULL,180,85,'GIAM_CAN','[\"TUE_MORNING\", \"THU_MORNING\"]',NULL,'Yoga, HIIT',NULL,1),(1005,'admin','$2a$10$YvjTAhs3a2DidCVzy6t7y.Ed0xvdquQgv8sdWIt3zajuHj3R/qH0S','admin@gmail.com',NULL,NULL,NULL,NULL,NULL,NULL,'[]',NULL,NULL,NULL,1),(1006,'member03','$2a$10$7caqjtXqBZURMSLCaFKzPOmhrv6Xzflfpd4yBXPALApmXM.vRfHf6','member03@gmail.com','Nguyễn Văn C','0123456003',NULL,170,65,'GIAM_CAN','[\"MON_MORNING\", \"WED_EVENING\"]',NULL,NULL,NULL,1),(1007,'member04','$2a$10$cWssedq4MXKhy6AhwkB.mu5DSXT8H26nTVVOKz2gz8TfoOtP8yZcC','member04@gmail.com','Nguyễn Văn D','0123456004',NULL,NULL,NULL,NULL,'[]',NULL,NULL,NULL,1),(1008,'member05','$2a$10$u9ZFFZ879AbjjXg34SicZOga/ske4ZmNqw5Io6qH6FkokfIjbrE7K','member05@gmail.com','Nguyễn Văn E','0123456005',NULL,NULL,NULL,NULL,'[]',NULL,NULL,198312,0),(1009,'member06','$2a$10$N./08pfiiUmZ0pr6aRAKOeuHZC1XeUE1a0Tavoge6TQxBktfXG2Be','member06@gmail.com','Nguyễn Văn F','0123456006',NULL,NULL,NULL,NULL,'[]',NULL,NULL,NULL,1),(1010,'member07','$2a$10$Yj1k7H.pjgYHcIJ/Osh1f.MMKfLP5/jIZyO6pAWaYZQ1oV8kK1eNW','member07@gmail.com','Nguyễn Văn G','0123456007',NULL,NULL,NULL,NULL,'[]',NULL,NULL,710464,0),(1011,'member08','$2a$10$lib5usuZLBPj2gNoJgOBKuteGLy1iK6/X4QeMRI06EoI/gFrruxsa','member08@gmail.com','Nguyễn Văn H','0123456008',NULL,NULL,NULL,NULL,'[]',NULL,NULL,920092,0),(1012,'member09','$2a$10$XYuQTQdQCTZpJmCVybAMHOZt4oY7/A.cHbzGfhOOwoYMg0Q9vmy3S','member09@gmail.com','Nguyễn Văn I','0123456009',NULL,NULL,NULL,NULL,'[]',NULL,NULL,484211,0),(1013,'member10','$2a$10$Dolov8USvSZ4UCYfBOyZC.yb93BNlJ5bnSLlLLzKj8Qq4XTsZgvI6','member10@gmail.com','Nguyễn Văn J','0123456010',NULL,NULL,NULL,NULL,'[]',NULL,NULL,384701,0),(1014,'member11','$2a$10$D0ChkZLngIzCLZ5Lpa7fFe4i50cfudUcaZA8cTnA43HVz9Z.JCtXG','member11@gmail.com','Nguyễn Văn K','0123456011',NULL,NULL,NULL,NULL,'[]',NULL,NULL,642526,0),(1015,'member12','$2a$10$uDXolu1buw5VGy8r1SFOEeVuSyEzHrZDslV7kRkXPVK1kRdTmsOS2','member12@gmail.com','Nguyễn Văn L','0123456012',NULL,NULL,NULL,NULL,'[]',NULL,NULL,NULL,1),(1016,'member13','$2a$10$QqJ82KKM2eXvV8gVUDZrOuR.jsBDuk8WtAcdAa9KWdWBZAgCVzokO','member13@gmail.com','Nguyễn Văn M','0123456013',NULL,NULL,NULL,NULL,'[]',NULL,NULL,NULL,1),(1017,'member14','$2a$10$4Z1BfnJufFqUVzST1fnD0u0b.0I7WsI7Qn55xqXt9quXS9aptKRym','member14@gmail.com','Nguyễn Văn N','0123456014',NULL,NULL,NULL,NULL,'[]',NULL,NULL,NULL,1);
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -391,4 +393,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-02-05 22:47:38
+-- Dump completed on 2026-02-09 10:39:12

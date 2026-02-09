@@ -85,11 +85,11 @@ public class MemberServiceImpl implements MemberService {
     public void updateAvatar(MultipartFile file) {
 
         try {
-            // ✅ Lấy username từ JWT SecurityContext
+            /// ✅ Lấy username từ JWT SecurityContext
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             String username = auth.getName();
 
-            // ✅ Tìm Member theo username
+            // ✅ Tìm Member theo UserId
             Member member = memberRepository.findByUserUsername(username)
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy Member"));
 

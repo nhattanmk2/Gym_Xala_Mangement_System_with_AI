@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { getProfile } from "../../../api/memberApi";
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { logout } from "../../../utils/auth";
+import { logout, getToken } from "../../../utils/auth";
 
 import "./member-profile.css";
 
@@ -11,12 +12,20 @@ export default function MemberProfile() {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Avatar preview state
+  const [avatarPreview, setAvatarPreview] = useState(null);
+
   // ================= LOAD PROFILE =================
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         const data = await getProfile();
         setProfile(data);
+
+        // Nếu backend trả avatarBase64
+        if (data.avatarBase64) {
+          setAvatarPreview(`data:image/jpeg;base64,${data.avatarBase64}`);
+        }
       } catch (error) {
         console.error("Lỗi lấy profile:", error);
 
@@ -29,6 +38,49 @@ export default function MemberProfile() {
 
     fetchProfile();
   }, []);
+
+  // ================= UPLOAD AVATAR =================
+  const handleAvatarChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // ✅ Preview ảnh ngay lập tức
+    setAvatarPreview(URL.createObjectURL(file));
+
+    // ✅ Multipart FormData
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const token = getToken();
+
+      await axios.put(
+        "http://localhost:8080/api/member/avatar",
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      alert("✅ Cập nhật avatar thành công!");
+
+      // Reload lại profile sau upload
+      const updated = await getProfile();
+      setProfile(updated);
+
+      if (updated.avatarBase64) {
+        setAvatarPreview(
+          `data:image/jpeg;base64,${updated.avatarBase64}`
+        );
+      }
+    } catch (err) {
+      console.error("Upload avatar lỗi:", err);
+      alert("❌ Upload thất bại!");
+    }
+  };
 
   // ================= UI LOADING =================
   if (loading) {
@@ -44,18 +96,30 @@ export default function MemberProfile() {
     <div className="profile-container">
       {/* HEADER */}
       <div className="profile-header">
-        <img
-          className="profile-avatar"
-          src={
-            profile.avatar ||
-            "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
-          }
-          alt="avatar"
-        />
+        {/* Avatar Upload */}
+        <label className="avatar-wrapper">
+          <img
+            className="profile-avatar"
+            src={
+              avatarPreview ||
+              "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
+            }
+            alt="avatar"
+          />
+
+          {/* Hidden file input */}
+          <input
+            type="file"
+            accept="image/*"
+            hidden
+            onChange={handleAvatarChange}
+          />
+        </label>
 
         <div>
           <h2>{profile.name}</h2>
           <p className="join-text">Thành viên Gym Xala</p>
+          <p className="change-text">📸 Nhấn vào ảnh để đổi avatar</p>
         </div>
       </div>
 

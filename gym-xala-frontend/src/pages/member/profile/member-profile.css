@@ -118,3 +118,22 @@
   background: #d0fd3e;
   color: black;
 }
+
+/* Avatar clickable upload */
+.avatar-wrapper {
+  cursor: pointer;
+  position: relative;
+  display: inline-block;
+}
+
+.avatar-wrapper:hover .profile-avatar {
+  opacity: 0.8;
+  transform: scale(1.03);
+  transition: 0.2s;
+}
+
+.change-text {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #d0fd3e;
+}
