@@ -117,7 +117,7 @@ export default function MemberProfile() {
         </label>
 
         <div>
-          <h2>{profile.name}</h2>
+          <h2>{profile.fullName}</h2>
           <p className="join-text">Thành viên Gym Xala</p>
           <p className="change-text">📸 Nhấn vào ảnh để đổi avatar</p>
         </div>
@@ -147,14 +147,14 @@ export default function MemberProfile() {
           <b>{profile.sex}</b>
         </div>
 
-        <div className="profile-row">
+        {/* <div className="profile-row">
           <span>Trạng thái:</span>
           <b className={profile.status === "ACTIVE" ? "active" : "inactive"}>
             {profile.status === "ACTIVE"
               ? "Đang hoạt động"
               : "Ngừng hoạt động"}
           </b>
-        </div>
+        </div> */}
 
         <div className="profile-row">
           <span>Mã thẻ hội viên:</span>
