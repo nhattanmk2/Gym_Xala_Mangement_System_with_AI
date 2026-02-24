@@ -1,0 +1,75 @@
+.member-container {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.member-container h2 {
+  margin-bottom: 20px;
+}
+
+.filter-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.filter-bar input {
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.filter-bar button {
+  padding: 8px 14px;
+  background: #1e1e2f;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.member-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.member-table th,
+.member-table td {
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+}
+
+.member-table th {
+  background: #f0f0f5;
+}
+
+.action-btn {
+  padding: 6px 10px;
+  margin-right: 5px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.action-btn.lock {
+  background: orange;
+  color: white;
+}
+
+.action-btn.delete {
+  background: crimson;
+  color: white;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .filter-bar {
+    flex-direction: column;
+  }
+
+  .member-table {
+    font-size: 13px;
+  }
+}

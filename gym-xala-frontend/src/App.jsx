@@ -11,6 +11,7 @@ import MemberDashboard from "./pages/member/MemberDashboard";
 import AdminMemberManagement from "./pages/admin/MemberManagement";
 import AdminPackageManagement from "./pages/admin/PackageManagement";
 import AdminBookingManagement from "./pages/admin/BookingManagement";
+import AdminMemberList from "./pages/admin/member/AdminMemberList";
 
 import MemberLayout from "./pages/member/MemberLayout";
 import MemberBooking from "./pages/member/booking/MemberBooking";
@@ -67,6 +68,14 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        <Route 
+          path="/admin/members" 
+          element={
+            <ProtectedRoute allowRoles={["ROLE_ADMIN"]}>
+              <AdminMemberList />
+            </ProtectedRoute>
+          } />
 
         {/* PT */}
         <Route
