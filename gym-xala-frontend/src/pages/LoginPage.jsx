@@ -24,7 +24,7 @@ const LoginPage = () => {
       if (role === "ROLE_ADMIN") {
         window.location.href = "/admin/dashboard";
       } else if (role === "ROLE_PT") {
-        window.location.href = "/pt/dashboard";   
+        window.location.href = "/pt/dashboard";
       } else if (role === "ROLE_MEMBER") {
         window.location.href = "/member/dashboard";
       } else {
@@ -44,7 +44,13 @@ const LoginPage = () => {
 
     } catch (err) {
       console.error("LOGIN ERROR:", err);
-      setError("Sai tài khoản hoặc mật khẩu");
+      if (err.response && err.response.status === 403) {
+        setError("Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.");
+      } else if (err.response && err.response.data) {
+        setError(typeof err.response.data === 'string' ? err.response.data : "Sai tài khoản hoặc mật khẩu");
+      } else {
+        setError("Lỗi kết nối đến server");
+      }
     }
   };
 

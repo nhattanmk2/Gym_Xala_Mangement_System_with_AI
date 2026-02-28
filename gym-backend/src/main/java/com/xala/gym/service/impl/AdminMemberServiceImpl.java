@@ -1,11 +1,14 @@
 package com.xala.gym.service.impl;
 
 import com.xala.gym.dto.request.AdminCreateMemberRequest;
+import com.xala.gym.dto.request.AdminUpdateMemberRequest;
 import com.xala.gym.dto.response.AdminMemberResponse;
+import com.xala.gym.entity.GymLocation;
 import com.xala.gym.entity.Role;
 import com.xala.gym.entity.User;
 import com.xala.gym.entity.Member;
 import com.xala.gym.entity.enums.UserRole;
+import com.xala.gym.repository.GymLocationRepository;
 import com.xala.gym.repository.MemberRepository;
 import com.xala.gym.repository.RoleRepository;
 import com.xala.gym.repository.UserRepository;
@@ -27,6 +30,7 @@ public class AdminMemberServiceImpl implements AdminMemberService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final GymLocationRepository gymLocationRepository;
 
     @Transactional
     public AdminMemberResponse createMember(AdminCreateMemberRequest request) {
@@ -45,6 +49,8 @@ public class AdminMemberServiceImpl implements AdminMemberService {
         user.setUsername(request.getUsername());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setEmail(request.getEmail());
+        user.setFullName(request.getName()); // Đồng bộ tên
+        user.setPhone(request.getPhone());   // Đồng bộ SĐT
         user.setEnabled(true); // Admin tạo thì kích hoạt luôn
 
         // 3️⃣ Gán ROLE_MEMBER
@@ -80,7 +86,10 @@ public class AdminMemberServiceImpl implements AdminMemberService {
     // ✅ API Admin lấy danh sách Member
     public List<AdminMemberResponse> getAllMembers(String name, String cccd, String email, String phone, String sex) {
 
-        List<Member> members = memberRepository.searchMembers(name, cccd);
+        String searchName = name == null ? "" : name.trim();
+        String searchCccd = cccd == null ? "" : cccd.trim();
+
+        List<Member> members = memberRepository.searchMembers(searchName, searchCccd);
 
         return members.stream()
                 .map(m -> AdminMemberResponse.builder()
@@ -89,6 +98,7 @@ public class AdminMemberServiceImpl implements AdminMemberService {
                         .cccd(m.getCccd())
                         .email(m.getEmail())
                         .phone(m.getPhone())
+                        .sex(m.getSex())
                         .status(m.getStatus())
                         .build())
                 .toList();
@@ -112,5 +122,92 @@ public class AdminMemberServiceImpl implements AdminMemberService {
         // 4️⃣ Lưu (cascade không dùng ở đây nên save cả 2 cho chắc chắn)
         memberRepository.save(member);
         userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public AdminMemberResponse updateMember(
+            Integer memberId,
+            AdminUpdateMemberRequest request
+    ) {
+
+        // 1️⃣ Tìm Member
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() ->
+                        new RuntimeException("Không tìm thấy học viên"));
+
+        User user = member.getUser();
+
+        // 1.5️⃣ Update new fields
+        if (request.getName() != null && !request.getName().isBlank()) {
+            member.setName(request.getName());
+            user.setFullName(request.getName()); // Đồng bộ tên
+        }
+        if (request.getCccd() != null) {
+            member.setCccd(request.getCccd());
+        }
+        if (request.getSex() != null) {
+            member.setSex(request.getSex());
+        }
+
+        // 2️⃣ Update Email (nếu có)
+        if (request.getEmail() != null && !request.getEmail().isBlank()) {
+
+            // check email trùng
+            userRepository.findByEmail(request.getEmail())
+                    .filter(u -> !u.getId().equals(user.getId()))
+                    .ifPresent(u -> {
+                        throw new RuntimeException("Email đã tồn tại");
+                    });
+
+            member.setEmail(request.getEmail());
+            user.setEmail(request.getEmail());
+        }
+
+        // 3️⃣ Update Phone
+        if (request.getPhone() != null) {
+            member.setPhone(request.getPhone());
+            user.setPhone(request.getPhone()); // Đồng bộ SĐT
+        }
+
+        // 4️⃣ Update GymLocation
+        if (request.getAddressGymId() != null) {
+
+            GymLocation gymLocation =
+                    gymLocationRepository.findById(request.getAddressGymId())
+                            .orElseThrow(() ->
+                                    new RuntimeException("Địa điểm gym không tồn tại"));
+
+            member.setGymLocation(gymLocation);
+        }
+
+        // 5️⃣ Save
+        memberRepository.save(member);
+        userRepository.save(user);
+
+        // 6️⃣ Return response
+        return AdminMemberResponse.builder()
+                .id(member.getId())
+                .name(member.getName())
+                .cccd(member.getCccd())
+                .email(member.getEmail())
+                .phone(member.getPhone())
+                .sex(member.getSex())
+                .status(member.getStatus())
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public void deleteMember(Integer memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy học viên"));
+
+        User user = member.getUser();
+
+        memberRepository.delete(member);
+        if (user != null) {
+            userRepository.delete(user);
+        }
     }
 }

@@ -17,11 +17,9 @@ public interface MemberRepository extends JpaRepository<Member, Integer> {
     Optional<Member> findByUserUsername(String username);
 
     // ✅ ADMIN: Search theo name + cccd
-    @Query("""
-        SELECT m FROM Member m
-        WHERE (:name IS NULL OR :name = '' OR m.name LIKE CONCAT('%', :name, '%'))
-        AND (:cccd IS NULL OR :cccd = '' OR m.cccd = :cccd)
-    """)
+    @Query("SELECT m FROM Member m " +
+           "WHERE (:name = '' OR m.name LIKE CONCAT('%', :name, '%')) " +
+           "AND (:cccd = '' OR m.cccd = :cccd)")
     List<Member> searchMembers(
             @Param("name") String name,
             @Param("cccd") String cccd
