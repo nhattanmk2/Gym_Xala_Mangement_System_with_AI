@@ -1,8 +1,8 @@
 .member-layout {
   display: flex;
   min-height: 100vh;
-  background: #1c1c1e;
-  color: white;
+  background: #000000;
+  color: rgb(255, 255, 255);
 }
 
 .member-sidebar {
@@ -53,6 +53,7 @@
   flex: 1;
   padding: 40px;
   display: flex;
-  justify-content: center; /* căn giữa */
+  justify-content: center;
+  /* căn giữa */
   align-items: flex-start;
 }

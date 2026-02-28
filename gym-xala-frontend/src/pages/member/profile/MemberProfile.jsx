@@ -3,6 +3,7 @@ import { getProfile } from "../../../api/memberApi";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { logout, getToken } from "../../../utils/auth";
+import { getMyCardList } from "../../../api/membershipApi";
 
 import "./member-profile.css";
 
@@ -10,6 +11,7 @@ export default function MemberProfile() {
   const navigate = useNavigate();
 
   const [profile, setProfile] = useState(null);
+  const [subscriptions, setSubscriptions] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Avatar preview state
@@ -17,26 +19,38 @@ export default function MemberProfile() {
 
   // ================= LOAD PROFILE =================
   useEffect(() => {
-    const fetchProfile = async () => {
+    const fetchProfileData = async () => {
       try {
-        const data = await getProfile();
-        setProfile(data);
+        const [profileData, cardsData] = await Promise.all([
+          getProfile(),
+          getMyCardList()
+        ]);
 
-        // Nếu backend trả avatarBase64
-        if (data.avatarBase64) {
-          setAvatarPreview(`data:image/jpeg;base64,${data.avatarBase64}`);
+        console.info("Profile data:", profileData);
+        console.info("Subscriptions data:", cardsData);
+
+        setProfile(profileData);
+        // Đảm bảo subscriptions luôn là mảng để tránh lỗi .map
+        setSubscriptions(Array.isArray(cardsData) ? cardsData : []);
+
+        if (profileData.avatarBase64) {
+          setAvatarPreview(`data:image/jpeg;base64,${profileData.avatarBase64}`);
         }
       } catch (error) {
-        console.error("Lỗi lấy profile:", error);
-
-        alert("Không thể tải hồ sơ. Token hết hạn hoặc không hợp lệ!");
-        logout();
+        console.error("Lỗi lấy dữ liệu hồ sơ:", error);
+        // Nếu lỗi 403/401 thì mới logout, còn lại chỉ thông báo
+        if (error.response?.status === 401 || error.response?.status === 403) {
+          alert("Phiên đăng nhập hết hạn.");
+          logout();
+        } else {
+          alert("Không thể tải một số thông tin. Vui lòng thử lại sau.");
+        }
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProfile();
+    fetchProfileData();
   }, []);
 
   // ================= UPLOAD AVATAR =================
@@ -162,6 +176,32 @@ export default function MemberProfile() {
         </div>
       </div>
 
+      {/* SUBSCRIPTIONS SECTION */}
+      <div className="profile-card">
+        <h3>Gói tập đã đăng ký</h3>
+        {Array.isArray(subscriptions) && subscriptions.length > 0 ? (
+          <div className="subscription-list">
+            {subscriptions.map(card => (
+              <div key={card.id} className="subscription-item">
+                <div className="sub-header">
+                  <span className="sub-pkg-name">{card.packageName || "Gói tập không tên"}</span>
+                  <span className={`sub-status ${(card.status || "UNKNOWN").toLowerCase()}`}>
+                    {card.status === "ACTIVE" ? "Đang hoạt động" : card.status}
+                  </span>
+                </div>
+                <div className="sub-dates">
+                  <div>Từ: <b>{card.startDate ? new Date(card.startDate).toLocaleDateString("vi-VN") : "N/A"}</b></div>
+                  <div>Đến: <b>{card.endDate ? new Date(card.endDate).toLocaleDateString("vi-VN") : "N/A"}</b></div>
+                </div>
+                <div className="sub-category">Loại: {card.category || "N/A"}</div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="no-sub-text">Bạn chưa đăng ký gói tập nào.</p>
+        )}
+      </div>
+
       {/* ACTION BUTTONS */}
       <div className="profile-actions">
         <button onClick={() => navigate("/member/profile/edit")}>
@@ -173,7 +213,7 @@ export default function MemberProfile() {
         </button>
 
         <button onClick={() => navigate("/member/packages")}>
-          💳 Gói tập đã đăng ký
+          🛒 Đăng ký gói tập mới
         </button>
       </div>
     </div>

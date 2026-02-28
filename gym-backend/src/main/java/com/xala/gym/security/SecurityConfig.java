@@ -69,6 +69,7 @@ public class SecurityConfig {
 
                         // ✅ Public API
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/packages/**").permitAll()
 
                         // ✅ Cho phép endpoint lỗi Spring Boot
                         .requestMatchers("/error").permitAll()

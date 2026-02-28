@@ -32,4 +32,11 @@ public class Package {
     
     // Trạng thái (Đang kinh doanh hay ngừng)
     private Boolean active = true;
+
+    @Lob
+    @Column(columnDefinition = "LONGBLOB")
+    private byte[] image;
+
+    @Column(columnDefinition = "TEXT")
+    private String promotion;
 }

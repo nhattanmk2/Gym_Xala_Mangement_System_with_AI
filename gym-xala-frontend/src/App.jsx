@@ -17,6 +17,7 @@ import AdminPTList from "./pages/admin/pt/AdminPTList";
 import MemberLayout from "./pages/member/MemberLayout";
 import MemberBooking from "./pages/member/booking/MemberBooking";
 import MemberPackages from "./pages/member/packages/MemberPackages";
+import PackageDetail from "./pages/member/packages/PackageDetail";
 import MemberProfile from "./pages/member/profile/MemberProfile";
 import MemberSchedule from "./pages/member/schedule/MemberSchedule";
 
@@ -114,6 +115,7 @@ function App() {
           <Route path="dashboard" element={<MemberDashboard />} />
           <Route path="booking" element={<MemberBooking />} />
           <Route path="packages" element={<MemberPackages />} />
+          <Route path="packages/:id" element={<PackageDetail />} />
           <Route path="profile" element={<MemberProfile />} />
           <Route path="schedule" element={<MemberSchedule />} />
         </Route>

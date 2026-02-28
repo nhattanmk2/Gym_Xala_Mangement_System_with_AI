@@ -1,8 +1,10 @@
 /* FULL PAGE PROFILE */
 .profile-container {
   width: 100%;
-  max-width: 1000px; /* mở rộng card */
-  margin: 40px auto; /* căn giữa */
+  max-width: 1000px;
+  /* mở rộng card */
+  margin: 40px auto;
+  /* căn giữa */
   padding: 20px;
   color: white;
 }
@@ -16,7 +18,8 @@
 
 /* HEADER AVATAR */
 .profile-header {
-  width: 100%; /* FULL ngang bằng card dưới */
+  width: 100%;
+  /* FULL ngang bằng card dưới */
   display: flex;
   align-items: center;
   gap: 25px;
@@ -27,7 +30,8 @@
   padding: 20px;
   border-radius: 18px;
 
-  box-sizing: border-box; /* đảm bảo padding không làm lệch width */
+  box-sizing: border-box;
+  /* đảm bảo padding không làm lệch width */
 }
 
 .profile-avatar {
@@ -56,7 +60,8 @@
   border-radius: 18px;
   margin-bottom: 25px;
 
-  box-sizing: border-box; /* FIX: để padding không làm rộng hơn */
+  box-sizing: border-box;
+  /* FIX: để padding không làm rộng hơn */
 }
 
 .profile-card h3 {
@@ -136,4 +141,75 @@
   margin-top: 6px;
   font-size: 13px;
   color: #d0fd3e;
+}
+
+/* SUBSCRIPTION LIST */
+.subscription-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.subscription-item {
+  background: #3a3a3c;
+  padding: 20px;
+  border-radius: 14px;
+  border-left: 4px solid #d0fd3e;
+}
+
+.sub-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.sub-pkg-name {
+  font-size: 17px;
+  font-weight: 800;
+  color: white;
+}
+
+.sub-status {
+  font-size: 12px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 20px;
+  text-transform: uppercase;
+}
+
+.sub-status.active {
+  background: #166534;
+  color: #dcfce7;
+}
+
+.sub-status.expired {
+  background: #7f1d1d;
+  color: #fee2e2;
+}
+
+.sub-dates {
+  display: flex;
+  gap: 30px;
+  font-size: 14px;
+  color: #aaa;
+  margin-bottom: 8px;
+}
+
+.sub-dates b {
+  color: white;
+}
+
+.sub-category {
+  font-size: 13px;
+  color: #d0fd3e;
+  font-weight: 600;
+}
+
+.no-sub-text {
+  text-align: center;
+  color: gray;
+  padding: 20px;
+  font-style: italic;
 }
