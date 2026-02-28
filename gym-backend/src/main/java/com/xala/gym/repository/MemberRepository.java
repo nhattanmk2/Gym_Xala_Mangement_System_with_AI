@@ -19,8 +19,8 @@ public interface MemberRepository extends JpaRepository<Member, Integer> {
     // ✅ ADMIN: Search theo name + cccd
     @Query("""
         SELECT m FROM Member m
-        WHERE (:name IS NULL OR m.name LIKE %:name%)
-        AND (:cccd IS NULL OR m.cccd = :cccd)
+        WHERE (:name IS NULL OR :name = '' OR m.name LIKE CONCAT('%', :name, '%'))
+        AND (:cccd IS NULL OR :cccd = '' OR m.cccd = :cccd)
     """)
     List<Member> searchMembers(
             @Param("name") String name,

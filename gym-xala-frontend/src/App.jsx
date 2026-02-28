@@ -8,7 +8,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import PTDashboard from "./pages/pt/dashboard/PTDashboard";
 import MemberDashboard from "./pages/member/MemberDashboard";
 
-import AdminMemberManagement from "./pages/admin/MemberManagement";
+// import AdminMemberManagement from "./pages/admin/MemberManagement";
 import AdminPackageManagement from "./pages/admin/PackageManagement";
 import AdminBookingManagement from "./pages/admin/BookingManagement";
 import AdminMemberList from "./pages/admin/member/AdminMemberList";
@@ -42,14 +42,14 @@ function App() {
           }
         />
 
-        <Route
+        {/* <Route
           path="/admin/members"
           element={
             <ProtectedRoute allowRoles={["ROLE_ADMIN"]}>
               <AdminMemberManagement />
             </ProtectedRoute>
           }
-        />
+        /> */}
 
         <Route
           path="/admin/packages"

@@ -9,6 +9,7 @@ import com.xala.gym.entity.enums.UserRole;
 import com.xala.gym.repository.MemberRepository;
 import com.xala.gym.repository.RoleRepository;
 import com.xala.gym.repository.UserRepository;
+import com.xala.gym.service.AdminMemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,9 +17,11 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static java.util.stream.Collectors.toList;
+
 @Service
 @RequiredArgsConstructor
-public class AdminMemberService {
+public class AdminMemberServiceImpl implements AdminMemberService {
 
     private final MemberRepository memberRepository;
     private final UserRepository userRepository;
@@ -26,7 +29,7 @@ public class AdminMemberService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public void createMember(AdminCreateMemberRequest request) {
+    public AdminMemberResponse createMember(AdminCreateMemberRequest request) {
 
         // 1️⃣ Kiểm tra trùng username/email
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
@@ -64,22 +67,50 @@ public class AdminMemberService {
                 .build();
 
         memberRepository.save(member);
+
+        // 3️⃣ Map sang response
+        return AdminMemberResponse.builder()
+                .id(member.getId())
+                .name(member.getName())
+                .cccd(member.getCccd())
+                .status(member.getStatus())
+                .build();
     }
 
     // ✅ API Admin lấy danh sách Member
-    public List<AdminMemberResponse> getAllMembers(String name, String cccd) {
+    public List<AdminMemberResponse> getAllMembers(String name, String cccd, String email, String phone, String sex) {
 
         List<Member> members = memberRepository.searchMembers(name, cccd);
 
         return members.stream()
-                .map(m -> new AdminMemberResponse(
-                        m.getId(),
-                        m.getName(),
-                        m.getCccd(),
-                        m.getEmail(),
-                        m.getPhone(),
-                        m.getStatus()
-                ))
+                .map(m -> AdminMemberResponse.builder()
+                        .id(m.getId())
+                        .name(m.getName())
+                        .cccd(m.getCccd())
+                        .email(m.getEmail())
+                        .phone(m.getPhone())
+                        .status(m.getStatus())
+                        .build())
                 .toList();
+    }
+
+    @Transactional
+    public void updateMemberStatus(Integer memberId, boolean status) {
+
+        // 1️⃣ Tìm Member
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() ->
+                        new RuntimeException("Không tìm thấy học viên"));
+
+        // 2️⃣ Cập nhật status Member
+        member.setStatus(status);
+
+        // 3️⃣ Đồng bộ User.enabled
+        User user = member.getUser();
+        user.setEnabled(status);
+
+        // 4️⃣ Lưu (cascade không dùng ở đây nên save cả 2 cho chắc chắn)
+        memberRepository.save(member);
+        userRepository.save(user);
     }
 }

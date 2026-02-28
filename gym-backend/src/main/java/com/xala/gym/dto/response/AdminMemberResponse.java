@@ -1,18 +1,23 @@
 package com.xala.gym.dto.response;
 
-import lombok.AllArgsConstructor;
+import com.xala.gym.entity.enums.GoalType;
+import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
+@Builder
 public class AdminMemberResponse {
 
     private Integer id;
     private String name;
-    private String cccd;
     private String email;
+    private String cccd;
     private String phone;
+    private String sex;
     private Boolean status;
+
+    private Float height;
+    private Float weight;
+    private Float bmi;
+    private GoalType goalType;
 }

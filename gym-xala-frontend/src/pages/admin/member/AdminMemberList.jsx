@@ -22,9 +22,9 @@ const AdminMemberList = () => {
     }
     }, [name, cccd]);
 
-  useEffect(() => {
-  fetchMembers();
-}, [fetchMembers]);
+    useEffect(() => {
+        fetchMembers();
+    }, [fetchMembers]);
 
   return (
     <AdminLayout>
