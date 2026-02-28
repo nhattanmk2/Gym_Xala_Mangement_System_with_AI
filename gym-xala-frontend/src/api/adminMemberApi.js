@@ -55,3 +55,11 @@ export const createMember = async (data) => {
   });
   return res.data;
 };
+
+export const upgradeToPt = async (id) => {
+  const token = getToken();
+  const res = await axios.put(`${BASE_URL}/${id}/upgrade-pt`, {}, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return res.data;
+};

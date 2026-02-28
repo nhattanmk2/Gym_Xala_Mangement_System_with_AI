@@ -201,13 +201,38 @@ public class AdminMemberServiceImpl implements AdminMemberService {
     @Transactional
     public void deleteMember(Integer memberId) {
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy học viên"));
+                .orElseThrow(() -> new RuntimeException("Member not found"));
 
         User user = member.getUser();
 
+        // Xóa member
         memberRepository.delete(member);
+
+        // Xóa user
         if (user != null) {
             userRepository.delete(user);
         }
+    }
+
+    @Override
+    @Transactional
+    public void upgradeToPt(Integer memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new RuntimeException("Member not found"));
+
+        User user = member.getUser();
+        if (user == null) {
+            throw new RuntimeException("User not found for this member");
+        }
+
+        Role ptRole = roleRepository.findByName(com.xala.gym.entity.enums.UserRole.ROLE_PT)
+                .orElseThrow(() -> new RuntimeException("ROLE_PT not found"));
+        Role memberRole = roleRepository.findByName(com.xala.gym.entity.enums.UserRole.ROLE_MEMBER)
+                .orElseThrow(() -> new RuntimeException("ROLE_MEMBER not found"));
+
+        user.getRoles().remove(memberRole);
+        user.getRoles().add(ptRole);
+
+        userRepository.save(user);
     }
 }

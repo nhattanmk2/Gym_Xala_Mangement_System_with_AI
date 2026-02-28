@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import AdminLayout from "../layout/AdminLayout";
-import { getAllMembers, updateMember, updateMemberStatus, deleteMember, createMember } from "../../../api/adminMemberApi";
+import { getAllMembers, updateMember, updateMemberStatus, deleteMember, createMember, upgradeToPt } from "../../../api/adminMemberApi";
 import "./adminMemberList.css";
 
 const AdminMemberList = () => {
@@ -76,6 +76,19 @@ const AdminMemberList = () => {
       } catch (error) {
         console.error("Lỗi xóa hội viên:", error);
         alert("Xóa thất bại do lỗi phía server. (Có thể vướng khóa ngoại DB)");
+      }
+    }
+  };
+
+  const handleUpgradeToPt = async (id) => {
+    if (window.confirm("Bạn có chắc chắn muốn nâng cấp hội viên này lên làm Huấn luyện viên (PT) không?")) {
+      try {
+        await upgradeToPt(id);
+        fetchMembers();
+        alert("Nâng cấp lên PT thành công!");
+      } catch (error) {
+        console.error("Lỗi nâng cấp PT:", error);
+        alert("Nâng cấp thất bại.");
       }
     }
   };
@@ -174,6 +187,7 @@ const AdminMemberList = () => {
                     >
                       {m.status !== false ? "Khóa" : "Mở Khóa"}
                     </button>
+                    <button className="action-btn" style={{ background: "#673AB7", color: "white" }} onClick={() => handleUpgradeToPt(m.id)}>Nâng cấp PT</button>
                     <button className="action-btn delete" onClick={() => handleDelete(m.id)}>Xóa</button>
                   </td>
                 </tr>

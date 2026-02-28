@@ -2,23 +2,71 @@
   width: 240px;
   background: #0f172a;
   color: white;
-  padding: 20px;
+  padding: 25px;
+  min-height: 100vh;
+  position: sticky;
+  top: 0;
+}
+
+.sidebar-brand {
+  margin-bottom: 40px;
+  padding: 0 10px;
 }
 
 .pt-sidebar .logo {
-  font-size: 20px;
-  margin-bottom: 25px;
+  font-size: 22px;
+  margin-bottom: 30px;
+  color: #fbbf24;
+  font-weight: bold;
+}
+
+.sidebar-brand .badge {
+  font-size: 10px;
+  background: rgba(251, 191, 36, 0.1);
+  color: #fbbf24;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
 .pt-sidebar a {
   display: block;
-  padding: 12px;
-  margin-bottom: 8px;
+  padding: 12px 15px;
   text-decoration: none;
-  color: white;
+  color: rgba(255, 255, 255, 0.7);
   border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.pt-sidebar a .icon {
+  margin-right: 12px;
+  font-size: 1.2rem;
+  transition: transform 0.3s;
 }
 
 .pt-sidebar a:hover {
-  background: #1e293b;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.pt-sidebar a.active {
+  background: #2563eb;
+  color: white;
+}
+
+.pt-sidebar a.active .icon {
+  transform: scale(1.1);
+}
+
+.nav-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 15px 0;
 }

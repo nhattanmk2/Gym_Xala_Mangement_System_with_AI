@@ -44,4 +44,8 @@ public class Employee {
 
     @Column(name = "pt_rating")
     private Double ptRating; // Đánh giá trung bình
+
+    @Lob
+    @Column(name = "avatar", columnDefinition = "LONGBLOB")
+    private byte[] avatar;
 }

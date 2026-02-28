@@ -17,4 +17,7 @@ public class AuthResponse {
 
     // Có thể mở rộng sau nếu 1 user nhiều role
     private List<String> roles;
+
+    private Integer gymLocationId;
+    private String gymLocationName;
 }

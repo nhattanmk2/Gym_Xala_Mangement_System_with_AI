@@ -9,6 +9,7 @@ const AdminSidebar = () => {
       <nav>
         <Link to="/admin/dashboard">Dashboard</Link>
         <Link to="/admin/members">Member Management</Link>
+        <Link to="/admin/pts">PT Management</Link>
         <Link to="/admin/packages">Package Management</Link>
         <Link to="/admin/bookings">Booking Management</Link>
       </nav>

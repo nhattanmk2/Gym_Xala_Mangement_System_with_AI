@@ -12,13 +12,14 @@ import java.util.Optional;
 @Repository
 public interface MemberRepository extends JpaRepository<Member, Integer> {
 
-    Optional<Member> findByUser_Id(Integer userId);
+    Optional<Member> findByUser_Id(Long userId);
 
     Optional<Member> findByUserUsername(String username);
 
-    // ✅ ADMIN: Search theo name + cccd
-    @Query("SELECT m FROM Member m " +
-           "WHERE (:name = '' OR m.name LIKE CONCAT('%', :name, '%')) " +
+    // ✅ ADMIN: Search theo name + cccd + filter ROLE_MEMBER
+    @Query("SELECT m FROM Member m JOIN m.user u JOIN u.roles r " +
+           "WHERE r.name = 'ROLE_MEMBER' " +
+           "AND (:name = '' OR m.name LIKE CONCAT('%', :name, '%')) " +
            "AND (:cccd = '' OR m.cccd = :cccd)")
     List<Member> searchMembers(
             @Param("name") String name,

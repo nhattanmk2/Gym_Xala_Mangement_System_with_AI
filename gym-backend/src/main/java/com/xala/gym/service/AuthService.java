@@ -8,6 +8,7 @@ import com.xala.gym.entity.Member;
 import com.xala.gym.entity.Role;
 import com.xala.gym.entity.User;
 import com.xala.gym.entity.enums.UserRole;
+import com.xala.gym.repository.EmployeeRepository;
 import com.xala.gym.repository.MemberRepository;
 import com.xala.gym.repository.RoleRepository;
 import com.xala.gym.repository.UserRepository;
@@ -37,6 +38,7 @@ public class AuthService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final MemberRepository memberRepository;
+    private final EmployeeRepository employeeRepository;
 
 
     // ======================= REGISTER MEMBER =======================
@@ -157,12 +159,25 @@ public class AuthService {
 
         String token = jwtService.generateToken(userDetails);
 
-        return new AuthResponse(
+        AuthResponse res = new AuthResponse(
                 token,
                 user.getUsername(),
                 user.getEmail(),
-                roles
+                roles,
+                null,
+                null
         );
+
+        if (roles.contains(UserRole.ROLE_PT.name())) {
+            employeeRepository.findByUser_Id(user.getId()).ifPresent(e -> {
+                if (e.getGymLocation() != null) {
+                    res.setGymLocationId(e.getGymLocation().getId());
+                    res.setGymLocationName(e.getGymLocation().getName());
+                }
+            });
+        }
+
+        return res;
     }
 }
 

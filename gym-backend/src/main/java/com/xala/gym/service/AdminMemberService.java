@@ -20,4 +20,6 @@ public interface AdminMemberService {
     );
 
     void deleteMember(Integer memberId);
+
+    void upgradeToPt(Integer memberId);
 }

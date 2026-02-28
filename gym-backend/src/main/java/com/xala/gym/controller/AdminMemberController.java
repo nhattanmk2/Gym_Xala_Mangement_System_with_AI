@@ -66,4 +66,10 @@ public class AdminMemberController {
         memberService.deleteMember(id);
         return ResponseEntity.ok("Xóa học viên thành công");
     }
+
+    @PutMapping("/members/{id}/upgrade-pt")
+    public ResponseEntity<String> upgradeToPt(@PathVariable("id") Integer id) {
+        memberService.upgradeToPt(id);
+        return ResponseEntity.ok("Nâng cấp hội viên lên PT thành công");
+    }
 }
