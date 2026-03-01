@@ -42,6 +42,12 @@ public class Employee {
     @Column(name = "pt_specialty")
     private String ptSpecialty; // Chuyên môn PT
 
+    @Column(name = "pt_experience")
+    private String ptExperience; // Kinh nghiệm (VD: 5 năm)
+
+    @Column(name = "pt_bio", columnDefinition = "TEXT")
+    private String ptBio; // Mô tả bản thân
+
     @Column(name = "pt_rating")
     private Double ptRating; // Đánh giá trung bình
 

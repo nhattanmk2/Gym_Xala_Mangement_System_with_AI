@@ -1,59 +1,115 @@
+/* --- Global Layout --- */
 .member-layout {
   display: flex;
   min-height: 100vh;
-  background: #000000;
-  color: rgb(255, 255, 255);
+  background: #09090b;
+  /* Deep premium black */
+  color: #fff;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
+/* --- Sidebar --- */
 .member-sidebar {
-  width: 240px;
-  background: #2c2c2e;
-  padding: 20px;
+  width: 260px;
+  background: #18181b;
+  padding: 30px 20px;
   display: flex;
   flex-direction: column;
+  border-right: 1px solid #27272a;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
 }
 
 .logo {
-  font-size: 20px;
-  font-weight: bold;
+  font-size: 24px;
+  font-weight: 900;
   color: #d0fd3e;
-  margin-bottom: 30px;
+  margin-bottom: 40px;
+  text-align: center;
+  letter-spacing: 2px;
+  text-transform: uppercase;
 }
 
-.member-sidebar nav {
+/* --- Navigation --- */
+.member-nav {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 10px;
+  flex: 1;
 }
 
-.member-sidebar nav a {
+.nav-item {
+  display: flex;
+  align-items: center;
   text-decoration: none;
-  color: white;
+  color: #a1a1aa;
   font-size: 15px;
-  padding: 10px;
-  border-radius: 10px;
+  font-weight: 500;
+  padding: 14px 18px;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  gap: 12px;
 }
 
-.member-sidebar nav a:hover {
-  background: #3a3a3c;
-  color: #d0fd3e;
+.nav-icon {
+  font-size: 18px;
 }
 
+.nav-text {
+  flex: 1;
+}
+
+.nav-item:hover {
+  background: #27272a;
+  color: #fff;
+  transform: translateX(4px);
+}
+
+.nav-item.active {
+  background: linear-gradient(90deg, #d0fd3e 0%, #b5e625 100%);
+  color: #000;
+  font-weight: 700;
+  box-shadow: 0 4px 15px rgba(208, 253, 62, 0.2);
+}
+
+/* --- Logout Button --- */
 .logout-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
   margin-top: auto;
-  padding: 12px;
-  border: none;
-  border-radius: 10px;
-  background: #d0fd3e;
-  font-weight: bold;
+  padding: 14px;
+  border: 1px solid #3f3f46;
+  border-radius: 12px;
+  background: transparent;
+  color: #fca5a5;
+  font-weight: 600;
+  font-size: 15px;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
+.logout-btn:hover {
+  background: #ef4444;
+  color: #fff;
+  border-color: #ef4444;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+}
+
+/* --- Content Area --- */
 .member-content {
   flex: 1;
-  padding: 40px;
-  display: flex;
-  justify-content: center;
-  /* căn giữa */
-  align-items: flex-start;
+  padding: 30px 40px;
+  overflow-y: auto;
+  background: #09090b;
+}
+
+.content-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
 }

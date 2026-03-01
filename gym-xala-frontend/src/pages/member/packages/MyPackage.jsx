@@ -145,12 +145,22 @@ export default function MyPackage() {
                                     <tr key={card.id}>
                                         <td><strong>{card.packageName}</strong></td>
                                         <td>{card.category}</td>
-                                        <td>{new Date(card.startDate).toLocaleDateString("vi-VN")}</td>
-                                        <td>{new Date(card.endDate).toLocaleDateString("vi-VN")}</td>
+                                        <td>{card.startDate ? new Date(card.startDate).toLocaleDateString("vi-VN") : "---"}</td>
+                                        <td>{card.endDate ? new Date(card.endDate).toLocaleDateString("vi-VN") : "---"}</td>
                                         <td>
-                                            <span className={`status-pill ${card.status.toLowerCase()}`}>
-                                                {card.status === "ACTIVE" ? "Đang hoạt động" : card.status}
-                                            </span>
+                                            <div className="status-action-group">
+                                                <span className={`status-pill ${card.status.toLowerCase()}`}>
+                                                    {card.status === "ACTIVE" ? "Đang hoạt động" :
+                                                        card.status === "PENDING" ? "Đang chờ duyệt" :
+                                                            card.status === "CANCELLED" || card.status === "CANCELED" ? "Đã hủy" :
+                                                                card.status}
+                                                </span>
+                                                {card.status === "PENDING" && (
+                                                    <button className="btn-cancel-mini" onClick={() => handleCancel(card.id)}>
+                                                        Hủy yêu cầu
+                                                    </button>
+                                                )}
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}

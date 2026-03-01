@@ -101,11 +101,11 @@ public class AdminMemberServiceImpl implements AdminMemberService {
                         .sex(m.getSex())
                         .status(m.getStatus())
                         .build())
-                .toList();
+                .collect(toList());
     }
 
     @Transactional
-    public void updateMemberStatus(Integer memberId, boolean status) {
+    public void updateMemberStatus(Long memberId, boolean status) {
 
         // 1️⃣ Tìm Member
         Member member = memberRepository.findById(memberId)
@@ -127,7 +127,7 @@ public class AdminMemberServiceImpl implements AdminMemberService {
     @Override
     @Transactional
     public AdminMemberResponse updateMember(
-            Integer memberId,
+            Long memberId,
             AdminUpdateMemberRequest request
     ) {
 
@@ -199,7 +199,7 @@ public class AdminMemberServiceImpl implements AdminMemberService {
 
     @Override
     @Transactional
-    public void deleteMember(Integer memberId) {
+    public void deleteMember(Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new RuntimeException("Member not found"));
 
@@ -216,7 +216,7 @@ public class AdminMemberServiceImpl implements AdminMemberService {
 
     @Override
     @Transactional
-    public void upgradeToPt(Integer memberId) {
+    public void upgradeToPt(Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new RuntimeException("Member not found"));
 

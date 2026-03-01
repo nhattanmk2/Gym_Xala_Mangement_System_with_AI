@@ -37,6 +37,12 @@ public class PtController {
         return ResponseEntity.ok(ptService.updateMyProfile(request, avatarBytes));
     }
 
+    @PostMapping("/profile/avatar")
+    public ResponseEntity<AdminPtResponse> updateAvatar(@RequestParam("file") MultipartFile file) throws Exception {
+        AdminUpdatePtRequest request = new AdminUpdatePtRequest();
+        return ResponseEntity.ok(ptService.updateMyProfile(request, file.getBytes()));
+    }
+
     @GetMapping("/positions")
     public List<Position> getAllPositions() {
         return ptService.getAllPositions();

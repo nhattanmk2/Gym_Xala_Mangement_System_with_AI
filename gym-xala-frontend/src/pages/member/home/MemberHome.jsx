@@ -1,7 +1,11 @@
 import { useEffect, useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { getActivePackages } from "../../../api/packageApi";
+import { getAllLocations } from "../../../api/locationApi";
 import "./member-home.css";
 
 export default function MemberHome() {
+  const navigate = useNavigate();
   const [branches, setBranches] = useState([]);
   const [packages, setPackages] = useState([]);
 
@@ -19,25 +23,27 @@ export default function MemberHome() {
 
   // Fake API load
   useEffect(() => {
-    setBranches([
-      {
-        id: 1,
-        name: "Gym Xala Hà Đông",
-        address: "Hà Nội",
-        image:
-          "https://images.pexels.com/photos/1552242/pexels-photo-1552242.jpeg",
-      },
-    ]);
+    const fetchLocations = async () => {
+      try {
+        const data = await getAllLocations();
+        setBranches(data);
+      } catch (error) {
+        console.error("Error fetching locations:", error);
+      }
+    };
 
-    setPackages([
-      {
-        id: 1,
-        name: "Gói 3 tháng",
-        price: "1.500.000 VNĐ",
-        image:
-          "https://images.pexels.com/photos/414029/pexels-photo-414029.jpeg",
-      },
-    ]);
+    fetchLocations();
+
+    const fetchPackages = async () => {
+      try {
+        const data = await getActivePackages();
+        // Chỉ hiện ra 4 gói tập nổi bật nhất (hoặc mới nhất)
+        setPackages(data.slice(0, 4));
+      } catch (error) {
+        console.error("Error fetching packages:", error);
+      }
+    };
+    fetchPackages();
   }, []);
 
   // Scroll chatbot xuống cuối
@@ -69,22 +75,45 @@ export default function MemberHome() {
 
   return (
     <div className="member-container">
+      {/* Header Info */}
+      <div className="dashboard-header">
+        <div>
+          <h1 className="welcome-title">Chào mừng trở lại, Hội viên!</h1>
+          <p className="welcome-subtitle">Cùng tiếp tục hành trình tập luyện tuyệt vời nhé.</p>
+        </div>
+      </div>
+
       {/* Banner */}
-      <img
-        className="banner"
-        src="https://i.ibb.co/WVnV8Zp/barner.png"
-        alt="banner"
-      />
+      <div className="banner-wrapper">
+        <img
+          className="banner"
+          src="https://images.pexels.com/photos/1954524/pexels-photo-1954524.jpeg"
+          alt="Banner Gym Xala"
+        />
+        <div className="banner-content">
+          <h2>Đăng ký gói tập hôm nay</h2>
+          <p>Nhận ngay ưu đãi giảm 20% cho gói VIP 6 tháng.</p>
+          <button className="banner-btn" onClick={() => navigate('/member/packages')}>Xem chi tiết</button>
+        </div>
+      </div>
 
-      {/* Branch Slider */}
-      <section>
-        <h2 className="section-title">CÁC CHI NHÁNH</h2>
+      {/* Branch Grid */}
+      <section className="dashboard-section">
+        <div className="section-header">
+          <h2 className="section-title">CÁC CHI NHÁNH</h2>
+          <button className="view-all-btn" onClick={() => navigate('/member/booking')}>Xem tất cả</button>
+        </div>
 
-        <div className="slider">
+        <div className="card-grid">
           {branches.map((b) => (
-            <div key={b.id} className="card-slide">
-              <img src={b.image} alt={b.name} />
-              <div className="overlay">
+            <div key={b.id} className="card-item">
+              <div className="card-image-wrapper">
+                <img
+                  src={b.image ? `data:image/png;base64,${b.image}` : "https://images.pexels.com/photos/1552242/pexels-photo-1552242.jpeg"}
+                  alt={b.name}
+                />
+              </div>
+              <div className="card-info">
                 <h3>{b.name}</h3>
                 <p>📍 {b.address}</p>
               </div>
@@ -93,17 +122,29 @@ export default function MemberHome() {
         </div>
       </section>
 
-      {/* Package Slider */}
-      <section>
-        <h2 className="section-title">GÓI THÀNH VIÊN</h2>
+      {/* Package Grid */}
+      <section className="dashboard-section">
+        <div className="section-header">
+          <h2 className="section-title">GÓI THÀNH VIÊN NỔI BẬT</h2>
+          <button className="view-all-btn" onClick={() => navigate('/member/packages')}>Khám phá ngay</button>
+        </div>
 
-        <div className="slider">
+        <div className="card-grid package-grid">
           {packages.map((p) => (
-            <div key={p.id} className="card-slide">
-              <img src={p.image} alt={p.name} />
-              <div className="overlay">
+            <div key={p.id} className="card-item package-item">
+              <div className="card-image-wrapper">
+                {p.image ? (
+                  <img src={`data:image/png;base64,${p.image}`} alt={p.name} />
+                ) : (
+                  <div style={{ width: "100%", height: "100%", background: "#f8fafc", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "3rem" }}>
+                    🏋️
+                  </div>
+                )}
+              </div>
+              <div className="card-info">
                 <h3>{p.name}</h3>
-                <p>🏷 {p.price}</p>
+                <p className="price">🏷 {p.price?.toLocaleString()} đ</p>
+                <button className="register-btn" onClick={() => navigate(`/member/packages/${p.id}`)}>Đăng ký ngay</button>
               </div>
             </div>
           ))}
@@ -115,24 +156,25 @@ export default function MemberHome() {
         className="chatbot-icon"
         onClick={() => setShowChatbot(!showChatbot)}
       >
-        🤖
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        </svg>
       </button>
 
       {/* Chatbot Popup */}
       {showChatbot && (
         <div className="chatbot-popup">
           <div className="chat-header">
-            <span>Chatbot hỗ trợ</span>
-            <button onClick={() => setShowChatbot(false)}>×</button>
+            <span>🤖 Trợ lý Gym Xala</span>
+            <button className="close-chat-btn" onClick={() => setShowChatbot(false)}>✕</button>
           </div>
 
           <div className="chat-body" ref={chatBoxRef}>
             {chatHistory.map((c, i) => (
               <div
                 key={i}
-                className={`chat-msg ${
-                  c.chatType === "USER" ? "user" : "bot"
-                }`}
+                className={`chat-msg ${c.chatType === "USER" ? "user" : "bot"
+                  }`}
               >
                 {c.content}
               </div>
@@ -144,11 +186,15 @@ export default function MemberHome() {
               value={message}
               placeholder="Nhập câu hỏi..."
               onChange={(e) => setMessage(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
             />
-            <button onClick={sendMessage}>➤</button>
+            <button onClick={sendMessage}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            </button>
           </div>
         </div>
       )}
     </div>
   );
 }
+

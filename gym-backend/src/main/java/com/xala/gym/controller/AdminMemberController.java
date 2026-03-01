@@ -34,7 +34,7 @@ public class AdminMemberController {
 
     @PutMapping("/members/{id}/status")
     public String updateMemberStatus(
-            @PathVariable("id") Integer id,
+            @PathVariable("id") Long id,
             @RequestParam("status") boolean status
     ) {
         memberService.updateMemberStatus(id, status);
@@ -51,7 +51,7 @@ public class AdminMemberController {
 
     @PutMapping("/members/{id}")
     public ResponseEntity<AdminMemberResponse> updateMember(
-            @PathVariable("id") Integer id,
+            @PathVariable("id") Long id,
             @RequestBody AdminUpdateMemberRequest request
     ) {
 
@@ -62,13 +62,13 @@ public class AdminMemberController {
     }
 
     @DeleteMapping("/members/{id}")
-    public ResponseEntity<String> deleteMember(@PathVariable("id") Integer id) {
+    public ResponseEntity<String> deleteMember(@PathVariable("id") Long id) {
         memberService.deleteMember(id);
         return ResponseEntity.ok("Xóa học viên thành công");
     }
 
     @PutMapping("/members/{id}/upgrade-pt")
-    public ResponseEntity<String> upgradeToPt(@PathVariable("id") Integer id) {
+    public ResponseEntity<String> upgradeToPt(@PathVariable("id") Long id) {
         memberService.upgradeToPt(id);
         return ResponseEntity.ok("Nâng cấp hội viên lên PT thành công");
     }

@@ -44,7 +44,7 @@ export default function PackageDetail() {
         try {
             setSubmitting(true);
             await registerPackage(pkg.id, startDate);
-            alert("Đăng ký gói tập thành công! Chào mừng bạn đến với Gym Xala.");
+            alert("Đã gửi yêu cầu đăng ký! Vui lòng chờ Admin xác nhận thanh toán để kích hoạt thẻ tập.");
             setShowModal(false);
             navigate("/member/profile"); // Or dashboard
         } catch (error) {
@@ -222,7 +222,7 @@ export default function PackageDetail() {
                     }}>
                         <h2 style={{ fontSize: "1.8rem", fontWeight: "900", color: "#0f172a", marginBottom: "10px" }}>🗓️ Bắt đầu luyện tập</h2>
                         <p style={{ color: "#64748b", marginBottom: "30px", lineHeight: "1.6" }}>
-                            Vui lòng chọn ngày bạn muốn bắt đầu kích hoạt thẻ tập. Ngày kết thúc sẽ tự động được gia hạn thêm {pkg.durationInDays} ngày.
+                            Sau khi bạn xác nhận, yêu cầu sẽ được gửi tới Admin ở trạng thái <b>Chờ duyệt</b>. Thẻ tập sẽ chính thức kích hoạt sau khi bạn hoàn tất thanh toán tại quầy.
                         </p>
 
                         <div style={{ marginBottom: "30px" }}>

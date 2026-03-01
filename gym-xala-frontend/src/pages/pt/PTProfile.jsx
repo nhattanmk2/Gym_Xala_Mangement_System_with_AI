@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
-import { getMyProfile, updateMyProfile, getAllPositions, getAllLocations } from "../../api/ptApi";
+import { getPTProfile, updatePTProfile, updatePTAvatar } from "../../api/ptProfileApi";
+import { getAllPositions, getAllLocations } from "../../api/ptApi";
+import "./pt-profile.css";
 
 const PTProfile = () => {
     const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
     const [positions, setPositions] = useState([]);
     const [locations, setLocations] = useState([]);
-    const [avatarFile, setAvatarFile] = useState(null);
     const [avatarPreview, setAvatarPreview] = useState("");
 
     useEffect(() => {
@@ -17,7 +19,7 @@ const PTProfile = () => {
         try {
             setLoading(true);
             const [profileData, posData, locData] = await Promise.all([
-                getMyProfile(),
+                getPTProfile(),
                 getAllPositions(),
                 getAllLocations()
             ]);
@@ -29,118 +31,209 @@ const PTProfile = () => {
             }
         } catch (error) {
             console.error("Error loading profile data:", error);
-            alert("Không thể tải thông tin hồ sơ.");
         } finally {
             setLoading(false);
         }
     };
 
-    const handleAvatarChange = (e) => {
+    const handleAvatarChange = async (e) => {
         const file = e.target.files[0];
         if (file) {
-            setAvatarFile(file);
-            setAvatarPreview(URL.createObjectURL(file));
+            try {
+                // Preview immediately
+                setAvatarPreview(URL.createObjectURL(file));
+
+                // Upload to server
+                await updatePTAvatar(file);
+                alert("✅ Cập nhật ảnh đại diện thành công!");
+            } catch (error) {
+                console.error("Error uploading avatar:", error);
+                alert("❌ Lỗi khi tải ảnh lên. Vui lòng thử lại.");
+            }
         }
     };
 
     const handleSave = async (e) => {
         e.preventDefault();
         try {
-            const formData = new FormData();
+            setSaving(true);
             const updateData = {
                 fullName: profile.name,
                 phone: profile.phone,
                 ptSpecialty: profile.ptSpecialty,
-                positionId: profile.positionId,
-                gymLocationId: profile.gymLocationId
+                ptExperience: profile.ptExperience,
+                ptBio: profile.ptBio
             };
-            formData.append("data", JSON.stringify(updateData));
-            if (avatarFile) {
-                formData.append("avatar", avatarFile);
-            }
 
-            await updateMyProfile(formData);
-            alert("Cập nhật hồ sơ thành công!");
-            window.location.reload();
+            await updatePTProfile(updateData);
+            alert("✅ Cập nhật hồ sơ thành công!");
         } catch (error) {
             console.error("Error updating profile:", error);
-            alert("Cập nhật thất bại.");
+            alert("❌ Cập nhật thất bại. Vui lòng kiểm tra lại dữ liệu.");
+        } finally {
+            setSaving(false);
         }
     };
 
-    if (loading) return <div>Đang tải...</div>;
+    if (loading) {
+        return (
+            <div className="pt-profile-wrapper">
+                <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "300px" }}>
+                    <div className="loader"></div>
+                    <p style={{ marginLeft: "15px", color: "#64748b" }}>Đang tải hồ sơ...</p>
+                </div>
+            </div>
+        );
+    }
 
-    if (!profile) return <div className="member-container"><h2>Lỗi</h2><p>Không thể tải thông tin hồ sơ. Vui lòng thử lại sau.</p></div>;
+    if (!profile) {
+        return (
+            <div className="pt-profile-wrapper">
+                <div style={{ textAlign: "center", padding: "50px" }}>
+                    <h3>⚠️ Không thể tải dữ liệu</h3>
+                    <p>Vui lòng thử đăng nhập lại hoặc liên hệ Admin.</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
-        <div className="member-container">
-            <h2>Hồ sơ của tôi</h2>
-            <form onSubmit={handleSave} style={{ maxWidth: "600px", background: "white", padding: "30px", borderRadius: "10px", boxShadow: "0 4px 6px rgba(0,0,0,0.05)" }}>
-                <div style={{ textAlign: "center", marginBottom: "30px" }}>
-                    <div style={{ width: "150px", height: "150px", borderRadius: "50%", margin: "0 auto 15px", overflow: "hidden", border: "3px solid #f1f5f9" }}>
-                        {avatarPreview ? (
-                            <img src={avatarPreview} alt="Profile" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                        ) : (
-                            <div style={{ height: "100%", background: "#e2e8f0", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "3rem", color: "#94a3b8" }}>
-                                {profile?.username?.charAt(0).toUpperCase()}
-                            </div>
-                        )}
+        <div className="pt-profile-wrapper">
+            <header className="pt-profile-header">
+                <h1>Hồ sơ cá nhân</h1>
+                <p>Quản lý thông tin công tác và xây dựng thương hiệu cá nhân của bạn.</p>
+            </header>
+
+            <div className="pt-profile-grid">
+                {/* Side Card: Avatar & Basic Stats */}
+                <aside className="pt-avatar-card">
+                    <div className="pt-avatar-container">
+                        <div className="pt-avatar-inner">
+                            {avatarPreview ? (
+                                <img src={avatarPreview} alt="PT Profile" />
+                            ) : (
+                                <div className="pt-avatar-placeholder">
+                                    {profile.name?.charAt(0).toUpperCase()}
+                                </div>
+                            )}
+                        </div>
+                        <label htmlFor="avatar-upload" className="btn-upload-avatar">
+                            📷
+                            <input
+                                type="file"
+                                id="avatar-upload"
+                                hidden
+                                accept="image/*"
+                                onChange={handleAvatarChange}
+                            />
+                        </label>
                     </div>
-                    <input type="file" id="avatar-input" style={{ display: "none" }} onChange={handleAvatarChange} />
-                    <label htmlFor="avatar-input" style={{ cursor: "pointer", color: "#2563eb", fontWeight: "600", fontSize: "0.9rem" }}>
-                        Thay đổi ảnh đại diện
-                    </label>
-                </div>
 
-                <div className="form-group">
-                    <label>Tên đăng nhập</label>
-                    <input type="text" value={profile.username} disabled style={{ background: "#f8fafc" }} />
-                </div>
+                    <div className="pt-basic-info">
+                        <h3>{profile.name}</h3>
+                        <p className="pt-username">@{profile.username}</p>
+                        <div className="pt-rating-badge">
+                            ⭐ {profile.ptRating ? profile.ptRating.toFixed(1) : "5.0"} (Đánh giá)
+                        </div>
+                    </div>
+                </aside>
 
-                <div className="form-group">
-                    <label>Họ và tên</label>
-                    <input type="text" value={profile.name} onChange={(e) => setProfile({ ...profile, name: e.target.value })} required />
-                </div>
+                {/* Main Card: Forms */}
+                <main className="pt-details-card">
+                    <form onSubmit={handleSave}>
+                        {/* Section 1: Thông tin cơ bản */}
+                        <section className="pt-form-section">
+                            <h4>👤 Thông tin cơ bản</h4>
+                            <div className="pt-form-grid">
+                                <div className="pt-input-group">
+                                    <label>Họ và tên</label>
+                                    <input
+                                        type="text"
+                                        value={profile.name || ""}
+                                        onChange={(e) => setProfile({ ...profile, name: e.target.value })}
+                                        required
+                                    />
+                                </div>
+                                <div className="pt-input-group">
+                                    <label>Số điện thoại</label>
+                                    <input
+                                        type="text"
+                                        value={profile.phone || ""}
+                                        onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
+                                    />
+                                </div>
+                                <div className="pt-input-group full-width">
+                                    <label>Email (Không được đổi)</label>
+                                    <input type="email" value={profile.email || ""} disabled />
+                                </div>
+                            </div>
+                        </section>
 
-                <div className="form-group">
-                    <label>Email</label>
-                    <input type="email" value={profile.email} disabled style={{ background: "#f8fafc" }} />
-                </div>
+                        {/* Section 2: Thông tin chuyên môn */}
+                        <section className="pt-form-section">
+                            <h4>🏋️ Chuyên môn & Kinh nghiệm</h4>
+                            <div className="pt-form-grid">
+                                <div className="pt-input-group">
+                                    <label>Lĩnh vực chuyên môn</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Ví dụ: Giảm cân, Tăng cơ, Yoga..."
+                                        value={profile.ptSpecialty || ""}
+                                        onChange={(e) => setProfile({ ...profile, ptSpecialty: e.target.value })}
+                                    />
+                                </div>
+                                <div className="pt-input-group">
+                                    <label>Kinh nghiệm làm việc</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Ví dụ: 3 năm, 5 năm..."
+                                        value={profile.ptExperience || ""}
+                                        onChange={(e) => setProfile({ ...profile, ptExperience: e.target.value })}
+                                    />
+                                </div>
+                                <div className="pt-input-group full-width">
+                                    <label>Mô tả bản thân & Thành tích</label>
+                                    <textarea
+                                        placeholder="Giới thiệu chi tiết để học viên tin tưởng bạn hơn..."
+                                        value={profile.ptBio || ""}
+                                        onChange={(e) => setProfile({ ...profile, ptBio: e.target.value })}
+                                    />
+                                </div>
+                            </div>
+                        </section>
 
-                <div className="form-group">
-                    <label>Số điện thoại</label>
-                    <input type="text" value={profile.phone} onChange={(e) => setProfile({ ...profile, phone: e.target.value })} />
-                </div>
+                        {/* Section 3: Vị trí công tác */}
+                        <section className="pt-form-section">
+                            <h4>🏢 Thông tin công tác (Chỉ đọc)</h4>
+                            <div className="pt-form-grid">
+                                <div className="pt-input-group">
+                                    <label>Vị trí hiện tại</label>
+                                    <select value={profile.positionId || ""} disabled>
+                                        <option value="">Chưa gán</option>
+                                        {positions.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                                    </select>
+                                </div>
+                                <div className="pt-input-group">
+                                    <label>Chi nhánh giảng dạy</label>
+                                    <select value={profile.gymLocationId || ""} disabled>
+                                        <option value="">Chưa gán</option>
+                                        {locations.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
+                                    </select>
+                                </div>
+                            </div>
+                            <p style={{ fontSize: "12px", color: "#94a3b8", marginTop: "10px" }}>
+                                * Liên hệ Quản trị viên nếu cần thay đổi thông tin công tác hoặc chi nhánh.
+                            </p>
+                        </section>
 
-                <div className="form-group">
-                    <label>Chuyên môn</label>
-                    <input type="text" value={profile.ptSpecialty || ""} onChange={(e) => setProfile({ ...profile, ptSpecialty: e.target.value })} />
-                </div>
-
-                <div className="form-group">
-                    <label>Vị trí</label>
-                    <select value={profile.positionId || ""} onChange={(e) => setProfile({ ...profile, positionId: e.target.value })} disabled style={{ background: "#f8fafc" }}>
-                        <option value="">Chưa gán</option>
-                        {positions.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                    </select>
-                    <small style={{ color: "#64748b" }}>* Liên hệ Quản trị viên để đổi vị trí công tác</small>
-                </div>
-
-                <div className="form-group">
-                    <label>Chi nhánh</label>
-                    <select value={profile.gymLocationId || ""} onChange={(e) => setProfile({ ...profile, gymLocationId: e.target.value })} disabled style={{ background: "#f8fafc" }}>
-                        <option value="">Chưa gán</option>
-                        {locations.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
-                    </select>
-                    <small style={{ color: "#64748b" }}>* Liên hệ Quản trị viên để đổi chi nhánh</small>
-                </div>
-
-                <div style={{ marginTop: "30px", display: "flex", justifyContent: "flex-end" }}>
-                    <button type="submit" className="action-btn" style={{ background: "#4CAF50", color: "white", padding: "12px 25px" }}>
-                        Lưu thay đổi
-                    </button>
-                </div>
-            </form>
+                        <div className="pt-profile-actions">
+                            <button type="submit" className="btn-save-profile" disabled={saving}>
+                                {saving ? "Đang lưu..." : "Lưu thay đổi hồ sơ"}
+                            </button>
+                        </div>
+                    </form>
+                </main>
+            </div>
         </div>
     );
 };

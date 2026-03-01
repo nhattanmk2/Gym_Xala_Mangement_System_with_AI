@@ -12,14 +12,14 @@ public interface AdminMemberService {
 
     List<AdminMemberResponse> getAllMembers(String name, String cccd, String email, String phone, String sex);
 
-    void updateMemberStatus(Integer memberId, boolean status);
+    void updateMemberStatus(Long memberId, boolean status);
 
     AdminMemberResponse updateMember(
-            Integer memberId,
+            Long memberId,
             AdminUpdateMemberRequest request
     );
 
-    void deleteMember(Integer memberId);
+    void deleteMember(Long memberId);
 
-    void upgradeToPt(Integer memberId);
+    void upgradeToPt(Long memberId);
 }

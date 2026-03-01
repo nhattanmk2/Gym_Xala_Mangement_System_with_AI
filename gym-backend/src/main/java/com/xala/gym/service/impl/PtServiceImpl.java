@@ -40,9 +40,9 @@ public class PtServiceImpl implements PtService {
         User user = getCurrentUser();
         
         // Update User info
-        user.setFullName(request.getFullName());
-        user.setPhone(request.getPhone());
-        user.setPtSpecialty(request.getPtSpecialty());
+        if (request.getFullName() != null) user.setFullName(request.getFullName());
+        if (request.getPhone() != null) user.setPhone(request.getPhone());
+        if (request.getPtSpecialty() != null) user.setPtSpecialty(request.getPtSpecialty());
         userRepository.save(user);
 
         // Update Employee info
@@ -53,9 +53,11 @@ public class PtServiceImpl implements PtService {
                     return e;
                 });
         
-        employee.setName(request.getFullName());
-        employee.setPhone(request.getPhone());
-        employee.setPtSpecialty(request.getPtSpecialty());
+        if (request.getFullName() != null) employee.setName(request.getFullName());
+        if (request.getPhone() != null) employee.setPhone(request.getPhone());
+        if (request.getPtSpecialty() != null) employee.setPtSpecialty(request.getPtSpecialty());
+        if (request.getPtExperience() != null) employee.setPtExperience(request.getPtExperience());
+        if (request.getPtBio() != null) employee.setPtBio(request.getPtBio());
 
         if (request.getPositionId() != null) {
             Position pos = positionRepository.findById(request.getPositionId())
@@ -118,6 +120,8 @@ public class PtServiceImpl implements PtService {
             if (e.getAvatar() != null) {
                 resp.setAvatar(Base64.getEncoder().encodeToString(e.getAvatar()));
             }
+            resp.setPtExperience(e.getPtExperience());
+            resp.setPtBio(e.getPtBio());
         });
 
         return resp;

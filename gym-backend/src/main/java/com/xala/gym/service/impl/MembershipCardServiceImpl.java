@@ -55,7 +55,7 @@ public class MembershipCardServiceImpl implements MembershipCardService {
                 .gymPackage(gymPackage)
                 .startDate(request.getStartDate())
                 .endDate(endDate)
-                .status("ACTIVE")
+                .status("PENDING") // Luôn là PENDING để chờ Admin duyệt
                 .build();
 
         MembershipCard saved = cardRepository.save(card);
@@ -96,11 +96,11 @@ public class MembershipCardServiceImpl implements MembershipCardService {
             throw new IllegalStateException("Bạn không có quyền hủy gói tập này");
         }
 
-        if (!"ACTIVE".equals(card.getStatus())) {
+        if (!"ACTIVE".equals(card.getStatus()) && !"PENDING".equals(card.getStatus())) {
             throw new IllegalStateException("Gói tập này hiện không ở trạng thái có thể hủy (Trạng thái hiện tại: " + card.getStatus() + ")");
         }
 
-        card.setStatus("CANCELED");
+        card.setStatus("CANCELLED"); // Sử dụng CANCELLED đồng nhất với hệ thống
         cardRepository.save(card);
     }
 

@@ -29,10 +29,8 @@ public class MembershipCard {
     @JoinColumn(name = "package_id", nullable = false)
     private Package gymPackage;
 
-    @Column(nullable = false)
     private LocalDate startDate;
 
-    @Column(nullable = false)
     private LocalDate endDate;
 
     @Column(nullable = false)
@@ -44,7 +42,7 @@ public class MembershipCard {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         if (status == null) {
-            status = "ACTIVE";
+            status = "PENDING";
         }
     }
 }

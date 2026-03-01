@@ -16,6 +16,8 @@ public class AdminPtResponse {
     private String email;
     private String phone;
     private String ptSpecialty;
+    private String ptExperience;
+    private String ptBio;
     private Double ptRating;
     private Boolean status;
 

@@ -170,10 +170,7 @@ export default function MemberProfile() {
           </b>
         </div> */}
 
-        <div className="profile-row">
-          <span>Mã thẻ hội viên:</span>
-          <b>{profile.membercard_id}</b>
-        </div>
+
       </div>
 
       {/* SUBSCRIPTIONS SECTION */}

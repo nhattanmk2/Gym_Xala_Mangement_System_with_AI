@@ -14,6 +14,8 @@ import java.util.Optional;
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
     Optional<Employee> findByUser_Id(Long userId);
+    
+    Optional<Employee> findByUserUsername(String username);
 
     @Query("SELECT e FROM Employee e JOIN e.user u JOIN u.roles r " +
            "WHERE r.name = 'ROLE_PT' " +

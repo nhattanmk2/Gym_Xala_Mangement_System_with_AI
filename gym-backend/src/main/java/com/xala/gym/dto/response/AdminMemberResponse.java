@@ -8,7 +8,7 @@ import lombok.Data;
 @Builder
 public class AdminMemberResponse {
 
-    private Integer id;
+    private Long id;
     private String name;
     private String email;
     private String cccd;

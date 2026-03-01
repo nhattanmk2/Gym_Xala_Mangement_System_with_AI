@@ -7,6 +7,7 @@ import {
   deletePackage,
   togglePackageActive
 } from "../../api/adminPackageApi";
+import "./packageManagement.css";
 
 const PackageManagement = () => {
   const [packages, setPackages] = useState([]);
@@ -330,123 +331,106 @@ const PackageManagement = () => {
         )}
 
         {showModal && (
-          <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(15, 23, 42, 0.7)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
-            <div style={{ background: "white", padding: "35px", borderRadius: "20px", width: "650px", maxWidth: "95%", maxHeight: "90vh", overflowY: "auto", boxShadow: "0 25px 50px -12px rgba(0,0,0,0.25)" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "30px" }}>
-                <h3 style={{ margin: 0, fontSize: "1.5rem", fontWeight: "800", color: "#0f172a" }}>{editingPkg ? "Chỉnh sửa gói tập" : "Thêm gói tập mới"}</h3>
+          <div className="modal-overlay">
+            <div className="modal-content">
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+                <h3>{editingPkg ? "Chỉnh sửa gói tập" : "Thêm gói tập mới"}</h3>
                 <button onClick={handleCloseModal} style={{ background: "none", border: "none", fontSize: "1.5rem", cursor: "pointer", color: "#94a3b8" }}>&times;</button>
               </div>
 
               <form onSubmit={handleSubmit}>
-                <div style={{ display: "flex", gap: "25px", marginBottom: "25px" }}>
-                  <div style={{ width: "140px" }}>
-                    <div style={{ width: "140px", height: "140px", background: "#f8fafc", borderRadius: "16px", overflow: "hidden", marginBottom: "12px", border: "2px dashed #e2e8f0", position: "relative" }}>
-                      {imagePreview ? (
-                        <img src={imagePreview} alt="Preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                      ) : (
-                        <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#cbd5e1", fontSize: "2.5rem" }}>🖼️</div>
-                      )}
-                    </div>
+                <div className="image-upload-section">
+                  <div className="image-preview-box">
+                    {imagePreview ? (
+                      <img src={imagePreview} alt="Preview" />
+                    ) : (
+                      <div style={{ color: "#cbd5e1", fontSize: "2.5rem" }}>🖼️</div>
+                    )}
+                  </div>
+                  <div style={{ flex: 1 }}>
                     <input type="file" id="package-image" hidden onChange={handleImageChange} accept="image/*" />
-                    <label htmlFor="package-image" style={{ display: "block", textAlign: "center", color: "#2563eb", fontSize: "0.85rem", fontWeight: "700", cursor: "pointer", padding: "8px", background: "#f0f7ff", borderRadius: "8px" }}>Chọn ảnh</label>
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ marginBottom: "20px" }}>
-                      <label style={{ display: "block", marginBottom: "8px", fontSize: "0.85rem", fontWeight: "700", color: "#475569" }}>Tên gói tập</label>
-                      <input
-                        type="text"
-                        value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        required
-                        placeholder="VD: Gói tập Premium 12 tháng"
-                        style={{ width: "100%", padding: "12px", borderRadius: "10px", border: "1px solid #e2e8f0", fontSize: "0.95rem" }}
-                      />
-                    </div>
-                    <div style={{ marginBottom: "0" }}>
-                      <label style={{ display: "block", marginBottom: "8px", fontSize: "0.85rem", fontWeight: "700", color: "#475569" }}>Loại gói (Category)</label>
-                      <select
-                        value={formData.category}
-                        onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                        style={{ width: "100%", padding: "12px", borderRadius: "10px", border: "1px solid #e2e8f0", fontSize: "0.95rem", background: "white" }}
-                      >
-                        <option value="GENERAL">Chung (General)</option>
-                        <option value="CARDIO">Tim mạch (Cardio)</option>
-                        <option value="MUSCLE">Tăng cơ (Muscle)</option>
-                        <option value="YOGA">Yoga</option>
-                      </select>
-                    </div>
+                    <label htmlFor="package-image" className="upload-btn">Chọn ảnh minh họa</label>
+                    <p style={{ fontSize: "0.75rem", color: "#64748b", marginTop: "5px" }}>Dung lượng tối đa 2MB. Định dạng JPG, PNG.</p>
                   </div>
                 </div>
 
-                <div style={{ display: "flex", gap: "20px", marginBottom: "20px" }}>
-                  <div style={{ flex: 1 }}>
-                    <label style={{ display: "block", marginBottom: "8px", fontSize: "0.85rem", fontWeight: "700", color: "#475569" }}>Giá niêm yết (VNĐ)</label>
-                    <div style={{ position: "relative" }}>
-                      <input
-                        type="text"
-                        value={formatCurrency(formData.price)}
-                        onChange={handlePriceChange}
-                        required
-                        placeholder="0"
-                        style={{ width: "100%", padding: "12px", borderRadius: "10px", border: "1px solid #e2e8f0", fontSize: "1.1rem", fontWeight: "800", color: "#2563eb" }}
-                      />
-                      <span style={{ position: "absolute", right: "15px", top: "12px", color: "#94a3b8", fontWeight: "600" }}>đ</span>
-                    </div>
+                <div className="form-group">
+                  <label>Tên gói tập *</label>
+                  <input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    required
+                    placeholder="VD: Gói tập Premium 12 tháng"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Loại gói (Category)</label>
+                  <select
+                    value={formData.category}
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                  >
+                    <option value="GENERAL">Chung (General)</option>
+                    <option value="CARDIO">Tim mạch (Cardio)</option>
+                    <option value="MUSCLE">Tăng cơ (Muscle)</option>
+                    <option value="YOGA">Yoga</option>
+                  </select>
+                </div>
+
+                <div style={{ display: "flex", gap: "15px" }}>
+                  <div className="form-group" style={{ flex: 1 }}>
+                    <label>Giá niêm yết (VNĐ) *</label>
+                    <input
+                      type="text"
+                      value={formatCurrency(formData.price)}
+                      onChange={handlePriceChange}
+                      required
+                      placeholder="0"
+                    />
                   </div>
-                  <div style={{ flex: 1 }}>
-                    <label style={{ display: "block", marginBottom: "8px", fontSize: "0.85rem", fontWeight: "700", color: "#475569" }}>Thời hạn (Ngày)</label>
-                    <div style={{ position: "relative" }}>
-                      <input
-                        type="number"
-                        value={formData.durationInDays}
-                        onChange={handleDurationChange}
-                        required
-                        placeholder="30"
-                        style={{ width: "100%", padding: "12px", borderRadius: "10px", border: "1px solid #e2e8f0", fontSize: "0.95rem" }}
-                      />
-                      <span style={{ position: "absolute", right: "15px", top: "12px", color: "#94a3b8", fontSize: "0.85rem" }}>ngày</span>
-                    </div>
+                  <div className="form-group" style={{ flex: 1 }}>
+                    <label>Thời hạn (Ngày) *</label>
+                    <input
+                      type="number"
+                      value={formData.durationInDays}
+                      onChange={handleDurationChange}
+                      required
+                      placeholder="30"
+                    />
                   </div>
                 </div>
 
-                <div style={{ marginBottom: "20px" }}>
-                  <label style={{ display: "block", marginBottom: "8px", fontSize: "0.85rem", fontWeight: "700", color: "#475569" }}>Mô tả chi tiết</label>
+                <div className="form-group">
+                  <label>Mô tả chi tiết</label>
                   <textarea
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     rows="3"
                     placeholder="Nhập các quyền lợi đi kèm..."
-                    style={{ width: "100%", padding: "12px", borderRadius: "10px", border: "1px solid #e2e8f0", fontSize: "0.95rem", resize: "none" }}
                   />
                 </div>
 
-                <div style={{ marginBottom: "30px" }}>
-                  <label style={{ display: "block", marginBottom: "8px", fontSize: "0.85rem", fontWeight: "700", color: "#475569" }}>Khuyến mãi & Quà tặng (Highlight)</label>
-                  <textarea
+                <div className="form-group">
+                  <label>Khuyến mãi & Quà tặng (Highlight)</label>
+                  <input
+                    className="promotion-input"
+                    type="text"
                     value={formData.promotion}
                     onChange={(e) => setFormData({ ...formData, promotion: e.target.value })}
-                    rows="2"
                     placeholder="VD: Tặng áo thun + Bình nước Gym Xala..."
-                    style={{ width: "100%", padding: "12px", borderRadius: "10px", border: "2px solid #fde68a", fontSize: "0.95rem", background: "#fffbeb", resize: "none" }}
                   />
                 </div>
 
-                <div style={{ display: "flex", justifyContent: "flex-end", gap: "12px" }}>
-                  <button type="button" onClick={handleCloseModal} style={{ padding: "12px 25px", border: "1px solid #e2e8f0", background: "white", borderRadius: "10px", cursor: "pointer", fontWeight: "600", color: "#64748b" }}>Hủy bỏ</button>
-                  <button type="submit" style={{ padding: "12px 35px", background: "#2563eb", color: "white", border: "none", borderRadius: "10px", cursor: "pointer", fontWeight: "700", boxShadow: "0 4px 6px -1px rgba(37,99,235,0.3)" }}>Lưu thay đổi</button>
+                <div className="modal-actions">
+                  <button type="button" className="btn-cancel" onClick={handleCloseModal}>Hủy bỏ</button>
+                  <button type="submit" className="btn-submit">{editingPkg ? "Cập nhật" : "Thêm Mới"}</button>
                 </div>
               </form>
             </div>
           </div>
         )}
       </div>
-      <style>
-        {`
-                    .table-row-hover:hover {
-                        background-color: #f8fafc !important;
-                    }
-                `}
-      </style>
     </AdminLayout>
   );
 };

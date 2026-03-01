@@ -1,6 +1,27 @@
+import { useEffect, useState } from "react";
 import AdminLayout from "./layout/AdminLayout";
+import { getDashboardStats } from "../../api/adminDashboardApi";
 
 const AdminDashboard = () => {
+  const [stats, setStats] = useState({
+    totalMembers: 0,
+    totalPTs: 0,
+    totalPackages: 0,
+    todayBookings: 0,
+  });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const data = await getDashboardStats();
+        setStats(data);
+      } catch (error) {
+        console.error("Failed to load dashboard stats", error);
+      }
+    };
+    fetchStats();
+  }, []);
+
   return (
     <AdminLayout>
       <h1>Admin Dashboard</h1>
@@ -10,10 +31,10 @@ const AdminDashboard = () => {
         <h3>Thống kê nhanh</h3>
 
         <ul>
-          <li>👤 Tổng số Member: 120</li>
-          <li>🏋️ Tổng số PT: 8</li>
-          <li>📦 Gói tập hiện có: 6</li>
-          <li>📅 Booking hôm nay: 15</li>
+          <li>👤 Tổng số Member: {stats.totalMembers}</li>
+          <li>🏋️ Tổng số PT: {stats.totalPTs}</li>
+          <li>📦 Gói tập hiện có: {stats.totalPackages}</li>
+          <li>🧾 Hóa đơn chờ duyệt: {stats.todayBookings}</li>
         </ul>
       </div>
     </AdminLayout>

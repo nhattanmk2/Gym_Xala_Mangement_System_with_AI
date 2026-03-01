@@ -13,6 +13,8 @@ import AdminPackageManagement from "./pages/admin/PackageManagement";
 import AdminBookingManagement from "./pages/admin/BookingManagement";
 import AdminMemberList from "./pages/admin/member/AdminMemberList";
 import AdminPTList from "./pages/admin/pt/AdminPTList";
+import AdminInvoices from "./pages/admin/invoices/AdminInvoices";
+import AdminLayout from "./pages/admin/layout/AdminLayout";
 
 import MemberLayout from "./pages/member/MemberLayout";
 import MemberBooking from "./pages/member/booking/MemberBooking";
@@ -86,6 +88,16 @@ function App() {
           element={
             <ProtectedRoute allowRoles={["ROLE_ADMIN"]}>
               <AdminPTList />
+            </ProtectedRoute>
+          } />
+
+        <Route
+          path="/admin/invoices"
+          element={
+            <ProtectedRoute allowRoles={["ROLE_ADMIN"]}>
+              <AdminLayout>
+                <AdminInvoices />
+              </AdminLayout>
             </ProtectedRoute>
           } />
 

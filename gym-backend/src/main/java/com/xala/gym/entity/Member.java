@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     // Liên kết 1-1 với User
     @OneToOne(cascade = CascadeType.ALL)

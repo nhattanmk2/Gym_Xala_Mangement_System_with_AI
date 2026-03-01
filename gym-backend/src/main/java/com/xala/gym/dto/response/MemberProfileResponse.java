@@ -8,7 +8,7 @@ import lombok.*;
 @Builder
 public class MemberProfileResponse {
 
-    private Integer id;
+    private Long id;
 
     // User fields
     private String username;
