@@ -24,7 +24,7 @@
 
 .pt-schedule-grid {
     display: grid;
-    grid-template-columns: 420px 1fr;
+    grid-template-columns: 575px 1fr;
     gap: 32px;
 }
 
@@ -326,4 +326,37 @@
     .pt-schedule-grid {
         grid-template-columns: 1fr;
     }
+}
+
+/* Busy Theme */
+.busy-theme .pt-schedule-header h1 {
+    color: #ef4444;
+}
+
+.busy-theme .schedule-form-card {
+    border-top: 4px solid #ef4444;
+}
+
+.btn-busy {
+    background: #ef4444 !important;
+}
+
+.btn-busy:hover {
+    background: #dc2626 !important;
+}
+
+.busy-style,
+.status-busy {
+    border-left: 4px solid #ef4444;
+    background: #fff1f2;
+}
+
+.status-busy .status-indicator {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.busy-theme .date-chip.active {
+    background: #ef4444;
+    border-color: #ef4444;
 }

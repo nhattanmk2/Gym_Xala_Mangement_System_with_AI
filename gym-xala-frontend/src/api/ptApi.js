@@ -38,3 +38,12 @@ export const getAllLocations = async () => {
     });
     return res.data;
 };
+
+export const getAllPTs = async (branchId) => {
+    const token = getToken();
+    const url = branchId ? `${BASE_URL}/all?branchId=${branchId}` : `${BASE_URL}/all`;
+    const res = await axios.get(url, {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+    return res.data;
+};

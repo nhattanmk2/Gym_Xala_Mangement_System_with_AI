@@ -16,4 +16,7 @@ public class GymLocation {
 
     @Column(columnDefinition = "TEXT")
     private String address;
+
+    @Column(name = "max_capacity")
+    private Integer maxCapacity = 20; // Mặc định 20 người/khung giờ
 }

@@ -3,6 +3,7 @@ package com.xala.gym.service.impl;
 import com.xala.gym.dto.request.AdminUpdatePtRequest;
 import com.xala.gym.dto.response.AdminPtResponse;
 import com.xala.gym.entity.Employee;
+import com.xala.gym.entity.enums.UserRole;
 import com.xala.gym.entity.GymLocation;
 import com.xala.gym.entity.Position;
 import com.xala.gym.entity.User;
@@ -88,6 +89,15 @@ public class PtServiceImpl implements PtService {
     @Override
     public List<GymLocation> getAllLocations() {
         return gymLocationRepository.findAll();
+    }
+
+    @Override
+    public List<AdminPtResponse> getAllPts(Integer branchId) {
+        return userRepository.findAll().stream()
+                .filter(u -> u.getRoles().stream().anyMatch(r -> r.getName() == UserRole.ROLE_PT))
+                .map(this::mapToAdminPtResponse)
+                .filter(resp -> branchId == null || branchId.equals(resp.getGymLocationId()))
+                .collect(java.util.stream.Collectors.toList());
     }
 
     private User getCurrentUser() {

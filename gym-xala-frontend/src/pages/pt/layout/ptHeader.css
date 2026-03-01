@@ -88,3 +88,148 @@
   background: #fff1f2;
   color: #e11d48;
 }
+
+/* Notification Bell Styles */
+.notification-bell-container {
+  position: relative;
+  margin-right: 5px;
+}
+
+.bell-icon {
+  font-size: 1.4rem;
+  cursor: pointer;
+  position: relative;
+  padding: 5px;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.bell-icon:hover {
+  background: #f1f5f9;
+}
+
+.unread-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background: #ef4444;
+  color: white;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 2px 5px;
+  border-radius: 10px;
+  border: 2px solid white;
+}
+
+.notification-dropdown {
+  position: absolute;
+  top: 50px;
+  right: -50px;
+  width: 350px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+  z-index: 1001;
+  overflow: hidden;
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.noti-header {
+  padding: 15px;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.noti-header h4 {
+  margin: 0;
+  font-size: 1rem;
+  color: #1e293b;
+}
+
+.noti-header button {
+  background: none;
+  border: none;
+  color: #2563eb;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.noti-header button:hover {
+  text-decoration: underline;
+}
+
+.noti-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.noti-item {
+  padding: 15px;
+  display: flex;
+  gap: 12px;
+  border-bottom: 1px solid #f8fafc;
+  cursor: pointer;
+  transition: background 0.2s;
+  position: relative;
+}
+
+.noti-item:last-child {
+  border-bottom: none;
+}
+
+.noti-item:hover {
+  background: #f8fafc;
+}
+
+.noti-item.unread {
+  background: #eff6ff;
+}
+
+.noti-item.unread:hover {
+  background: #dbeafe;
+}
+
+.noti-content p {
+  margin: 0 0 5px 0;
+  font-size: 0.9rem;
+  color: #334155;
+  line-height: 1.4;
+}
+
+.noti-time {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.unread-dot {
+  width: 8px;
+  height: 8px;
+  background: #3b82f6;
+  border-radius: 50%;
+  position: absolute;
+  right: 15px;
+  top: 20px;
+}
+
+.noti-empty {
+  padding: 30px;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 0.9rem;
+}

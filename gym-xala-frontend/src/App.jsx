@@ -14,6 +14,7 @@ import AdminBookingManagement from "./pages/admin/BookingManagement";
 import AdminMemberList from "./pages/admin/member/AdminMemberList";
 import AdminPTList from "./pages/admin/pt/AdminPTList";
 import AdminInvoices from "./pages/admin/invoices/AdminInvoices";
+import AdminSchedules from "./pages/admin/schedules/AdminSchedules";
 import AdminLayout from "./pages/admin/layout/AdminLayout";
 
 import MemberLayout from "./pages/member/MemberLayout";
@@ -27,6 +28,7 @@ import MyPackage from "./pages/member/packages/MyPackage";
 import PTLayout from "./pages/pt/layout/PTLayout";
 import PTMembers from "./pages/pt/members/PTMembers";
 import PTSchedule from "./pages/pt/schedule/PTSchedule";
+import PTPersonalSchedule from "./pages/pt/schedule/PTPersonalSchedule";
 import PTProfile from "./pages/pt/PTProfile";
 
 function App() {
@@ -101,6 +103,16 @@ function App() {
             </ProtectedRoute>
           } />
 
+        <Route
+          path="/admin/schedules"
+          element={
+            <ProtectedRoute allowRoles={["ROLE_ADMIN"]}>
+              <AdminLayout>
+                <AdminSchedules />
+              </AdminLayout>
+            </ProtectedRoute>
+          } />
+
         {/* PT */}
         <Route
           path="/pt"
@@ -113,6 +125,7 @@ function App() {
           <Route path="dashboard" element={<PTDashboard />} />
           <Route path="members" element={<PTMembers />} />
           <Route path="schedule" element={<PTSchedule />} />
+          <Route path="personal-schedule" element={<PTPersonalSchedule />} />
           <Route path="profile" element={<PTProfile />} />
         </Route>
 

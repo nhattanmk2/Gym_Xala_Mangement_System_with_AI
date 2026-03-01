@@ -15,11 +15,18 @@ import org.springframework.web.multipart.MultipartFile;
 public class MemberController {
 
     private final MemberService memberService;
+    private final com.xala.gym.service.PtScheduleService ptScheduleService;
 
     // ✅ API Profile
     @GetMapping("/profile")
     public MemberProfileResponse getMyProfile() {
         return memberService.getMyProfile();
+    }
+
+    // ✅ API Get My Schedule
+    @GetMapping("/schedule")
+    public ResponseEntity<java.util.List<com.xala.gym.dto.response.PtScheduleResponse>> getMySchedule() {
+        return ResponseEntity.ok(ptScheduleService.getMemberBookings());
     }
 
     // ✅ API Upload Avatar

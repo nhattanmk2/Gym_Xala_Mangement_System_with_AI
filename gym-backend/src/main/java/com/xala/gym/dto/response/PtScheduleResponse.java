@@ -13,6 +13,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class PtScheduleResponse {
     private Long id;
+    private Long ptId;
+    private String ptName;
+    private String branchName;
     private Long memberId;
     private String memberName;
     private LocalDateTime startTime;

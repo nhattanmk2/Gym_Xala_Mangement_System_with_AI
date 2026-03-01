@@ -12,4 +12,5 @@ import java.time.LocalDateTime;
 public class PtScheduleRequest {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
+    private String status;
 }

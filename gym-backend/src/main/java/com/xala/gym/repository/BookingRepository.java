@@ -25,4 +25,33 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findByPersonalTrainerIdAndStartTimeBetweenOrderByStartTimeAsc(
             Long ptId, LocalDateTime start, LocalDateTime end
     );
+
+    @Query("SELECT b FROM Booking b " +
+           "JOIN b.personalTrainer u " +
+           "WHERE (:branchId IS NULL OR EXISTS (SELECT e FROM Employee e WHERE e.user.id = u.id AND e.gymLocation.id = :branchId)) " +
+           "AND (:ptName IS NULL OR :ptName = '' OR u.fullName LIKE %:ptName%) " +
+           "AND (:status IS NULL OR :status = '' OR b.status = :status) " +
+           "ORDER BY b.startTime DESC")
+    List<Booking> searchSchedules(
+            @Param("branchId") Integer branchId,
+            @Param("ptName") String ptName,
+            @Param("status") String status
+    );
+
+    @Query("SELECT COUNT(b) FROM Booking b " +
+           "JOIN b.personalTrainer u " +
+           "JOIN Employee e ON e.user.id = u.id " +
+           "WHERE e.gymLocation.id = :branchId " +
+           "AND b.status IN ('PENDING', 'CONFIRMED') " +
+           "AND b.startTime < :endTime " +
+           "AND b.endTime > :startTime")
+    long countBookingsInBranchAtInterval(
+            @Param("branchId") Integer branchId,
+            @Param("startTime") java.time.LocalDateTime startTime,
+            @Param("endTime") java.time.LocalDateTime endTime
+    );
+
+    List<Booking> findByStatusOrderByStartTimeDesc(String status);
+
+    List<Booking> findByMemberIdOrderByStartTimeDesc(Long memberId);
 }

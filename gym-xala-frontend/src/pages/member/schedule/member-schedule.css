@@ -1,0 +1,186 @@
+.member-schedule-container {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    min-height: 80vh;
+}
+
+.schedule-header {
+    margin-bottom: 2.5rem;
+    text-align: left;
+}
+
+.schedule-header h1 {
+    font-size: 2.5rem;
+    color: #1a1a1a;
+    margin-bottom: 0.5rem;
+}
+
+.schedule-header p {
+    color: #666;
+    font-size: 1.1rem;
+}
+
+.filter-tabs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 1rem;
+}
+
+.tab-btn {
+    padding: 0.6rem 1.5rem;
+    border: none;
+    background: none;
+    font-weight: 600;
+    color: #888;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 8px;
+}
+
+.tab-btn:hover {
+    color: #1a1a1a;
+    background: #f5f5f5;
+}
+
+.tab-btn.active {
+    color: #fff;
+    background: #1a1a1a;
+}
+
+.schedule-list-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+}
+
+.schedule-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    border: 1px solid #f0f0f0;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.schedule-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+}
+
+.card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.2rem;
+}
+
+.status-badge {
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.status-badge.pending {
+    background: #fff8e1;
+    color: #ff8f00;
+}
+
+.status-badge.confirmed {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.status-badge.cancelled {
+    background: #ffebee;
+    color: #c62828;
+}
+
+.status-badge.completed {
+    background: #e3f2fd;
+    color: #1565c0;
+}
+
+.pt-details h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #1a1a1a;
+}
+
+.branch-name {
+    display: block;
+    font-size: 0.9rem;
+    color: #888;
+    margin-top: 0.2rem;
+}
+
+.card-mid {
+    margin-bottom: 1.5rem;
+}
+
+.info-row {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 0.6rem;
+    color: #444;
+}
+
+.info-row i {
+    width: 20px;
+    text-align: center;
+    color: #1a1a1a;
+}
+
+.card-bottom {
+    border-top: 1px solid #f0f0f0;
+    padding-top: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.btn-cancel {
+    background: none;
+    border: none;
+    color: #c62828;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 0.5rem 0;
+}
+
+.btn-cancel:hover {
+    text-decoration: underline;
+}
+
+.loading-state,
+.empty-state {
+    text-align: center;
+    padding: 4rem;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.pulsate-in {
+    animation: pulsateIn 0.5s ease-out;
+}
+
+@keyframes pulsateIn {
+    0% {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}

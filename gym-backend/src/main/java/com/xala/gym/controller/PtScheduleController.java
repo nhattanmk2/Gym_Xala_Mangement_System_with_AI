@@ -41,4 +41,9 @@ public class PtScheduleController {
         ptScheduleService.deleteSlot(id);
         return ResponseEntity.ok("Xóa khung giờ thành công.");
     }
+
+    @PostMapping("/book/{id}")
+    public ResponseEntity<PtScheduleResponse> bookSlot(@PathVariable Long id) {
+        return ResponseEntity.ok(ptScheduleService.bookSlot(id));
+    }
 }

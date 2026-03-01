@@ -52,4 +52,9 @@ public class PtController {
     public List<GymLocation> getAllLocations() {
         return ptService.getAllLocations();
     }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<AdminPtResponse>> getAllPts(@RequestParam(value = "branchId", required = false) Integer branchId) {
+        return ResponseEntity.ok(ptService.getAllPts(branchId));
+    }
 }

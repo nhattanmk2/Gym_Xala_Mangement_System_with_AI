@@ -11,4 +11,5 @@ public interface PtService {
     AdminPtResponse updateMyProfile(AdminUpdatePtRequest request, byte[] avatarFile);
     List<Position> getAllPositions();
     List<GymLocation> getAllLocations();
+    List<AdminPtResponse> getAllPts(Integer branchId);
 }

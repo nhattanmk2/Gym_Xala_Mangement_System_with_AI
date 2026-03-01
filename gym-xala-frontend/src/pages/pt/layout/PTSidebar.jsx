@@ -14,7 +14,10 @@ const PTSidebar = () => {
           My Members
         </NavLink>
         <NavLink to="/pt/schedule" className={({ isActive }) => isActive ? "active" : ""}>
-          Schedule
+          Lịch dạy học
+        </NavLink>
+        <NavLink to="/pt/personal-schedule" className={({ isActive }) => isActive ? "active" : ""}>
+          Lịch bận cá nhân
         </NavLink>
         <div className="nav-divider"></div>
         <NavLink to="/pt/profile" className={({ isActive }) => isActive ? "active" : ""}>

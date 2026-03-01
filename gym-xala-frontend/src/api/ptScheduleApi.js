@@ -31,3 +31,17 @@ export const getAvailableSlots = async (ptId) => {
     const response = await axios.get(`${API_URL}/available/${ptId}`, { headers: getAuthHeader() });
     return response.data;
 };
+
+export const bookSlot = async (slotId) => {
+    const res = await axios.post(`${API_URL}/book/${slotId}`, {}, {
+        headers: getAuthHeader()
+    });
+    return res.data;
+};
+
+export const getMemberSchedules = async () => {
+    const res = await axios.get(`http://localhost:8080/api/member/schedule`, {
+        headers: getAuthHeader()
+    });
+    return res.data;
+};

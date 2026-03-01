@@ -115,7 +115,7 @@ const PTSchedule = () => {
   // Group schedule by week
   const groupScheduleByWeek = () => {
     const weeks = {};
-    schedule.forEach(slot => {
+    schedule.filter(slot => slot.status !== "BUSY").forEach(slot => {
       const date = new Date(slot.startTime);
       const startOfWeek = new Date(date);
       const day = startOfWeek.getDay();
