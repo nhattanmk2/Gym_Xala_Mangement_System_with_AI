@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "schedule")
+@Table(name = "pt_schedules")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,9 +18,9 @@ public class Booking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Người đặt (Member)
+    // Người đặt (Member) - Có thể null nếu là khung giờ rảnh PT tự đăng ký
     @ManyToOne
-    @JoinColumn(name = "member_id", nullable = false)
+    @JoinColumn(name = "member_id", nullable = true)
     private User member;
 
     // PT được chọn (Nếu có)
@@ -28,12 +28,15 @@ public class Booking {
     @JoinColumn(name = "pt_id")
     private User personalTrainer;
 
-    // Gói tập đã đăng ký
+    // Gói tập đã đăng ký - Có thể null khi PT đăng ký giờ rảnh
     @ManyToOne
-    @JoinColumn(name = "package_id")
+    @JoinColumn(name = "package_id", nullable = true)
     private Package gymPackage;
 
+    @Column(name = "booking_time")
     private LocalDateTime startTime;
+
+    @Column(name = "end_time")
     private LocalDateTime endTime;
 
     // Trạng thái: PENDING, CONFIRMED, COMPLETED, CANCELLED

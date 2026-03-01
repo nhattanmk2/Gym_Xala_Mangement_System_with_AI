@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { getInvoices, updateInvoiceStatus } from "../../../api/adminInvoiceApi";
 import "./admin-invoices.css";
 
@@ -11,7 +11,7 @@ export default function AdminInvoices() {
     const [registrationDate, setRegistrationDate] = useState("");
     const [status, setStatus] = useState("PENDING"); // Default load pending
 
-    const fetchInvoices = async () => {
+    const fetchInvoices = useCallback(async () => {
         setLoading(true);
         try {
             const data = await getInvoices(status, memberCode, registrationDate);
@@ -22,11 +22,11 @@ export default function AdminInvoices() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [status, memberCode, registrationDate]);
 
     useEffect(() => {
         fetchInvoices();
-    }, [status]); // Reload when tab changes
+    }, [fetchInvoices]);
 
     const handleSearch = (e) => {
         e.preventDefault();
