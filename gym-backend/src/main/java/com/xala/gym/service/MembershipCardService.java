@@ -8,4 +8,6 @@ import java.util.List;
 public interface MembershipCardService {
     MembershipCardResponse registerPackage(String username, MembershipRegistrationRequest request);
     List<MembershipCardResponse> getMyCards(String username);
+    MembershipCardResponse getCurrentCard(String username);
+    void cancelCard(String username, Long cardId);
 }

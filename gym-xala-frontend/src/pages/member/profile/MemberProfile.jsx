@@ -212,6 +212,10 @@ export default function MemberProfile() {
           📅 Xem lịch tập
         </button>
 
+        <button onClick={() => navigate("/member/my-package")}>
+          📦 Gói tập của tôi
+        </button>
+
         <button onClick={() => navigate("/member/packages")}>
           🛒 Đăng ký gói tập mới
         </button>

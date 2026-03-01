@@ -29,4 +29,17 @@ public class MemberPackageController {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity.ok(membershipCardService.getMyCards(username));
     }
+
+    @GetMapping("/current")
+    public ResponseEntity<MembershipCardResponse> getCurrentCard() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return ResponseEntity.ok(membershipCardService.getCurrentCard(username));
+    }
+
+    @PutMapping("/cancel/{id}")
+    public ResponseEntity<Void> cancelCard(@PathVariable Long id) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        membershipCardService.cancelCard(username, id);
+        return ResponseEntity.ok().build();
+    }
 }

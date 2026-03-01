@@ -17,3 +17,13 @@ export const getMyCardList = async () => {
     const res = await axios.get(`${BASE_URL}/my-cards`, getHeaders());
     return res.data;
 };
+
+export const getCurrentCard = async () => {
+    const res = await axios.get(`${BASE_URL}/current`, getHeaders());
+    return res.data;
+};
+
+export const cancelPackage = async (cardId) => {
+    const res = await axios.put(`${BASE_URL}/cancel/${cardId}`, {}, getHeaders());
+    return res.data;
+};

@@ -20,6 +20,7 @@ import MemberPackages from "./pages/member/packages/MemberPackages";
 import PackageDetail from "./pages/member/packages/PackageDetail";
 import MemberProfile from "./pages/member/profile/MemberProfile";
 import MemberSchedule from "./pages/member/schedule/MemberSchedule";
+import MyPackage from "./pages/member/packages/MyPackage";
 
 import PTLayout from "./pages/pt/layout/PTLayout";
 import PTMembers from "./pages/pt/members/PTMembers";
@@ -118,6 +119,7 @@ function App() {
           <Route path="packages/:id" element={<PackageDetail />} />
           <Route path="profile" element={<MemberProfile />} />
           <Route path="schedule" element={<MemberSchedule />} />
+          <Route path="my-package" element={<MyPackage />} />
         </Route>
 
         {/* DEFAULT */}

@@ -13,6 +13,7 @@ export default function MemberLayout() {
           <Link to="/member/dashboard">🏠 Trang chủ</Link>
           <Link to="/member/booking">📅 Đặt lịch</Link>
           <Link to="/member/packages">💳 Gói tập</Link>
+          <Link to="/member/my-package">📦 Gói tập của tôi</Link>
           <Link to="/member/schedule">📝 Lịch của tôi</Link>
           <Link to="/member/profile">👤 Cá nhân</Link>
         </nav>
