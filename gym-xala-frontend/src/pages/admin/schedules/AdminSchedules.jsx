@@ -23,7 +23,8 @@ const AdminSchedules = () => {
     const [editFormData, setEditFormData] = useState({
         startTime: "08:00",
         endTime: "09:00",
-        status: "AVAILABLE"
+        status: "AVAILABLE",
+        adminNotes: ""
     });
     const [selectedExistingSlotIds, setSelectedExistingSlotIds] = useState([]);
     const [selectedNewDates, setSelectedNewDates] = useState([]);
@@ -95,6 +96,8 @@ const AdminSchedules = () => {
             acc[curr.ptId] = {
                 ptName: curr.ptName,
                 branchName: curr.branchName,
+                ptPhone: curr.ptPhone,
+                ptSpecialty: curr.ptSpecialty,
                 slots: []
             };
         }
@@ -120,7 +123,8 @@ const AdminSchedules = () => {
                     memberName: slot.memberName,
                     status: slot.status,
                     dates: [],
-                    rawSlots: []
+                    rawSlots: [],
+                    adminNotes: slot.adminNotes // Lấy note từ slot đầu tiên của group
                 };
             }
             acc[key].dates.push(dateStr);
@@ -145,7 +149,8 @@ const AdminSchedules = () => {
         setEditFormData({
             startTime: formatTime(startD),
             endTime: formatTime(endD),
-            status: firstSlot.status
+            status: firstSlot.status,
+            adminNotes: firstSlot.adminNotes || ""
         });
         setModalError(null);
         setSelectedExistingSlotIds(group.rawSlots.map(s => s.id));
@@ -163,6 +168,33 @@ const AdminSchedules = () => {
         setSelectedNewDates(prev =>
             prev.includes(date) ? prev.filter(item => item !== date) : [...prev, date].sort()
         );
+    };
+
+    const handleQuickStatus = async (slots, newStatus) => {
+        const statusMap = {
+            'CONFIRMED': 'Sắp diễn ra',
+            'COMPLETED': 'Hoàn thành',
+            'ABSENT': 'Vắng mặt'
+        };
+        if (!window.confirm(`Xác nhận chuyển ${slots.length} khung giờ sang trạng thái: ${statusMap[newStatus]}?`)) return;
+
+        try {
+            setLoading(true);
+            await Promise.all(slots.map(slot =>
+                updateSchedule(slot.id, {
+                    startTime: slot.startTime,
+                    endTime: slot.endTime,
+                    status: newStatus,
+                    adminNotes: slot.adminNotes // Giữ nguyên ghi chú cũ nếu có
+                })
+            ));
+            showToast(`✅ Đã cập nhật trạng thái thành ${statusMap[newStatus]}.`);
+            fetchData();
+        } catch (error) {
+            alert("Lỗi khi cập nhật trạng thái: " + (error.response?.data?.message || error.message));
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleDeleteClick = async (group) => {
@@ -240,7 +272,8 @@ const AdminSchedules = () => {
                     return updateSchedule(slot.id, {
                         startTime: formatLocalISO(slot.startTime, editFormData.startTime),
                         endTime: formatLocalISO(slot.endTime, editFormData.endTime),
-                        status: editFormData.status
+                        status: editFormData.status,
+                        adminNotes: editFormData.adminNotes
                     });
                 });
 
@@ -254,7 +287,8 @@ const AdminSchedules = () => {
                 const newSlotsRequests = selectedNewDates.map(date => ({
                     startTime: `${date}T${editFormData.startTime}:00`,
                     endTime: `${date}T${editFormData.endTime}:00`,
-                    status: editFormData.status
+                    status: editFormData.status,
+                    adminNotes: editFormData.adminNotes
                 }));
                 newSlotsPromise = batchAddSchedule(editingGroup.rawSlots[0].ptId, newSlotsRequests);
             }
@@ -281,6 +315,7 @@ const AdminSchedules = () => {
             case "PENDING": return <span className="badge badge-warning">Chờ duyệt</span>;
             case "CANCELLED": return <span className="badge badge-danger">Đã hủy</span>;
             case "COMPLETED": return <span className="badge badge-info">Hoàn thành</span>;
+            case "ABSENT": return <span className="badge badge-secondary">Vắng mặt</span>;
             case "BUSY": return <span className="badge badge-busy">🔒 Lịch cá nhân</span>;
             default: return status;
         }
@@ -360,7 +395,11 @@ const AdminSchedules = () => {
                                             </div>
                                             <div className="pt-text">
                                                 <h3>{data.ptName}</h3>
-                                                <span className="branch-tag">{data.branchName}</span>
+                                                <div className="pt-sub-info">
+                                                    <span className="branch-tag">{data.branchName}</span>
+                                                    <span className="pt-specialty-tag">🎓 {data.ptSpecialty}</span>
+                                                    <span className="pt-phone-tag">📞 {data.ptPhone}</span>
+                                                </div>
                                             </div>
                                         </div>
                                         <div className="pt-stats">
@@ -383,6 +422,7 @@ const AdminSchedules = () => {
                                                         <th>Các ngày</th>
                                                         <th>Học viên</th>
                                                         <th>Trạng thái</th>
+                                                        <th>Nội dung</th>
                                                         <th>Thao tác</th>
                                                     </tr>
                                                 </thead>
@@ -399,16 +439,28 @@ const AdminSchedules = () => {
                                                             </td>
                                                             <td>{group.memberName || <span className="text-muted">Chưa có</span>}</td>
                                                             <td>{getStatusLabel(group.status)}</td>
+                                                            <td className="notes-cell" onClick={() => handleEditClick(group, data.ptName)}>
+                                                                <div className="notes-content-truncate" title="Nhấn để viết nội dung buổi tập">
+                                                                    {group.adminNotes || <span className="text-muted">✎ Thêm nội dung...</span>}
+                                                                </div>
+                                                            </td>
                                                             <td className="action-cell">
                                                                 {group.status !== 'BUSY' ? (
-                                                                    <>
-                                                                        <button className="btn-icon edit" title="Sửa lịch" onClick={() => handleEditClick(group, data.ptName)}>
-                                                                            ✏️
-                                                                        </button>
-                                                                        <button className="btn-icon delete" title="Xóa lịch" onClick={() => handleDeleteClick(group)}>
-                                                                            🗑️
-                                                                        </button>
-                                                                    </>
+                                                                    <div className="admin-actions">
+                                                                        <div className="quick-status-buttons">
+                                                                            <button className="btn-status upcoming" title="Sắp diễn ra" onClick={() => handleQuickStatus(group.rawSlots, 'CONFIRMED')}>📅</button>
+                                                                            <button className="btn-status completed" title="Hoàn thành" onClick={() => handleQuickStatus(group.rawSlots, 'COMPLETED')}>✅</button>
+                                                                            <button className="btn-status absent" title="Vắng mặt" onClick={() => handleQuickStatus(group.rawSlots, 'ABSENT')}>❌</button>
+                                                                        </div>
+                                                                        <div className="main-actions">
+                                                                            <button className="btn-icon edit" title="Sửa lịch" onClick={() => handleEditClick(group, data.ptName)}>
+                                                                                ✏️
+                                                                            </button>
+                                                                            <button className="btn-icon delete" title="Xóa lịch" onClick={() => handleDeleteClick(group)}>
+                                                                                🗑️
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
                                                                 ) : (
                                                                     <span className="read-only-tag" title="Lịch bận cá nhân của PT - Không thể chỉnh sửa">🔒 Đọc duy nhất</span>
                                                                 )}
@@ -522,7 +574,19 @@ const AdminSchedules = () => {
                                         <option value="PENDING">Chờ duyệt</option>
                                         <option value="CANCELLED">Hủy bỏ</option>
                                         <option value="COMPLETED">Hoàn thành</option>
+                                        <option value="ABSENT">Vắng mặt</option>
                                     </select>
+                                </div>
+
+                                <div className="form-group-pt">
+                                    <label>Nội dung buổi tập</label>
+                                    <textarea
+                                        className="admin-notes-textarea"
+                                        rows="4"
+                                        placeholder="Nhập nội dung buổi tập (ví dụ: Tập Leg Press 4 hiệp, Deadlift 5 hiệp)..."
+                                        value={editFormData.adminNotes}
+                                        onChange={(e) => setEditFormData({ ...editFormData, adminNotes: e.target.value })}
+                                    ></textarea>
                                 </div>
 
                                 <div className="modal-actions-pt">

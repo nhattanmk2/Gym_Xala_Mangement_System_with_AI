@@ -20,5 +20,8 @@ public class PtScheduleResponse {
     private String memberName;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
-    private String status; // AVAILABLE, PENDING, CONFIRMED, COMPLETED, CANCELLED
+    private String status; // AVAILABLE, PENDING, CONFIRMED, COMPLETED, CANCELLED, ABSENT
+    private String ptPhone;
+    private String ptSpecialty;
+    private String adminNotes;
 }

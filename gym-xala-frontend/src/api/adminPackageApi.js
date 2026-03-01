@@ -51,3 +51,13 @@ export const updatePackagePromotion = async (id, promotion) => {
     const res = await axios.patch(`${BASE_URL}/${id}/promotion`, { promotion }, getHeaders());
     return res.data;
 };
+
+export const getWorkoutPlan = async (packageId) => {
+    const res = await axios.get(`http://localhost:8080/api/admin/packages/${packageId}/workout-plan`, getHeaders());
+    return res.data;
+};
+
+export const saveWorkoutPlan = async (packageId, data) => {
+    const res = await axios.post(`http://localhost:8080/api/admin/packages/${packageId}/workout-plan`, data, getHeaders());
+    return res.data;
+};

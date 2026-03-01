@@ -46,6 +46,13 @@ export default function MemberLayout() {
             <span className="nav-text">Lịch của tôi</span>
           </NavLink>
           <NavLink
+            to="/member/roadmap"
+            className={({ isActive }) => (isActive ? "nav-item active" : "nav-item")}
+          >
+            <span className="nav-icon">📋</span>
+            <span className="nav-text">Lộ trình tập</span>
+          </NavLink>
+          <NavLink
             to="/member/profile"
             className={({ isActive }) => (isActive ? "nav-item active" : "nav-item")}
           >

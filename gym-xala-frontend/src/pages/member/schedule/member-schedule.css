@@ -113,11 +113,28 @@
     color: #1a1a1a;
 }
 
-.branch-name {
-    display: block;
-    font-size: 0.9rem;
-    color: #888;
-    margin-top: 0.2rem;
+.pt-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    margin-top: 0.4rem;
+}
+
+.branch-name,
+.pt-specialty,
+.pt-phone {
+    font-size: 0.85rem;
+    color: #666;
+    display: flex;
+    align-items: center;
+}
+
+.pt-specialty {
+    color: #2e7d32;
+    background: #e8f5e9;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
 }
 
 .card-mid {

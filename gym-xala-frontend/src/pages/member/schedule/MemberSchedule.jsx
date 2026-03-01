@@ -75,7 +75,11 @@ const MemberSchedule = () => {
               <div className="card-top">
                 <div className="pt-details">
                   <h3>PT: {item.ptName}</h3>
-                  <span className="branch-name">📍 {item.branchName}</span>
+                  <div className="pt-meta">
+                    <span className="branch-name">📍 {item.branchName}</span>
+                    <span className="pt-specialty">🎓 {item.ptSpecialty}</span>
+                    <span className="pt-phone">📞 {item.ptPhone}</span>
+                  </div>
                 </div>
                 <span className={`status-badge ${item.status.toLowerCase()}`}>
                   {getStatusLabel(item.status)}

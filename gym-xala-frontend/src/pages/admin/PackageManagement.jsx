@@ -5,7 +5,9 @@ import {
   createPackage,
   updatePackage,
   deletePackage,
-  togglePackageActive
+  togglePackageActive,
+  getWorkoutPlan,
+  saveWorkoutPlan
 } from "../../api/adminPackageApi";
 import "./packageManagement.css";
 
@@ -25,6 +27,15 @@ const PackageManagement = () => {
     category: "GENERAL",
     active: true,
     promotion: ""
+  });
+
+  // Roadmap State
+  const [showRoadmapModal, setShowRoadmapModal] = useState(false);
+  const [activeRoadmapPkg, setActiveRoadmapPkg] = useState(null);
+  const [workoutPlan, setWorkoutPlan] = useState({
+    name: "",
+    description: "",
+    exercises: []
   });
 
   useEffect(() => {
@@ -165,6 +176,66 @@ const PackageManagement = () => {
     }
   };
 
+  const handleOpenRoadmap = async (pkg) => {
+    try {
+      setLoading(true);
+      setActiveRoadmapPkg(pkg);
+      const plan = await getWorkoutPlan(pkg.id);
+      if (plan) {
+        setWorkoutPlan(plan);
+      } else {
+        setWorkoutPlan({
+          name: `Lộ trình ${pkg.name}`,
+          description: `Lộ trình tập luyện chi tiết cho gói ${pkg.name}`,
+          exercises: []
+        });
+      }
+      setShowRoadmapModal(true);
+    } catch (error) {
+      console.error("Error fetching roadmap:", error);
+      alert("Không thể tải lộ trình tập luyện.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddExercise = () => {
+    const newExercise = {
+      name: "",
+      description: "",
+      sets: 3,
+      reps: 12,
+      orderIndex: workoutPlan.exercises.length
+    };
+    setWorkoutPlan({
+      ...workoutPlan,
+      exercises: [...workoutPlan.exercises, newExercise]
+    });
+  };
+
+  const handleExerciseChange = (index, field, value) => {
+    const updatedExercises = [...workoutPlan.exercises];
+    updatedExercises[index] = { ...updatedExercises[index], [field]: value };
+    setWorkoutPlan({ ...workoutPlan, exercises: updatedExercises });
+  };
+
+  const handleRemoveExercise = (index) => {
+    const updatedExercises = workoutPlan.exercises.filter((_, i) => i !== index);
+    setWorkoutPlan({ ...workoutPlan, exercises: updatedExercises });
+  };
+
+  const handleSaveRoadmap = async (e) => {
+    e.preventDefault();
+    try {
+      await saveWorkoutPlan(activeRoadmapPkg.id, workoutPlan);
+      alert("Lưu lộ trình tập luyện thành công!");
+      setShowRoadmapModal(false);
+    } catch (error) {
+      console.error("Error saving roadmap:", error);
+      alert("Lỗi khi lưu lộ trình tập luyện.");
+    }
+  };
+
   const PackageCard = ({ pkg }) => (
     <div style={{
       background: "white",
@@ -210,6 +281,7 @@ const PackageManagement = () => {
             <div style={{ fontSize: "0.75rem", color: "#94a3b8" }}>{pkg.durationInDays} ngày</div>
           </div>
           <div style={{ display: "flex", gap: "5px" }}>
+            <button onClick={() => handleOpenRoadmap(pkg)} title="Lộ trình tập" style={{ background: "#eff6ff", border: "1px solid #bfdbfe", padding: "6px", borderRadius: "6px", cursor: "pointer" }}>📋</button>
             <button onClick={() => handleOpenModal(pkg)} style={{ background: "#f8fafc", border: "1px solid #e2e8f0", padding: "6px", borderRadius: "6px", cursor: "pointer" }}>✏️</button>
             <button onClick={() => handleDelete(pkg.id)} style={{ background: "#fff1f2", border: "1px solid #fecaca", padding: "6px", borderRadius: "6px", cursor: "pointer" }}>🗑️</button>
           </div>
@@ -314,6 +386,7 @@ const PackageManagement = () => {
                       </td>
                       <td style={{ padding: "18px", textAlign: "center" }}>
                         <div style={{ display: "flex", justifyContent: "center", gap: "8px" }}>
+                          <button onClick={() => handleOpenRoadmap(pkg)} style={{ background: "none", border: "1px solid #bfdbfe", color: "#2563eb", padding: "6px 12px", borderRadius: "6px", fontSize: "0.8rem", cursor: "pointer" }}>Lộ trình</button>
                           <button onClick={() => handleOpenModal(pkg)} style={{ background: "none", border: "1px solid #e2e8f0", padding: "6px 12px", borderRadius: "6px", fontSize: "0.8rem", cursor: "pointer" }}>Sửa</button>
                           <button onClick={() => handleDelete(pkg.id)} style={{ background: "none", border: "1px solid #fee2e2", color: "#ef4444", padding: "6px 12px", borderRadius: "6px", fontSize: "0.8rem", cursor: "pointer" }}>Xóa</button>
                         </div>
@@ -425,6 +498,104 @@ const PackageManagement = () => {
                 <div className="modal-actions">
                   <button type="button" className="btn-cancel" onClick={handleCloseModal}>Hủy bỏ</button>
                   <button type="submit" className="btn-submit">{editingPkg ? "Cập nhật" : "Thêm Mới"}</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {showRoadmapModal && (
+          <div className="modal-overlay">
+            <div className="modal-content roadmap-modal" style={{ maxWidth: "600px", padding: "24px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+                <h3 style={{ margin: 0 }}>Lộ trình tập luyện: {activeRoadmapPkg?.name}</h3>
+                <button onClick={() => setShowRoadmapModal(false)} style={{ background: "none", border: "none", fontSize: "1.8rem", cursor: "pointer", color: "#94a3b8" }}>&times;</button>
+              </div>
+
+              <form onSubmit={handleSaveRoadmap}>
+                <div className="form-group" style={{ marginBottom: "15px" }}>
+                  <label style={{ display: "block", marginBottom: "5px", fontWeight: "600" }}>Tên lộ trình</label>
+                  <input
+                    style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #e2e8f0" }}
+                    type="text"
+                    value={workoutPlan.name}
+                    onChange={(e) => setWorkoutPlan({ ...workoutPlan, name: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="form-group" style={{ marginBottom: "20px" }}>
+                  <label style={{ display: "block", marginBottom: "5px", fontWeight: "600" }}>Mô tả lộ trình</label>
+                  <textarea
+                    style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #e2e8f0" }}
+                    value={workoutPlan.description}
+                    onChange={(e) => setWorkoutPlan({ ...workoutPlan, description: e.target.value })}
+                    rows="2"
+                  />
+                </div>
+
+                <div className="exercise-list-section">
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "15px" }}>
+                    <h4 style={{ margin: 0, color: "#1e293b" }}>Danh sách bài tập ({workoutPlan.exercises.length})</h4>
+                    <button type="button" onClick={handleAddExercise} style={{ background: "#2563eb", color: "white", border: "none", padding: "8px 16px", borderRadius: "8px", cursor: "pointer", fontSize: "0.85rem", fontWeight: "600", transition: "all 0.2s" }}>+ Thêm bài tập</button>
+                  </div>
+
+                  <div className="exercise-items" style={{ maxHeight: "35vh", overflowY: "auto", padding: "4px", paddingRight: "10px" }}>
+                    {workoutPlan.exercises.length === 0 && (
+                      <div style={{ textAlign: "center", padding: "40px 20px", color: "#94a3b8", background: "#f8fafc", borderRadius: "12px", border: "2px dashed #e2e8f0" }}>
+                        Chưa có bài tập nào. Hãy bắt đầu xây dựng lộ trình!
+                      </div>
+                    )}
+                    {workoutPlan.exercises.map((ex, idx) => (
+                      <div key={idx} style={{ background: "#fff", padding: "16px", borderRadius: "12px", marginBottom: "12px", border: "1px solid #e2e8f0", boxShadow: "0 1px 2px rgba(0,0,0,0.05)" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+                          <span style={{ fontWeight: "700", color: "#64748b", fontSize: "0.9rem" }}>Bài tập #{idx + 1}</span>
+                          <button type="button" onClick={() => handleRemoveExercise(idx)} style={{ background: "#fff1f2", color: "#ef4444", border: "none", width: "28px", height: "28px", borderRadius: "6px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>🗑️</button>
+                        </div>
+                        <div className="exercise-item-body">
+                          <input
+                            style={{ width: "100%", marginBottom: "12px", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1" }}
+                            type="text"
+                            placeholder="Tên bài tập (VD: Hít đất, Squat...)"
+                            value={ex.name}
+                            onChange={(e) => handleExerciseChange(idx, "name", e.target.value)}
+                            required
+                          />
+                          <div style={{ display: "flex", gap: "12px", marginBottom: "12px" }}>
+                            <div style={{ flex: 1 }}>
+                              <label style={{ display: "block", fontSize: "0.75rem", color: "#64748b", marginBottom: "4px" }}>Số hiệp</label>
+                              <input
+                                style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1" }}
+                                type="number"
+                                value={ex.sets}
+                                onChange={(e) => handleExerciseChange(idx, "sets", parseInt(e.target.value))}
+                              />
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <label style={{ display: "block", fontSize: "0.75rem", color: "#64748b", marginBottom: "4px" }}>Số lần/hiệp</label>
+                              <input
+                                style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1" }}
+                                type="number"
+                                value={ex.reps}
+                                onChange={(e) => handleExerciseChange(idx, "reps", parseInt(e.target.value))}
+                              />
+                            </div>
+                          </div>
+                          <textarea
+                            style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1", resize: "none" }}
+                            placeholder="Ghi chú kỹ thuật hoặc mô tả..."
+                            value={ex.description}
+                            onChange={(e) => handleExerciseChange(idx, "description", e.target.value)}
+                            rows="2"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="modal-actions" style={{ marginTop: "24px", paddingTop: "20px", borderTop: "1px solid #f1f5f9" }}>
+                  <button type="button" className="btn-cancel" onClick={() => setShowRoadmapModal(false)}>Hủy bỏ</button>
+                  <button type="submit" className="btn-submit" style={{ background: "#2563eb", color: "#white" }}>Lưu lộ trình</button>
                 </div>
               </form>
             </div>

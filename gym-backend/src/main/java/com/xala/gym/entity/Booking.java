@@ -48,4 +48,7 @@ public class Booking {
     
     @Column(columnDefinition = "TEXT")
     private String feedback;
+
+    @Column(name = "admin_notes", columnDefinition = "TEXT")
+    private String adminNotes;
 }

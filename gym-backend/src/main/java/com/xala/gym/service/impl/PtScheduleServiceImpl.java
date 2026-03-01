@@ -153,6 +153,9 @@ public class PtScheduleServiceImpl implements PtScheduleService {
         if (request.getStatus() != null) {
             slot.setStatus(request.getStatus());
         }
+        if (request.getAdminNotes() != null) {
+            slot.setAdminNotes(request.getAdminNotes());
+        }
 
         // Kiểm tra sức chứa sau khi cập nhật (nếu là lịch đã có người đặt)
         if (slot.getMember() != null && (slot.getStatus().equals("CONFIRMED") || slot.getStatus().equals("PENDING"))) {
@@ -175,9 +178,18 @@ public class PtScheduleServiceImpl implements PtScheduleService {
         String timeStr = slot.getStartTime().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm dd/MM"));
         notificationService.sendNotification(
             slot.getPersonalTrainer().getId(),
-            "Admin đã cập nhật lịch tập của bạn vào lúc " + timeStr,
+            "Lịch tập lúc " + timeStr + " đã có cập nhật mới từ Admin.",
             "SCHEDULE_UPDATE"
         );
+
+        // Gửi thông báo cho học viên (nếu có)
+        if (slot.getMember() != null) {
+            notificationService.sendNotification(
+                slot.getMember().getId(),
+                "Lịch tập của bạn lúc " + timeStr + " đã có cập nhật từ Admin. Vui lòng kiểm tra lại.",
+                "SCHEDULE_UPDATE"
+            );
+        }
         
         return mapToResponse(saved);
     }
@@ -358,6 +370,9 @@ public class PtScheduleServiceImpl implements PtScheduleService {
                 .startTime(b.getStartTime())
                 .endTime(b.getEndTime())
                 .status(b.getStatus())
+                .ptPhone(emp != null ? emp.getPhone() : "N/A")
+                .ptSpecialty(emp != null ? emp.getPtSpecialty() : "General")
+                .adminNotes(b.getAdminNotes())
                 .build();
     }
 }
