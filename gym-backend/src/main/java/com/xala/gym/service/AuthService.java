@@ -39,7 +39,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final MemberRepository memberRepository;
     private final EmployeeRepository employeeRepository;
-
+    private final EmailService emailService;
 
     // ======================= REGISTER MEMBER =======================
     public User registerMember(RegisterRequest request) {
@@ -87,7 +87,16 @@ public class AuthService {
         // ===== FIXED ROLE =====
         user.getRoles().add(memberRole);
 
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+
+        // Send Email Async
+        emailService.sendVerificationEmail(
+            savedUser.getEmail(), 
+            savedUser.getFullName(), 
+            verificationCode
+        );
+
+        return savedUser;
     }
 
 
