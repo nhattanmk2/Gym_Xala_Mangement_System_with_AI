@@ -334,6 +334,40 @@ public class PtScheduleServiceImpl implements PtScheduleService {
     }
 
     @Override
+    @Transactional
+    public void cancelBookingByMember(Long slotId) {
+        Booking slot = bookingRepository.findById(slotId)
+                .orElseThrow(() -> new RuntimeException("Buổi tập không tồn tại"));
+
+        User member = getCurrentUser();
+        
+        if (slot.getMember() == null || !slot.getMember().getId().equals(member.getId())) {
+            throw new RuntimeException("Bạn không có quyền thao tác trên lịch tập này.");
+        }
+
+        if (!"PENDING".equals(slot.getStatus()) && !"CONFIRMED".equals(slot.getStatus())) {
+            throw new RuntimeException("Chỉ có thể hủy lịch khi đang chờ duyệt hoặc đã xác nhận.");
+        }
+
+        // Kiểm tra quy tắc 24h
+        java.time.Duration timeUntilStart = java.time.Duration.between(LocalDateTime.now(), slot.getStartTime());
+        if (timeUntilStart.toHours() < 24) {
+            throw new RuntimeException("Không thể hủy! Chỉ được phép hủy lịch trước thời gian bắt đầu ít nhất 24 giờ. Vui lòng liên hệ Admin.");
+        }
+
+        slot.setStatus("CANCELLED");
+        bookingRepository.save(slot);
+
+        // Thông báo cho PT
+        String timeStr = slot.getStartTime().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm dd/MM"));
+        notificationService.sendNotification(
+            slot.getPersonalTrainer().getId(),
+            "Học viên " + member.getFullName() + " đã HỦY lịch tập lúc " + timeStr + ".",
+            "BOOKING_CANCELLED"
+        );
+    }
+
+    @Override
     public List<PtScheduleResponse> getPendingBookings() {
         return bookingRepository.findByStatusOrderByStartTimeDesc("PENDING")
                 .stream()
@@ -348,6 +382,24 @@ public class PtScheduleServiceImpl implements PtScheduleService {
                 .stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public PtScheduleResponse getScheduleById(Long id) {
+        Booking slot = bookingRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Khung giờ không tồn tại"));
+
+        User currentUser = getCurrentUser();
+        // Check permissions: only the assigned PT or the booked member can view details (or Admin)
+        boolean isMember = slot.getMember() != null && slot.getMember().getId().equals(currentUser.getId());
+        boolean isPT = slot.getPersonalTrainer().getId().equals(currentUser.getId());
+        
+        // You might want to allow Admins too if needed. Here we allow the member or the PT.
+        if (!isMember && !isPT) {
+             throw new RuntimeException("Bạn không có quyền xem chi tiết buổi tập này.");
+        }
+
+        return mapToResponse(slot);
     }
 
     private User getCurrentUser() {

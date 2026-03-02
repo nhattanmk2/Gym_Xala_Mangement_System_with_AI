@@ -19,6 +19,8 @@ public interface PtScheduleService {
     PtScheduleResponse bookSlot(Long slotId);
     void approveBooking(Long slotId);
     void rejectBooking(Long slotId);
+    void cancelBookingByMember(Long slotId);
     List<PtScheduleResponse> getPendingBookings();
     List<PtScheduleResponse> getMemberBookings();
+    PtScheduleResponse getScheduleById(Long id);
 }

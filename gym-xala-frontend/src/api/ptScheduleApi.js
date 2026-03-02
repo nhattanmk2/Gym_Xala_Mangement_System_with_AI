@@ -45,3 +45,17 @@ export const getMemberSchedules = async () => {
     });
     return res.data;
 };
+
+export const getMemberScheduleById = async (id) => {
+    const res = await axios.get(`http://localhost:8080/api/member/schedule/${id}`, {
+        headers: getAuthHeader()
+    });
+    return res.data;
+};
+
+export const cancelMemberSchedule = async (id) => {
+    const res = await axios.put(`http://localhost:8080/api/member/schedule/${id}/cancel`, {}, {
+        headers: getAuthHeader()
+    });
+    return res.data;
+};

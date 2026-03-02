@@ -29,6 +29,19 @@ public class MemberController {
         return ResponseEntity.ok(ptScheduleService.getMemberBookings());
     }
 
+    // ✅ API Get Schedule Details
+    @GetMapping("/schedule/{id}")
+    public ResponseEntity<com.xala.gym.dto.response.PtScheduleResponse> getScheduleDetails(@PathVariable Long id) {
+        return ResponseEntity.ok(ptScheduleService.getScheduleById(id));
+    }
+
+    // ✅ API Cancel Schedule Booking
+    @PutMapping("/schedule/{id}/cancel")
+    public ResponseEntity<?> cancelSchedule(@PathVariable Long id) {
+        ptScheduleService.cancelBookingByMember(id);
+        return ResponseEntity.ok("Hủy lịch thành công.");
+    }
+
     // ✅ API Upload Avatar
     @PutMapping(value = "/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> uploadAvatar(@RequestParam("file") MultipartFile file) {
