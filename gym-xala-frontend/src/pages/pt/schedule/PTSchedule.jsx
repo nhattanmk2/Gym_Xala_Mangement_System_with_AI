@@ -67,9 +67,9 @@ const PTSchedule = () => {
       console.log("Payload:", slots);
       await addBatchScheduleSlots(slots);
 
-      alert(`✅ Đã thêm khung giờ rảnh cho ${selectedDates.length} ngày thành công!`);
       setSelectedDates([]);
-      loadSchedule();
+      await loadSchedule();
+      setTimeout(() => alert(`✅ Đã thêm khung giờ rảnh cho ${selectedDates.length} ngày thành công!`), 100);
     } catch (error) {
       console.error("Error adding slots:", error);
       const msg = error.response?.data || "Lỗi khi thêm khung giờ rảnh. Có thể bị trùng lịch?";
@@ -84,8 +84,8 @@ const PTSchedule = () => {
 
     try {
       await deleteScheduleSlot(id);
-      alert("✅ Đã xóa khung giờ.");
-      loadSchedule();
+      await loadSchedule();
+      setTimeout(() => alert("✅ Đã xóa khung giờ."), 100);
     } catch (error) {
       console.error("Error deleting slot:", error);
       alert("❌ Lỗi khi xóa. Khung giờ này có thể đã có người đặt.");

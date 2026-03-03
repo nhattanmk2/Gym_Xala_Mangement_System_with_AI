@@ -1,6 +1,7 @@
 package com.xala.gym.repository;
 
 import com.xala.gym.entity.Booking;
+import com.xala.gym.entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -54,4 +55,15 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findByStatusOrderByStartTimeDesc(String status);
 
     List<Booking> findByMemberIdOrderByStartTimeDesc(Long memberId);
+
+    List<Booking> findByMemberIdAndPersonalTrainerIdOrderByStartTimeDesc(Long memberId, Long ptId);
+
+    @Query("SELECT COUNT(b) FROM Booking b WHERE b.personalTrainer.id = :ptId AND b.status = 'COMPLETED' AND MONTH(b.startTime) = :month AND YEAR(b.startTime) = :year")
+    long countCompletedSessionsByPtIdAndMonthAndYear(@Param("ptId") Long ptId, @Param("month") int month, @Param("year") int year);
+
+    @Query("SELECT b FROM Booking b WHERE b.personalTrainer.id = :ptId AND (b.status = 'CONFIRMED' OR b.status = 'PENDING') AND b.startTime >= :currentTime ORDER BY b.startTime ASC")
+    List<Booking> findUpcomingSchedulesByPtId(@Param("ptId") Long ptId, @Param("currentTime") LocalDateTime currentTime);
+
+    @Query("SELECT DISTINCT m FROM Member m WHERE m.user IN (SELECT b.member FROM Booking b WHERE b.personalTrainer.id = :ptId AND b.status != 'CANCELLED')")
+    List<Member> findDistinctMembersByPtId(@Param("ptId") Long ptId);
 }

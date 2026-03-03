@@ -9,7 +9,11 @@ import com.xala.gym.entity.User;
 import com.xala.gym.repository.BookingRepository;
 import com.xala.gym.repository.EmployeeRepository;
 import com.xala.gym.repository.UserRepository;
+import com.xala.gym.repository.MembershipCardRepository;
+import com.xala.gym.repository.MemberExerciseStatusRepository;
 import com.xala.gym.service.PtScheduleService;
+import com.xala.gym.service.NotificationService;
+import com.xala.gym.dto.response.PtClientResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -26,7 +30,9 @@ public class PtScheduleServiceImpl implements PtScheduleService {
     private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
     private final EmployeeRepository employeeRepository;
-    private final com.xala.gym.service.NotificationService notificationService;
+    private final NotificationService notificationService;
+    private final MembershipCardRepository membershipCardRepository;
+    private final MemberExerciseStatusRepository memberExerciseStatusRepository;
 
     @Override
     @Transactional
@@ -377,11 +383,48 @@ public class PtScheduleServiceImpl implements PtScheduleService {
 
     @Override
     public List<PtScheduleResponse> getMemberBookings() {
-        User member = getCurrentUser();
-        return bookingRepository.findByMemberIdOrderByStartTimeDesc(member.getId())
+        User currentUser = getCurrentUser();
+        return bookingRepository.findByMemberIdOrderByStartTimeDesc(currentUser.getId())
                 .stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<PtClientResponse> getMyClients() {
+        User pt = getCurrentUser();
+        
+        // Find existing distinct members that this PT has booked sessions with
+        List<com.xala.gym.entity.Member> distinctMembers = bookingRepository.findDistinctMembersByPtId(pt.getId());
+
+        return distinctMembers.stream().map(member -> {
+            
+            // Look up the active gym package
+            String activePackageName = "Chưa đăng ký gói tập";
+            java.time.LocalDate packageEndDate = null;
+
+            // We depend on membershipCardRepository here
+            java.util.Optional<com.xala.gym.entity.MembershipCard> activeCardOpt = 
+                membershipCardRepository.findFirstByMemberIdAndStatusOrderByEndDateDesc(member.getId(), "ACTIVE");
+            
+            if (activeCardOpt.isPresent() && activeCardOpt.get().getGymPackage() != null) {
+                activePackageName = activeCardOpt.get().getGymPackage().getName();
+                packageEndDate = activeCardOpt.get().getEndDate();
+            }
+
+            return PtClientResponse.builder()
+                .memberId(member.getId())
+                .memberName(member.getName() != null ? member.getName() : "Khách hàng")
+                .email(member.getEmail())
+                .phone(member.getPhone())
+                .height(member.getHeight())
+                .weight(member.getWeight())
+                .bmi(member.getBmi())
+                .goalType(member.getGoalType() != null ? member.getGoalType().name() : null)
+                .activePackageName(activePackageName)
+                .packageEndDate(packageEndDate)
+                .build();
+        }).collect(Collectors.toList());
     }
 
     @Override
@@ -400,6 +443,57 @@ public class PtScheduleServiceImpl implements PtScheduleService {
         }
 
         return mapToResponse(slot);
+    }
+
+    @Override
+    public List<PtScheduleResponse> getMemberTrainingHistory(Long memberId) {
+        User pt = getCurrentUser();
+        return bookingRepository.findByMemberIdAndPersonalTrainerIdOrderByStartTimeDesc(memberId, pt.getId())
+                .stream()
+                .filter(b -> "COMPLETED".equals(b.getStatus()) || (b.getStartTime().isBefore(LocalDateTime.now()) && !"CANCELLED".equals(b.getStatus())))
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<com.xala.gym.dto.response.MemberExerciseProgressResponse> getMemberExerciseProgress(Long memberId) {
+        User pt = getCurrentUser();
+        // Return exercise progress for the member.
+        return memberExerciseStatusRepository.findByMembershipCard_Member_IdOrderByCompletedAtDesc(memberId)
+                .stream()
+                .map(status -> com.xala.gym.dto.response.MemberExerciseProgressResponse.builder()
+                        .id(status.getId())
+                        .exerciseName(status.getExercise().getName())
+                        .description(status.getExercise().getDescription())
+                        .sets(status.getExercise().getSets())
+                        .reps(status.getExercise().getReps())
+                        .isCompleted(status.getIsCompleted())
+                        .completedAt(status.getCompletedAt())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public long getMonthlyCompletedSessionsCount() {
+        User pt = getCurrentUser();
+        LocalDateTime now = LocalDateTime.now();
+        return bookingRepository.countCompletedSessionsByPtIdAndMonthAndYear(pt.getId(), now.getMonthValue(), now.getYear());
+    }
+
+    @Override
+    public long getManagedClientsCount() {
+        User pt = getCurrentUser();
+        return bookingRepository.findDistinctMembersByPtId(pt.getId()).size();
+    }
+
+    @Override
+    public List<PtScheduleResponse> getUpcomingSchedules(int limit) {
+        User pt = getCurrentUser();
+        List<Booking> upcoming = bookingRepository.findUpcomingSchedulesByPtId(pt.getId(), LocalDateTime.now());
+        return upcoming.stream()
+                .limit(limit)
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
     }
 
     private User getCurrentUser() {

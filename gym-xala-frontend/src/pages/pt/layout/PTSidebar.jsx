@@ -10,8 +10,8 @@ const PTSidebar = () => {
         <NavLink to="/pt/dashboard" className={({ isActive }) => isActive ? "active" : ""}>
           Dashboard
         </NavLink>
-        <NavLink to="/pt/members" className={({ isActive }) => isActive ? "active" : ""}>
-          My Members
+        <NavLink to="/pt/clients" className={({ isActive }) => isActive ? "active" : ""}>
+          Học viên của tôi
         </NavLink>
         <NavLink to="/pt/schedule" className={({ isActive }) => isActive ? "active" : ""}>
           Lịch dạy học

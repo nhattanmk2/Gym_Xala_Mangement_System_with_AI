@@ -64,9 +64,9 @@ const PTPersonalSchedule = () => {
             }));
 
             await addBatchScheduleSlots(slots);
-            alert(`✅ Đã đánh dấu lịch bận cho ${selectedDates.length} ngày!`);
             setSelectedDates([]);
-            loadSchedule();
+            await loadSchedule();
+            setTimeout(() => alert(`✅ Đã đánh dấu lịch bận cho ${selectedDates.length} ngày!`), 100);
         } catch (error) {
             console.error("Error adding busy slots:", error);
             const msg = error.response?.data || "Lỗi khi lưu lịch bận. Khung giờ này có thể đã có lịch dạy.";
@@ -80,7 +80,8 @@ const PTPersonalSchedule = () => {
         if (!window.confirm("Bạn có chắc chắn muốn xóa lịch bận này?")) return;
         try {
             await deleteScheduleSlot(id);
-            loadSchedule();
+            await loadSchedule();
+            setTimeout(() => alert("✅ Đã xóa lịch bận."), 100);
         } catch (error) {
             alert("❌ Không thể xóa.");
         }

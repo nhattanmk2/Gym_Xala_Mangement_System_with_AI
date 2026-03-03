@@ -31,6 +31,8 @@ import PTMembers from "./pages/pt/members/PTMembers";
 import PTSchedule from "./pages/pt/schedule/PTSchedule";
 import PTPersonalSchedule from "./pages/pt/schedule/PTPersonalSchedule";
 import PTProfile from "./pages/pt/PTProfile";
+import MyClients from "./pages/pt/clients/MyClients";
+import MemberProgressDetail from "./pages/pt/clients/MemberProgressDetail";
 
 function App() {
   return (
@@ -124,6 +126,8 @@ function App() {
           }
         >
           <Route path="dashboard" element={<PTDashboard />} />
+          <Route path="clients" element={<MyClients />} />
+          <Route path="clients/:id" element={<MemberProgressDetail />} />
           <Route path="members" element={<PTMembers />} />
           <Route path="schedule" element={<PTSchedule />} />
           <Route path="personal-schedule" element={<PTPersonalSchedule />} />

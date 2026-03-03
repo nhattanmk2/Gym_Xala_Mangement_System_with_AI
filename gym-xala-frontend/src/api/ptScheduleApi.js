@@ -22,8 +22,39 @@ export const addBatchScheduleSlots = async (slots) => {
     return response.data;
 };
 
+// ======================== NEW FOR PT ==========================
+export const getPtClients = async () => {
+    const response = await axios.get(`${API_URL}/clients`, { headers: getAuthHeader() });
+    return response.data;
+};
+
 export const deleteScheduleSlot = async (id) => {
     const response = await axios.delete(`${API_URL}/${id}`, { headers: getAuthHeader() });
+    return response.data;
+};
+
+export const getPtMemberHistory = async (memberId) => {
+    const response = await axios.get(`${API_URL}/history/${memberId}`, { headers: getAuthHeader() });
+    return response.data;
+};
+
+export const getPtMemberProgress = async (memberId) => {
+    const response = await axios.get(`${API_URL}/progress/${memberId}`, { headers: getAuthHeader() });
+    return response.data;
+};
+
+export const getMonthlyCompletedSessions = async () => {
+    const response = await axios.get(`${API_URL}/stats/monthly-completed`, { headers: getAuthHeader() });
+    return response.data;
+};
+
+export const getManagedClientsCount = async () => {
+    const response = await axios.get(`${API_URL}/stats/clients-count`, { headers: getAuthHeader() });
+    return response.data;
+};
+
+export const getUpcomingSchedules = async (limit = 5) => {
+    const response = await axios.get(`${API_URL}/upcoming?limit=${limit}`, { headers: getAuthHeader() });
     return response.data;
 };
 

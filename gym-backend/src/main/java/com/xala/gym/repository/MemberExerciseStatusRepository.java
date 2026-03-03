@@ -8,4 +8,5 @@ import java.util.Optional;
 public interface MemberExerciseStatusRepository extends JpaRepository<MemberExerciseStatus, Long> {
     List<MemberExerciseStatus> findByMembershipCard_Id(Long membershipCardId);
     Optional<MemberExerciseStatus> findByMembershipCard_IdAndExercise_Id(Long membershipCardId, Long exerciseId);
+    List<MemberExerciseStatus> findByMembershipCard_Member_IdOrderByCompletedAtDesc(Long memberId);
 }

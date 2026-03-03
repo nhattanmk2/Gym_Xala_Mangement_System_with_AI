@@ -1,6 +1,7 @@
 package com.xala.gym.service;
 
 import com.xala.gym.dto.request.PtScheduleRequest;
+import com.xala.gym.dto.response.PtClientResponse;
 import com.xala.gym.dto.response.PtScheduleResponse;
 import java.util.List;
 
@@ -22,5 +23,13 @@ public interface PtScheduleService {
     void cancelBookingByMember(Long slotId);
     List<PtScheduleResponse> getPendingBookings();
     List<PtScheduleResponse> getMemberBookings();
+    List<PtClientResponse> getMyClients();
     PtScheduleResponse getScheduleById(Long id);
+    
+    List<PtScheduleResponse> getMemberTrainingHistory(Long memberId);
+    List<com.xala.gym.dto.response.MemberExerciseProgressResponse> getMemberExerciseProgress(Long memberId);
+    long getMonthlyCompletedSessionsCount();
+    
+    long getManagedClientsCount();
+    List<PtScheduleResponse> getUpcomingSchedules(int limit);
 }

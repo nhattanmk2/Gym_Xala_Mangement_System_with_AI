@@ -1,6 +1,7 @@
 package com.xala.gym.controller;
 
 import com.xala.gym.dto.request.PtScheduleRequest;
+import com.xala.gym.dto.response.PtClientResponse;
 import com.xala.gym.dto.response.PtScheduleResponse;
 import com.xala.gym.service.PtScheduleService;
 import lombok.RequiredArgsConstructor;
@@ -17,8 +18,14 @@ public class PtScheduleController {
     private final PtScheduleService ptScheduleService;
 
     @GetMapping
-    public ResponseEntity<List<PtScheduleResponse>> getMySchedule() {
+    public ResponseEntity<List<PtScheduleResponse>> getMySchedules() {
         return ResponseEntity.ok(ptScheduleService.getMySchedule());
+    }
+
+    // ✅ Xem danh sách học viên của PT
+    @GetMapping("/clients")
+    public ResponseEntity<List<PtClientResponse>> getMyClients() {
+        return ResponseEntity.ok(ptScheduleService.getMyClients());
     }
 
     @PostMapping
@@ -45,5 +52,31 @@ public class PtScheduleController {
     @PostMapping("/book/{id}")
     public ResponseEntity<PtScheduleResponse> bookSlot(@PathVariable Long id) {
         return ResponseEntity.ok(ptScheduleService.bookSlot(id));
+    }
+
+    @GetMapping("/history/{memberId}")
+    public ResponseEntity<List<PtScheduleResponse>> getMemberTrainingHistory(@PathVariable Long memberId) {
+        return ResponseEntity.ok(ptScheduleService.getMemberTrainingHistory(memberId));
+    }
+
+    @GetMapping("/progress/{memberId}")
+    public ResponseEntity<List<com.xala.gym.dto.response.MemberExerciseProgressResponse>> getMemberExerciseProgress(@PathVariable Long memberId) {
+        return ResponseEntity.ok(ptScheduleService.getMemberExerciseProgress(memberId));
+    }
+
+    @GetMapping("/stats/monthly-completed")
+    public ResponseEntity<Long> getMonthlyCompletedSessionsCount() {
+        return ResponseEntity.ok(ptScheduleService.getMonthlyCompletedSessionsCount());
+    }
+
+    @GetMapping("/stats/clients-count")
+    public ResponseEntity<Long> getManagedClientsCount() {
+        return ResponseEntity.ok(ptScheduleService.getManagedClientsCount());
+    }
+
+    @GetMapping("/upcoming")
+    public ResponseEntity<List<PtScheduleResponse>> getUpcomingSchedules(
+            @RequestParam(defaultValue = "5") int limit) {
+        return ResponseEntity.ok(ptScheduleService.getUpcomingSchedules(limit));
     }
 }
