@@ -1,19 +1,24 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getAIConsultation } from "../../../api/aiConsultationApi";
+import ConsultationHistory from "./ConsultationHistory";
 import "./ai-consultation.css";
 
 export default function AIConsultation() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState(null);
+    const [refreshTrigger, setRefreshTrigger] = useState(0);
 
     const [formData, setFormData] = useState({
         weight: "",
         height: "",
         age: "",
         gender: "MALE",
-        goal: "WEIGHT_LOSS"
+        goal: "WEIGHT_LOSS",
+        preferredDate: "",
+        startTime: "",
+        endTime: ""
     });
 
     const handleChange = (e) => {
@@ -28,8 +33,16 @@ export default function AIConsultation() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!formData.weight || !formData.height || !formData.age) {
-            alert("Vui lòng điền đầy đủ chiều cao, cân nặng và tuổi!");
+            alert("Vui lòng điền đầy đủ chiều cao, cân nặng, và tuổi!");
             return;
+        }
+
+        let startDateTime = null;
+        let endDateTime = null;
+
+        if (formData.preferredDate && formData.startTime && formData.endTime) {
+            startDateTime = `${formData.preferredDate}T${formData.startTime}:00`;
+            endDateTime = `${formData.preferredDate}T${formData.endTime}:00`;
         }
 
         try {
@@ -39,11 +52,14 @@ export default function AIConsultation() {
                 height: parseFloat(formData.height),
                 age: parseInt(formData.age),
                 gender: formData.gender,
-                goal: formData.goal
+                goal: formData.goal,
+                preferredStartTime: startDateTime,
+                preferredEndTime: endDateTime
             };
 
             const data = await getAIConsultation(payload);
             setResult(data);
+            setRefreshTrigger(prev => prev + 1);
         } catch (error) {
             console.error("Error getting AI consultation:", error);
             alert("Có lỗi xảy ra khi gọi chuyên gia AI. Vui lòng thử lại sau.");
@@ -83,6 +99,31 @@ export default function AIConsultation() {
                         <div className="form-group">
                             <label>Cân nặng (kg)</label>
                             <input type="number" name="weight" value={formData.weight} onChange={handleChange} placeholder="VD: 70" min="30" max="200" />
+                        </div>
+                    </div>
+
+                    <div className="goal-selection">
+                        <label>Khung giờ bạn dự định tập luyện (Bắt buộc để gợi ý PT)</label>
+                        <div className="form-row" style={{ marginTop: '10px' }}>
+                            <div className="form-group">
+                                <label>Ngày tập</label>
+                                <input
+                                    type="date"
+                                    name="preferredDate"
+                                    value={formData.preferredDate}
+                                    onChange={handleChange}
+                                    min={new Date().toISOString().split('T')[0]}
+                                    required
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Từ giờ</label>
+                                <input type="time" name="startTime" value={formData.startTime} onChange={handleChange} required />
+                            </div>
+                            <div className="form-group">
+                                <label>Đến giờ</label>
+                                <input type="time" name="endTime" value={formData.endTime} onChange={handleChange} required />
+                            </div>
                         </div>
                     </div>
 
@@ -168,6 +209,26 @@ export default function AIConsultation() {
                                             </div>
                                         )}
 
+                                        {pkg.recommendedPts && pkg.recommendedPts.length > 0 && (
+                                            <div className="rec-pt-list" style={{ marginTop: '15px', padding: '10px', backgroundColor: '#1a1a1a', borderRadius: '8px', borderLeft: '3px solid #00e5ff' }}>
+                                                <h5 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#00e5ff' }}>👨‍🏫 HLV Chuyên môn phù hợp đề xuất:</h5>
+                                                {pkg.recommendedPts.map(pt => (
+                                                    <div key={pt.ptId} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', paddingBottom: '8px', borderBottom: '1px solid #333' }}>
+                                                        <div style={{ flex: 1 }}>
+                                                            <div style={{ fontWeight: 'bold', fontSize: '15px', color: '#fff' }}>{pt.ptName} <span style={{ color: '#ffc107', fontSize: '13px' }}>⭐ {pt.ptRating}</span></div>
+                                                            <div style={{ fontSize: '12px', color: '#aaa', marginTop: '2px' }}>{pt.ptSpecialty} • {pt.ptExperience}</div>
+                                                        </div>
+                                                        <button
+                                                            style={{ padding: '6px 12px', background: '#00e5ff', border: 'none', color: '#000', borderRadius: '4px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}
+                                                            onClick={() => navigate('/member/booking')}
+                                                        >
+                                                            Đặt lịch PT
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+
                                         <button className="book-btn" onClick={() => navigate(`/member/packages/${pkg.packageInfo.id}`)}>Xem chi tiết</button>
                                     </div>
                                 </div>
@@ -178,6 +239,8 @@ export default function AIConsultation() {
                     </div>
                 </div>
             )}
+
+            <ConsultationHistory triggerFetch={refreshTrigger} />
         </div>
     );
 }

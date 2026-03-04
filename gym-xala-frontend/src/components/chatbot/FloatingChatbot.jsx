@@ -22,15 +22,60 @@ const FloatingChatbot = () => {
     const messagesEndRef = useRef(null);
     const navigate = useNavigate();
 
+    // LocalStorage keys
+    const HISTORY_KEY = "gym_xala_cb_history";
+    const STEP_KEY = "gym_xala_cb_step";
+    const USER_DATA_KEY = "gym_xala_cb_userData";
+
+    // Load history on mount
+    useEffect(() => {
+        const savedHistory = localStorage.getItem(HISTORY_KEY);
+        if (savedHistory) {
+            try {
+                setMessages(JSON.parse(savedHistory));
+                const savedStep = localStorage.getItem(STEP_KEY);
+                if (savedStep) setStep(parseInt(savedStep));
+                const savedUserData = localStorage.getItem(USER_DATA_KEY);
+                if (savedUserData) setUserData(JSON.parse(savedUserData));
+            } catch (e) {
+                console.error("Error parsing chatbot history", e);
+            }
+        }
+    }, []);
+
     // Initial greeting when opened first time
     useEffect(() => {
-        if (isOpen && messages.length === 0) {
+        if (isOpen && messages.length === 0 && !localStorage.getItem(HISTORY_KEY)) {
             addBotMessage("👋 Chào bạn, mình là HLV ảo của Xala Gym. Bạn đang muốn nhận tư vấn định hướng tập luyện hay tìm gói tập phù hợp ạ?");
             setTimeout(() => {
                 addBotMessage("Để mình có thể tư vấn chính xác nhất, bạn vui lòng cho mình biết **Chiều cao (cm)** và **Cân nặng (kg)** của bạn nhé. (VD: 175cm 70kg)");
             }, 1000);
         }
-    }, [isOpen]);
+    }, [isOpen, messages.length]);
+
+    // Save history when messages update
+    useEffect(() => {
+        if (messages.length > 0) {
+            localStorage.setItem(HISTORY_KEY, JSON.stringify(messages));
+            localStorage.setItem(STEP_KEY, step.toString());
+            localStorage.setItem(USER_DATA_KEY, JSON.stringify(userData));
+        }
+    }, [messages, step, userData]);
+
+    const resetChat = () => {
+        localStorage.removeItem(HISTORY_KEY);
+        localStorage.removeItem(STEP_KEY);
+        localStorage.removeItem(USER_DATA_KEY);
+        setStep(0);
+        setUserData({ weight: null, height: null, age: null, gender: null, goal: null });
+        setMessages([]);
+        setTimeout(() => {
+            addBotMessage("👋 Chào bạn, mình là HLV ảo của Xala Gym. Bạn đang muốn nhận tư vấn định hướng tập luyện hay tìm gói tập phù hợp ạ?");
+            setTimeout(() => {
+                addBotMessage("Để mình có thể tư vấn chính xác nhất, bạn vui lòng cho mình biết **Chiều cao (cm)** và **Cân nặng (kg)** của bạn nhé. (VD: 175cm 70kg)");
+            }, 1000);
+        }, 100);
+    };
 
     // Scroll to bottom when messages update
     useEffect(() => {
@@ -196,12 +241,14 @@ const FloatingChatbot = () => {
                     <div className="chatbot-header">
                         <div className="chatbot-header-info">
                             <div className="bot-avatar">🤖</div>
-                            <div className="chatbot-header-titles">
-                                <h3>AI Coach</h3>
-                                <p>Online & Sẵn sàng</p>
+                            <div className="cb-header">
+                                <h3>🤖 Chuyên gia AI của Gym Xala</h3>
+                                <div className="cb-header-actions" style={{ display: 'flex', gap: '10px' }}>
+                                    <button className="cb-reset-btn" onClick={resetChat} title="Làm mới cuộc trò chuyện" style={{ background: 'transparent', border: 'none', color: '#fff', fontSize: '1.2rem', cursor: 'pointer' }}>🔄</button>
+                                    <button className="cb-close-btn" onClick={() => setIsOpen(false)}>✖</button>
+                                </div>
                             </div>
                         </div>
-                        <button className="close-btn" onClick={() => setIsOpen(false)}>✖</button>
                     </div>
 
                     <div className="chatbot-messages">
@@ -253,6 +300,29 @@ const FloatingChatbot = () => {
                                                     {pkg.reason && (
                                                         <div className="chat-package-reason">
                                                             💡 <i>{pkg.reason}</i>
+                                                        </div>
+                                                    )}
+
+                                                    {pkg.recommendedPts && pkg.recommendedPts.length > 0 && (
+                                                        <div className="chat-recommended-pts" style={{ marginTop: '10px', padding: '10px', backgroundColor: 'rgba(0,0,0,0.2)', borderRadius: '8px' }}>
+                                                            <h5 style={{ margin: '0 0 5px 0', fontSize: '13px', color: '#00e5ff' }}>👨‍🏫 Huấn luyện viên phù hợp:</h5>
+                                                            {pkg.recommendedPts.map(pt => (
+                                                                <div key={pt.ptId} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px', fontSize: '12px' }}>
+                                                                    <div>
+                                                                        <strong>{pt.ptName}</strong> ⭐ {pt.ptRating}<br />
+                                                                        <span style={{ color: '#aaa' }}>{pt.ptSpecialty}</span>
+                                                                    </div>
+                                                                    <button
+                                                                        style={{ padding: '4px 8px', background: 'transparent', border: '1px solid #00e5ff', color: '#00e5ff', borderRadius: '4px', cursor: 'pointer', fontSize: '11px' }}
+                                                                        onClick={() => {
+                                                                            navigate('/member/booking');
+                                                                            setIsOpen(false);
+                                                                        }}
+                                                                    >
+                                                                        Đặt lịch
+                                                                    </button>
+                                                                </div>
+                                                            ))}
                                                         </div>
                                                     )}
 

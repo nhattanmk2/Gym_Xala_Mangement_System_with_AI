@@ -125,7 +125,18 @@ export default function MemberLayout() {
             }}
           >
             <span className="nav-icon">✨</span>
-            <span className="nav-text" style={{ color: '#d0fd3e', fontWeight: 'bold' }}>Tư Vấn AI</span>
+            <span className="nav-text" style={{ color: '#d0fd3e', fontWeight: 'bold' }}>Tư Vấn Thể Trạng AI</span>
+          </NavLink>
+          <NavLink
+            to="/member/suggest-pt"
+            className={({ isActive }) => (isActive ? "nav-item active" : "nav-item")}
+            style={{
+              background: 'linear-gradient(90deg, rgba(0, 229, 255, 0.1) 0%, rgba(0, 119, 255, 0.1) 100%)',
+              borderLeftColor: '#00e5ff'
+            }}
+          >
+            <span className="nav-icon">🤖</span>
+            <span className="nav-text" style={{ color: '#00e5ff', fontWeight: 'bold' }}>Tìm kiếm PT theo lịch rảnh</span>
           </NavLink>
           <NavLink
             to="/member/profile"

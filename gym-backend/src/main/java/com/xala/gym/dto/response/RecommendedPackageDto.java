@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -12,4 +14,5 @@ import lombok.NoArgsConstructor;
 public class RecommendedPackageDto {
     private PackageResponse packageInfo;
     private String reason;
+    private List<PtMatchingResponse> recommendedPts;
 }

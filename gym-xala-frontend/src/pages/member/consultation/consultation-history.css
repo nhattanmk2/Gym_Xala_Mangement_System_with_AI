@@ -1,0 +1,139 @@
+.history-container {
+    margin-top: 50px;
+    padding: 30px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.history-title {
+    font-size: 1.8rem;
+    color: #fff;
+    margin-bottom: 25px;
+    border-bottom: 2px solid #333;
+    padding-bottom: 10px;
+}
+
+.history-loading,
+.history-empty {
+    text-align: center;
+    color: #aaa;
+    padding: 30px;
+    font-size: 1.1rem;
+}
+
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.history-card {
+    background: #1a1a1a;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid #333;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.history-card:hover {
+    transform: translateX(5px);
+    border-color: #555;
+    box-shadow: -5px 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.h-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    border-bottom: 1px dashed #444;
+    padding-bottom: 15px;
+}
+
+.h-time {
+    color: #00e5ff;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.h-bmi-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: #fff;
+}
+
+.h-bmi-badge.cat-normal {
+    background-color: #4caf50;
+}
+
+.h-bmi-badge.cat-under {
+    background-color: #2196f3;
+}
+
+.h-bmi-badge.cat-over {
+    background-color: #ff9800;
+}
+
+.h-bmi-badge.cat-obese {
+    background-color: #f44336;
+}
+
+.h-params {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 15px;
+    color: #bbb;
+    font-size: 0.95rem;
+}
+
+.h-params strong {
+    color: #fff;
+}
+
+.h-advice {
+    background: rgba(0, 229, 255, 0.05);
+    border-left: 3px solid #00e5ff;
+    padding: 12px 15px;
+    border-radius: 4px;
+    color: #ddd;
+    font-style: italic;
+    margin-bottom: 15px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.h-recs h4 {
+    color: #d0fd3e;
+    font-size: 1rem;
+    margin-bottom: 10px;
+}
+
+.h-rec-item {
+    background: #2a2a2a;
+    padding: 10px 15px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.h-rec-name {
+    color: #fff;
+    font-weight: bold;
+    font-size: 0.95rem;
+}
+
+.h-pts {
+    color: #ffc107;
+    font-size: 0.85rem;
+}
+
+.h-no-rec {
+    color: #777;
+    font-size: 0.9rem;
+}

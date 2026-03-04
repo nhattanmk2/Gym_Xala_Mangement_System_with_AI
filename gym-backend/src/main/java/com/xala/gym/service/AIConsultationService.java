@@ -6,9 +6,16 @@ import com.xala.gym.dto.request.AIConsultationRequest;
 import com.xala.gym.dto.response.AIConsultationResponse;
 import com.xala.gym.dto.response.PackageResponse;
 import com.xala.gym.dto.response.RecommendedPackageDto;
+import com.xala.gym.dto.request.PtMatchingRequest;
+import com.xala.gym.dto.response.PtMatchingResponse;
+import com.xala.gym.entity.AIConsultationHistory;
 import com.xala.gym.entity.Package;
+import com.xala.gym.entity.User;
+import com.xala.gym.repository.AIConsultationHistoryRepository;
 import com.xala.gym.repository.PackageRepository;
+import com.xala.gym.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -22,6 +29,9 @@ public class AIConsultationService {
 
     private final PackageRepository packageRepository;
     private final GeminiService geminiService;
+    private final PtMatchingService ptMatchingService;
+    private final AIConsultationHistoryRepository historyRepository;
+    private final UserRepository userRepository;
     private final ObjectMapper objectMapper;
 
     public AIConsultationResponse getConsultation(AIConsultationRequest request) {
@@ -76,17 +86,69 @@ public class AIConsultationService {
                             .findFirst().orElse(null);
                         
                         if (foundPkg != null) {
-                            recommendedPackages.add(new RecommendedPackageDto(foundPkg, reason));
+                            // Gọi thuật toán so khớp để lấy top PT phù hợp cho gói này
+                            PtMatchingRequest matchRequest = PtMatchingRequest.builder()
+                                    .packageId(foundPkg.getId())
+                                    .preferredStartTime(request.getPreferredStartTime())
+                                    .preferredEndTime(request.getPreferredEndTime())
+                                    .build();
+                                    
+                            List<PtMatchingResponse> topPts = ptMatchingService.matchPt(matchRequest).stream()
+                                    .limit(3) // Lấy top 3 PT
+                                    .collect(Collectors.toList());
+
+                            recommendedPackages.add(new RecommendedPackageDto(foundPkg, reason, topPts));
                         }
                     }
                 }
 
-                return AIConsultationResponse.builder()
+                AIConsultationResponse response = AIConsultationResponse.builder()
                         .bmi(bmi)
                         .bmiCategory(bmiCategory)
                         .advice(advice)
                         .recommendedPackages(recommendedPackages)
                         .build();
+
+                // Lưu lịch sử
+                try {
+                    String username = SecurityContextHolder.getContext().getAuthentication().getName();
+                    User member = userRepository.findByUsername(username).orElse(null);
+                    if (member != null) {
+                        // Tối ưu JSON: Bỏ cột image (byte[]) ra để chống lỗi DataTruncation
+                        List<RecommendedPackageDto> historyPackages = recommendedPackages.stream().map(pkgDto -> {
+                            PackageResponse noImgPkg = PackageResponse.builder()
+                                    .id(pkgDto.getPackageInfo().getId())
+                                    .name(pkgDto.getPackageInfo().getName())
+                                    .description(pkgDto.getPackageInfo().getDescription())
+                                    .price(pkgDto.getPackageInfo().getPrice())
+                                    .durationInDays(pkgDto.getPackageInfo().getDurationInDays())
+                                    .category(pkgDto.getPackageInfo().getCategory())
+                                    .promotion(pkgDto.getPackageInfo().getPromotion())
+                                    // Bố trí lại image = null
+                                    .image(null)
+                                    .build();
+                            return new RecommendedPackageDto(noImgPkg, pkgDto.getReason(), pkgDto.getRecommendedPts());
+                        }).collect(Collectors.toList());
+
+                        AIConsultationHistory history = AIConsultationHistory.builder()
+                                .member(member)
+                                .weight(request.getWeight())
+                                .height(request.getHeight())
+                                .age(request.getAge())
+                                .gender(request.getGender())
+                                .goal(request.getGoal())
+                                .bmi(bmi)
+                                .bmiCategory(bmiCategory)
+                                .advice(advice)
+                                .recommendationJson(objectMapper.writeValueAsString(historyPackages))
+                                .build();
+                        historyRepository.save(history);
+                    }
+                } catch (Exception e) {
+                    System.err.println("Failed to save AI consultation history: " + e.getMessage());
+                }
+
+                return response;
 
             } catch (Exception e) {
                 System.err.println("Failed to parse Gemini JSON: " + e.getMessage());
@@ -101,6 +163,11 @@ public class AIConsultationService {
                 .advice("Xin lỗi, Chuyên gia AI đang bận. Vui lòng thử lại sau.")
                 .recommendedPackages(new ArrayList<>())
                 .build();
+    }
+
+    public List<AIConsultationHistory> getHistory(String username) {
+        User member = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại"));
+        return historyRepository.findByMember_IdOrderByConsultationTimeDesc(member.getId());
     }
 
     private String buildPrompt(AIConsultationRequest req, List<PackageResponse> pkgs) {

@@ -15,4 +15,6 @@ public class AIConsultationRequest {
     private int age;           // years
     private String gender;     // "MALE", "FEMALE"
     private String goal;       // "WEIGHT_LOSS", "MUSCLE_GAIN", "MAINTAIN" 
+    private java.time.LocalDateTime preferredStartTime;
+    private java.time.LocalDateTime preferredEndTime;
 }
