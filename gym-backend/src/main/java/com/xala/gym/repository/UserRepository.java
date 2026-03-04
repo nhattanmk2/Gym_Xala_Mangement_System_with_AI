@@ -22,4 +22,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
            "AND (:name = '' OR u.fullName LIKE CONCAT('%', :name, '%')) " +
            "AND (:phone = '' OR u.phone LIKE CONCAT('%', :phone, '%'))")
     List<User> searchPTs(@Param("name") String name, @Param("phone") String phone);
+
+    @Query("SELECT COUNT(u) FROM User u JOIN u.roles r WHERE r.name = 'ROLE_PT'")
+    long countTotalPTs();
 }

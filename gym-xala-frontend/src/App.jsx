@@ -15,6 +15,7 @@ import AdminMemberList from "./pages/admin/member/AdminMemberList";
 import AdminPTList from "./pages/admin/pt/AdminPTList";
 import AdminInvoices from "./pages/admin/invoices/AdminInvoices";
 import AdminSchedules from "./pages/admin/schedules/AdminSchedules";
+import AdminReports from "./pages/admin/AdminReports";
 import AdminLayout from "./pages/admin/layout/AdminLayout";
 
 import MemberLayout from "./pages/member/MemberLayout";
@@ -114,6 +115,16 @@ function App() {
             <ProtectedRoute allowRoles={["ROLE_ADMIN"]}>
               <AdminLayout>
                 <AdminSchedules />
+              </AdminLayout>
+            </ProtectedRoute>
+          } />
+
+        <Route
+          path="/admin/reports"
+          element={
+            <ProtectedRoute allowRoles={["ROLE_ADMIN"]}>
+              <AdminLayout>
+                <AdminReports />
               </AdminLayout>
             </ProtectedRoute>
           } />

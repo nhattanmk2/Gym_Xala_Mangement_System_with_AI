@@ -78,17 +78,41 @@ public class AdminPtServiceImpl implements AdminPtService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy Huấn luyện viên (User)"));
 
-        // Thu hồi quyền ROLE_PT
+        // 1. Cập nhật quyền ROLE_PT -> ROLE_MEMBER
         Role ptRole = roleRepository.findByName(UserRole.ROLE_PT)
                 .orElseThrow(() -> new RuntimeException("ROLE_PT không tồn tại"));
-        user.getRoles().remove(ptRole);
-
-        // Hạ xuống ROLE_MEMBER
         Role memberRole = roleRepository.findByName(UserRole.ROLE_MEMBER)
                 .orElseThrow(() -> new RuntimeException("ROLE_MEMBER không tồn tại"));
-        user.getRoles().add(memberRole);
-
+        
+        user.getRoles().remove(ptRole);
+        if (!user.getRoles().contains(memberRole)) {
+            user.getRoles().add(memberRole);
+        }
         userRepository.save(user);
+
+        // 2. Tìm Employee hiện tại (để lấy dữ liệu)
+        Optional<Employee> empOpt = employeeRepository.findByUser_Id(id);
+        
+        // 3. Đảm bảo có bản ghi Member (Nếu đã có thì update, không thì create)
+        Member member = memberRepository.findByUser_Id(id).orElse(new Member());
+        member.setUser(user);
+        
+        if (empOpt.isPresent()) {
+            Employee employee = empOpt.get();
+            member.setName(employee.getName());
+            member.setPhone(employee.getPhone());
+            member.setGymLocation(employee.getGymLocation());
+            member.setAvatar(employee.getAvatar());
+        } else {
+            member.setName(user.getFullName());
+            member.setPhone(user.getPhone());
+        }
+        member.setEmail(user.getEmail());
+        member.setStatus(true);
+        memberRepository.save(member);
+
+        // 4. We keep the employee record if it has dependencies (history),
+        // but it won't show in the PT List because searchPTs filters by ROLE_PT.
     }
 
     @Override

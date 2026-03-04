@@ -29,4 +29,18 @@ public interface MembershipCardRepository extends JpaRepository<MembershipCard, 
             @Param("startDate") java.time.LocalDateTime startDate,
             @Param("endDate") java.time.LocalDateTime endDate
     );
+
+    @Query("SELECT SUM(p.price) FROM MembershipCard mc JOIN mc.gymPackage p WHERE MONTH(mc.createdAt) = :month AND YEAR(mc.createdAt) = :year AND mc.status = 'ACTIVE'")
+    Double calculateRevenueByMonthAndYear(@Param("month") int month, @Param("year") int year);
+
+    // Đếm số lượng membership đăng ký nhóm theo ngày để vẽ Chart
+    @Query("SELECT new map(FUNCTION('DATE', mc.createdAt) as regDate, COUNT(mc.id) as count) " +
+           "FROM MembershipCard mc " +
+           "WHERE mc.createdAt >= :startDate " +
+           "GROUP BY FUNCTION('DATE', mc.createdAt) " +
+           "ORDER BY FUNCTION('DATE', mc.createdAt) ASC")
+    List<java.util.Map<String, Object>> countMembershipsGroupedByDate(@Param("startDate") java.time.LocalDateTime startDate);
+
+    @Query("SELECT COUNT(DISTINCT mc.member.id) FROM MembershipCard mc WHERE mc.createdAt < :startDate")
+    long countDistinctMembersBeforeDate(@Param("startDate") java.time.LocalDateTime startDate);
 }

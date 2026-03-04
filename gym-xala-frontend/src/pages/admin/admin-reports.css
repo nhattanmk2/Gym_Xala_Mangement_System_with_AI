@@ -1,0 +1,144 @@
+.ad-reports-container {
+    padding: 24px;
+    background: #121212;
+    min-height: calc(100vh - 80px);
+    color: #e0e0e0;
+}
+
+.ad-reports-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.ad-reports-header h1 {
+    font-size: 28px;
+    margin: 0;
+    color: #fff;
+    font-weight: 700;
+}
+
+.ad-reports-filters {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    background: #1e1e1e;
+    padding: 16px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.filter-group label {
+    font-size: 13px;
+    color: #888;
+}
+
+.ad-reports-filters input {
+    background: #2a2a2a;
+    border: 1px solid #333;
+    color: #fff;
+    padding: 10px;
+    border-radius: 8px;
+    outline: none;
+}
+
+.ad-btn-export {
+    background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: transform 0.2s;
+}
+
+.ad-btn-export:hover {
+    transform: translateY(-2px);
+}
+
+.ad-reports-tabs {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 12px;
+}
+
+.ad-tab-btn {
+    background: transparent;
+    border: none;
+    color: #888;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s;
+    border-radius: 8px;
+}
+
+.ad-tab-btn.active {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    font-weight: 600;
+}
+
+.ad-report-table-wrapper {
+    background: #1e1e1e;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.ad-report-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.ad-report-table th {
+    background: #252525;
+    color: #888;
+    text-align: left;
+    padding: 16px;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 12px;
+}
+
+.ad-report-table td {
+    padding: 16px;
+    border-bottom: 1px solid #333;
+    font-size: 14px;
+}
+
+.ad-report-table tr:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.status-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.status-active {
+    background: rgba(76, 175, 80, 0.1);
+    color: #4caf50;
+}
+
+.status-pending {
+    background: rgba(255, 152, 0, 0.1);
+    color: #ff9800;
+}
+
+.status-expired {
+    background: rgba(244, 67, 54, 0.1);
+    color: #f44336;
+}

@@ -14,6 +14,7 @@ const AdminSidebar = () => {
         <Link to="/admin/packages">Package Management</Link>
         <Link to="/admin/bookings">Booking Management</Link>
         <Link to="/admin/invoices">🧾 Invoice Management</Link>
+        <Link to="/admin/reports" style={{ fontWeight: 'bold', color: '#ff9800' }}>📊 Báo cáo sơ bộ</Link>
       </nav>
     </div>
   );

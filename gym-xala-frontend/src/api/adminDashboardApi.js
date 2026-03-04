@@ -15,3 +15,31 @@ export const getDashboardStats = async () => {
         throw error;
     }
 };
+
+export const getMemberGrowth = async (filter = 'month') => {
+    try {
+        const response = await axios.get(`${BASE_URL}/member-growth?filter=${filter}`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching member growth:", error);
+        throw error;
+    }
+};
+
+export const getPtRanking = async (filter = 'month') => {
+    try {
+        const response = await axios.get(`${BASE_URL}/pt-ranking?filter=${filter}`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching PT ranking:", error);
+        throw error;
+    }
+};

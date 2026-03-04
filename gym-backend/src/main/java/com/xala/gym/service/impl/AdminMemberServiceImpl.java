@@ -3,15 +3,9 @@ package com.xala.gym.service.impl;
 import com.xala.gym.dto.request.AdminCreateMemberRequest;
 import com.xala.gym.dto.request.AdminUpdateMemberRequest;
 import com.xala.gym.dto.response.AdminMemberResponse;
-import com.xala.gym.entity.GymLocation;
-import com.xala.gym.entity.Role;
-import com.xala.gym.entity.User;
-import com.xala.gym.entity.Member;
+import com.xala.gym.entity.*;
 import com.xala.gym.entity.enums.UserRole;
-import com.xala.gym.repository.GymLocationRepository;
-import com.xala.gym.repository.MemberRepository;
-import com.xala.gym.repository.RoleRepository;
-import com.xala.gym.repository.UserRepository;
+import com.xala.gym.repository.*;
 import com.xala.gym.service.AdminMemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -31,6 +25,8 @@ public class AdminMemberServiceImpl implements AdminMemberService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final GymLocationRepository gymLocationRepository;
+    private final EmployeeRepository employeeRepository;
+    private final PositionRepository positionRepository;
 
     @Transactional
     public AdminMemberResponse createMember(AdminCreateMemberRequest request) {
@@ -225,14 +221,38 @@ public class AdminMemberServiceImpl implements AdminMemberService {
             throw new RuntimeException("User not found for this member");
         }
 
-        Role ptRole = roleRepository.findByName(com.xala.gym.entity.enums.UserRole.ROLE_PT)
+        // 1. Assign ROLE_PT
+        Role ptRole = roleRepository.findByName(UserRole.ROLE_PT)
                 .orElseThrow(() -> new RuntimeException("ROLE_PT not found"));
-        Role memberRole = roleRepository.findByName(com.xala.gym.entity.enums.UserRole.ROLE_MEMBER)
+        Role memberRole = roleRepository.findByName(UserRole.ROLE_MEMBER)
                 .orElseThrow(() -> new RuntimeException("ROLE_MEMBER not found"));
 
         user.getRoles().remove(memberRole);
-        user.getRoles().add(ptRole);
-
+        if (!user.getRoles().contains(ptRole)) {
+            user.getRoles().add(ptRole);
+        }
         userRepository.save(user);
+
+        // 2. Đảm bảo có bản ghi Employee (Update nếu đã có, Create nếu chưa có)
+        Employee employee = employeeRepository.findByUser_Id(user.getId()).orElse(new Employee());
+        employee.setUser(user);
+        employee.setName(member.getName());
+        employee.setPhone(member.getPhone());
+        employee.setGymLocation(member.getGymLocation());
+        employee.setAvatar(member.getAvatar());
+        
+        // Lấy vị trí mặc định nếu employee chưa có position
+        if (employee.getPosition() == null) {
+            positionRepository.findAll().stream()
+                    .filter(p -> p.getName().contains("Huấn luyện viên") || p.getName().contains("PT"))
+                    .findFirst()
+                    .ifPresent(employee::setPosition);
+        }
+
+        employeeRepository.save(employee);
+
+        // 3. We keep the member record if it has dependencies (history),
+        // but it won't show in the Member List because searchMembers filters by ROLE_MEMBER.
+        // This ensures a 100% success rate even if there are FK constraints.
     }
 }

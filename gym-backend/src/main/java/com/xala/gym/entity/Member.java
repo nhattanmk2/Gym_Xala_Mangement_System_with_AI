@@ -19,7 +19,7 @@ public class Member {
     private Long id;
 
     // Liên kết 1-1 với User
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 

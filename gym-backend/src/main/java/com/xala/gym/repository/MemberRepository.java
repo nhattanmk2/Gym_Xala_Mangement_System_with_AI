@@ -25,4 +25,10 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
             @Param("name") String name,
             @Param("cccd") String cccd
     );
+
+    @Query("SELECT COUNT(m) FROM Member m WHERE m.status = true")
+    long countActiveMembers();
+
+    @Query("SELECT new map(l.name as branch, COUNT(m.id) as count) FROM Member m JOIN m.gymLocation l WHERE m.status = true GROUP BY l.id")
+    List<java.util.Map<String, Object>> countActiveMembersByBranch();
 }
