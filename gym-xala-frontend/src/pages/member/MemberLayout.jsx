@@ -2,6 +2,7 @@ import { NavLink, Outlet } from "react-router-dom";
 import { logout } from "../../utils/auth";
 import { useEffect, useState, useRef } from "react";
 import { getMyNotifications, getUnreadCount, markAsRead, markAllAsRead } from "../../api/notificationApi";
+import FloatingChatbot from "../../components/chatbot/FloatingChatbot";
 import "./member-layout.css";
 
 export default function MemberLayout() {
@@ -116,6 +117,17 @@ export default function MemberLayout() {
             <span className="nav-text">Lộ trình tập</span>
           </NavLink>
           <NavLink
+            to="/member/ai-consultation"
+            className={({ isActive }) => (isActive ? "nav-item active" : "nav-item")}
+            style={{
+              background: 'linear-gradient(90deg, rgba(208, 253, 62, 0.1) 0%, rgba(16, 185, 129, 0.1) 100%)',
+              borderLeftColor: '#10b981'
+            }}
+          >
+            <span className="nav-icon">✨</span>
+            <span className="nav-text" style={{ color: '#d0fd3e', fontWeight: 'bold' }}>Tư Vấn AI</span>
+          </NavLink>
+          <NavLink
             to="/member/profile"
             className={({ isActive }) => (isActive ? "nav-item active" : "nav-item")}
           >
@@ -188,6 +200,9 @@ export default function MemberLayout() {
           <Outlet />
         </div>
       </main>
+
+      {/* Tích hợp Bot tư vấn Floating */}
+      <FloatingChatbot />
     </div>
   );
 }

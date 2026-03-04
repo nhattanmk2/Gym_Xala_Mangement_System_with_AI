@@ -25,6 +25,7 @@ import MemberProfile from "./pages/member/profile/MemberProfile";
 import MemberSchedule from "./pages/member/schedule/MemberSchedule";
 import WorkoutRoadmap from "./pages/member/schedule/WorkoutRoadmap";
 import MyPackage from "./pages/member/packages/MyPackage";
+import AIConsultation from "./pages/member/consultation/AIConsultation";
 
 import PTLayout from "./pages/pt/layout/PTLayout";
 import PTMembers from "./pages/pt/members/PTMembers";
@@ -151,6 +152,7 @@ function App() {
           <Route path="schedule" element={<MemberSchedule />} />
           <Route path="roadmap" element={<WorkoutRoadmap />} />
           <Route path="my-package" element={<MyPackage />} />
+          <Route path="ai-consultation" element={<AIConsultation />} />
         </Route>
 
         {/* DEFAULT */}
