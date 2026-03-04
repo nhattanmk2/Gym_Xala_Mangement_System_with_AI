@@ -24,4 +24,8 @@ public class PtScheduleResponse {
     private String ptPhone;
     private String ptSpecialty;
     private String adminNotes;
+
+    private String exercises;
+    private String achievedGoals;
+    private String ptEvaluation;
 }

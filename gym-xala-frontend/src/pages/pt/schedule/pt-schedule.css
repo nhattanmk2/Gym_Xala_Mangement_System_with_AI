@@ -360,3 +360,130 @@
     background: #ef4444;
     border-color: #ef4444;
 }
+
+/* Session Content Modal */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.session-content-modal {
+    background: white;
+    padding: 32px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+}
+
+.session-content-modal h2 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    font-size: 22px;
+    color: #1e293b;
+}
+
+.session-content-modal p {
+    margin: 8px 0;
+    color: #475569;
+}
+
+.session-content-modal textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 14px;
+    font-family: inherit;
+    resize: vertical;
+    transition: border-color 0.2s;
+}
+
+.session-content-modal textarea:focus {
+    border-color: #3b82f6;
+    outline: none;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.btn-cancel,
+.btn-submit {
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+}
+
+.btn-cancel {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.btn-cancel:hover {
+    background: #e2e8f0;
+}
+
+.btn-submit {
+    background: #2563eb;
+    color: white;
+}
+
+.btn-submit:hover:not(:disabled) {
+    background: #1d4ed8;
+}
+
+.btn-submit:disabled {
+    background: #94a3b8;
+    cursor: not-allowed;
+}
+
+.btn-action-mini.btn-content {
+    background: #fdf2f8;
+    color: #db2777;
+    border: 1px solid #fbcfe8;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-action-mini.btn-content:hover {
+    background: #fbcfe8;
+    transform: translateY(-1px);
+}
+
+.btn-action-mini.btn-complete {
+    background: #ecfccb;
+    color: #4d7c0f;
+    border: 1px solid #d9f99d;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-right: 8px;
+}
+
+.btn-action-mini.btn-complete:hover {
+    background: #d9f99d;
+    transform: translateY(-1px);
+}

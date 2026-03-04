@@ -51,4 +51,13 @@ public class Booking {
 
     @Column(name = "admin_notes", columnDefinition = "TEXT")
     private String adminNotes;
+
+    @Column(columnDefinition = "TEXT")
+    private String exercises;
+
+    @Column(name = "achieved_goals", columnDefinition = "TEXT")
+    private String achievedGoals;
+
+    @Column(name = "pt_evaluation", columnDefinition = "TEXT")
+    private String ptEvaluation;
 }

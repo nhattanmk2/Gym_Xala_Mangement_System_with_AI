@@ -579,15 +579,35 @@ const AdminSchedules = () => {
                                 </div>
 
                                 <div className="form-group-pt">
-                                    <label>Nội dung buổi tập</label>
+                                    <label>Ghi chú của Quản trị viên</label>
                                     <textarea
                                         className="admin-notes-textarea"
                                         rows="4"
-                                        placeholder="Nhập nội dung buổi tập (ví dụ: Tập Leg Press 4 hiệp, Deadlift 5 hiệp)..."
+                                        placeholder="Nhập ghi chú hoặc nhắc nhở thêm..."
                                         value={editFormData.adminNotes}
                                         onChange={(e) => setEditFormData({ ...editFormData, adminNotes: e.target.value })}
                                     ></textarea>
                                 </div>
+
+                                {editingGroup && editingGroup.rawSlots[0] && (editingGroup.rawSlots[0].status === 'COMPLETED' || editingGroup.rawSlots[0].exercises || editingGroup.rawSlots[0].ptEvaluation) && (
+                                    <div className="pt-evaluation-readonly-container">
+                                        <h4 className="eval-readonly-title">🏋️ Nội dung & Nhận xét từ PT</h4>
+                                        <div className="eval-readonly-box">
+                                            <div className="eval-read-group">
+                                                <label>Bài tập đã thực hiện:</label>
+                                                <div className="eval-read-content">{editingGroup.rawSlots[0].exercises || "Chưa có thông tin"}</div>
+                                            </div>
+                                            <div className="eval-read-group">
+                                                <label>Mục tiêu đạt được:</label>
+                                                <div className="eval-read-content">{editingGroup.rawSlots[0].achievedGoals || "Chưa có thông tin"}</div>
+                                            </div>
+                                            <div className="eval-read-group">
+                                                <label>Đánh giá của PT:</label>
+                                                <div className="eval-read-content">{editingGroup.rawSlots[0].ptEvaluation || "Chưa có nhận xét"}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
 
                                 <div className="modal-actions-pt">
                                     <button type="button" className="btn-cancel-pt" onClick={() => { setIsEditModalOpen(false); setModalError(null); }}>Hủy</button>

@@ -90,3 +90,26 @@ export const cancelMemberSchedule = async (id) => {
     });
     return res.data;
 };
+
+export const saveSessionContent = async (id, payload) => {
+    const res = await axios.put(`${API_URL}/${id}/content`, payload, {
+        headers: getAuthHeader()
+    });
+    return res.data;
+};
+
+export const markSessionCompleted = async (id) => {
+    const res = await axios.put(`${API_URL}/${id}/complete`, {}, {
+        headers: getAuthHeader()
+    });
+    return res.data;
+};
+
+// API Lấy Thống kê tuần của Member
+export const getMemberWeeklyStats = async () => {
+    const res = await axios.get(`http://localhost:8080/api/member/stats/weekly`, {
+        headers: getAuthHeader()
+    });
+    return res.data;
+};
+

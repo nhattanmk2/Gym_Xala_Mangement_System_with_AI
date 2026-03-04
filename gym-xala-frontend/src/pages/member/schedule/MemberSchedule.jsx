@@ -393,6 +393,26 @@ const MemberSchedule = () => {
                     </div>
                   )}
 
+                  {(selectedSchedule.status === 'COMPLETED' || selectedSchedule.exercises || selectedSchedule.ptEvaluation) && (
+                    <div className="modal-info-group pt-evaluation-group">
+                      <label>Nội dung & Nhận xét từ PT</label>
+                      <div className="pt-evaluation-box">
+                        <div className="eval-section">
+                          <h5>🏋️ Bài tập đã thực hiện:</h5>
+                          <p>{selectedSchedule.exercises || "Chưa có thông tin"}</p>
+                        </div>
+                        <div className="eval-section">
+                          <h5>🎯 Mục tiêu đạt được:</h5>
+                          <p>{selectedSchedule.achievedGoals || "Chưa có thông tin"}</p>
+                        </div>
+                        <div className="eval-section">
+                          <h5>📝 Đánh giá của PT:</h5>
+                          <p>{selectedSchedule.ptEvaluation || "Chưa có nhận xét"}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {(selectedSchedule.status === 'PENDING' || selectedSchedule.status === 'CONFIRMED') && (
                     <div className="modal-action-group">
                       <button

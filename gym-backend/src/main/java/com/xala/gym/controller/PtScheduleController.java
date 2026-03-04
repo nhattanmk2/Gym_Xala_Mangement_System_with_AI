@@ -49,6 +49,17 @@ public class PtScheduleController {
         return ResponseEntity.ok("Xóa khung giờ thành công.");
     }
 
+    @PutMapping("/{id}/content")
+    public ResponseEntity<PtScheduleResponse> saveSessionContent(@PathVariable Long id, @RequestBody com.xala.gym.dto.request.WorkoutSessionContentRequest request) {
+        return ResponseEntity.ok(ptScheduleService.saveSessionContent(id, request));
+    }
+
+    @PutMapping("/{id}/complete")
+    public ResponseEntity<String> markSessionAsCompleted(@PathVariable Long id) {
+        ptScheduleService.markSessionAsCompleted(id);
+        return ResponseEntity.ok("Xác nhận hoàn thành buổi tập thành công");
+    }
+
     @PostMapping("/book/{id}")
     public ResponseEntity<PtScheduleResponse> bookSlot(@PathVariable Long id) {
         return ResponseEntity.ok(ptScheduleService.bookSlot(id));

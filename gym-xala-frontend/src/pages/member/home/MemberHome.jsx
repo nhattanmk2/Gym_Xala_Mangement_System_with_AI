@@ -2,12 +2,14 @@ import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { getActivePackages } from "../../../api/packageApi";
 import { getAllLocations } from "../../../api/locationApi";
+import { getMemberWeeklyStats } from "../../../api/ptScheduleApi";
 import "./member-home.css";
 
 export default function MemberHome() {
   const navigate = useNavigate();
   const [branches, setBranches] = useState([]);
   const [packages, setPackages] = useState([]);
+  const [weeklyStats, setWeeklyStats] = useState(null);
 
   const [showChatbot, setShowChatbot] = useState(false);
   const [chatHistory, setChatHistory] = useState([
@@ -44,6 +46,16 @@ export default function MemberHome() {
       }
     };
     fetchPackages();
+
+    const fetchWeeklyStats = async () => {
+      try {
+        const data = await getMemberWeeklyStats();
+        setWeeklyStats(data);
+      } catch (error) {
+        console.error("Error fetching weekly stats:", error);
+      }
+    };
+    fetchWeeklyStats();
   }, []);
 
   // Scroll chatbot xuống cuối
@@ -96,6 +108,39 @@ export default function MemberHome() {
           <button className="banner-btn" onClick={() => navigate('/member/packages')}>Xem chi tiết</button>
         </div>
       </div>
+
+      {/* Weekly Stats Chart */}
+      <section className="dashboard-section chart-section">
+        <div className="section-header">
+          <h2 className="section-title">THỐNG KÊ TẬP LUYỆN (TUẦN NÀY)</h2>
+          <span className="total-time-badge">
+            ⏱️ Tổng thời gian: <b>{weeklyStats?.totalMinutes || 0} phút</b>
+          </span>
+        </div>
+
+        <div className="chart-container">
+          {weeklyStats?.dailyStats?.map((day, idx) => {
+            // Find max minutes to calculate relative height (max height = 150px)
+            const maxMinutes = Math.max(...weeklyStats.dailyStats.map(d => d.minutes), 60); // min max = 60
+            const heightPercentage = (day.minutes / maxMinutes) * 100;
+
+            return (
+              <div key={idx} className="chart-col-wrapper">
+                <div className="chart-col-value">{day.minutes}p</div>
+                <div className="chart-col">
+                  <div
+                    className="chart-col-fill"
+                    style={{ height: `${heightPercentage}%` }}
+                    title={`${day.minutes} phút vào ${day.dayOfWeek} (${day.dateStr})`}
+                  ></div>
+                </div>
+                <div className="chart-col-label">{day.dayOfWeek}</div>
+                <div className="chart-col-date">{day.dateStr}</div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
 
       {/* Branch Grid */}
       <section className="dashboard-section">

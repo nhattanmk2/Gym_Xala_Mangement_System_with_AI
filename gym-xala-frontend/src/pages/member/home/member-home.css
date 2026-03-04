@@ -4,7 +4,7 @@
   max-width: 1400px;
   margin: 0 auto;
   background: transparent;
-  color: #ffffff;
+  color: #0c0b0b;
   display: flex;
   flex-direction: column;
   gap: 40px;
@@ -360,4 +360,97 @@
 .chat-input button:hover {
   transform: scale(1.05);
   background: #b5e625;
+}
+
+/* --- Weekly Stats Chart --- */
+.chart-section {
+  background: #18181b;
+  border: 1px solid #27272a;
+  border-radius: 20px;
+  padding: 30px;
+  margin-bottom: 40px;
+}
+
+.chart-section .section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #27272a;
+  padding-bottom: 20px;
+  margin-bottom: 30px;
+}
+
+.total-time-badge {
+  background: rgba(208, 253, 62, 0.1);
+  color: #d0fd3e;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+}
+
+.chart-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  height: 220px;
+  padding: 0 10px;
+  gap: 15px;
+}
+
+.chart-col-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.chart-col-value {
+  font-size: 12px;
+  font-weight: 600;
+  color: #d0fd3e;
+  margin-bottom: 8px;
+  opacity: 0;
+  transform: translateY(5px);
+  transition: all 0.3s ease;
+}
+
+.chart-col-wrapper:hover .chart-col-value {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.chart-col {
+  width: 100%;
+  max-width: 40px;
+  height: 150px;
+  background: #27272a;
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+}
+
+.chart-col-fill {
+  width: 100%;
+  background: linear-gradient(180deg, #d0fd3e 0%, #a3d915 100%);
+  border-radius: 8px;
+  transition: height 1s ease-out;
+}
+
+.chart-col-wrapper:hover .chart-col-fill {
+  box-shadow: 0 0 15px rgba(208, 253, 62, 0.5);
+}
+
+.chart-col-label {
+  margin-top: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.chart-col-date {
+  font-size: 11px;
+  color: #71717a;
+  margin-top: 4px;
 }

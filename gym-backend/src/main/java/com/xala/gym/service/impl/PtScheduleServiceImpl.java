@@ -374,6 +374,68 @@ public class PtScheduleServiceImpl implements PtScheduleService {
     }
 
     @Override
+    @Transactional
+    public PtScheduleResponse saveSessionContent(Long slotId, com.xala.gym.dto.request.WorkoutSessionContentRequest request) {
+        Booking slot = bookingRepository.findById(slotId)
+                .orElseThrow(() -> new RuntimeException("Khung giờ không tồn tại"));
+
+        User pt = getCurrentUser();
+        if (!slot.getPersonalTrainer().getId().equals(pt.getId())) {
+            throw new RuntimeException("Bạn không có quyền cập nhật phiên tập này.");
+        }
+
+        if (!"COMPLETED".equals(slot.getStatus()) && !"CONFIRMED".equals(slot.getStatus())) {
+            throw new RuntimeException("Chỉ có thể nhập nội dung cho phiên tập đã xác nhận hoặc hoàn thành.");
+        }
+
+        slot.setExercises(request.getExercises());
+        slot.setAchievedGoals(request.getAchievedGoals());
+        slot.setPtEvaluation(request.getPtEvaluation());
+        
+        // Auto mark as COMPLETED if it's CONFIRMED
+        if ("CONFIRMED".equals(slot.getStatus())) {
+            slot.setStatus("COMPLETED");
+        }
+
+        Booking saved = bookingRepository.save(slot);
+
+        // Gửi thông báo cho học viên khi PT cập nhật đánh giá buổi tập
+        notificationService.sendNotification(
+            slot.getMember().getId(),
+            "PT " + pt.getFullName() + " đã cập nhật kết quả và đánh giá buổi tập của bạn. Nhấn vào để xem chi tiết.",
+            "WORKOUT_EVALUATED"
+        );
+
+        return mapToResponse(saved);
+    }
+
+    @Override
+    @Transactional
+    public void markSessionAsCompleted(Long slotId) {
+        Booking slot = bookingRepository.findById(slotId)
+                .orElseThrow(() -> new RuntimeException("Khung giờ không tồn tại"));
+
+        User pt = getCurrentUser();
+        if (!slot.getPersonalTrainer().getId().equals(pt.getId())) {
+            throw new RuntimeException("Bạn không có quyền cập nhật phiên tập này.");
+        }
+
+        if (!"CONFIRMED".equals(slot.getStatus())) {
+            throw new RuntimeException("Chỉ có thể đánh dấu hoàn thành cho buổi tập đã được xác nhận (CONFIRMED).");
+        }
+
+        slot.setStatus("COMPLETED");
+        bookingRepository.save(slot);
+
+        // Gửi thông báo cho học viên
+        notificationService.sendNotification(
+            slot.getMember().getId(),
+            "PT " + pt.getFullName() + " đã xác nhận bạn hoàn thành buổi tập. Chúc mừng bạn đã nỗ lực!",
+            "WORKOUT_COMPLETED"
+        );
+    }
+
+    @Override
     public List<PtScheduleResponse> getPendingBookings() {
         return bookingRepository.findByStatusOrderByStartTimeDesc("PENDING")
                 .stream()
@@ -496,6 +558,52 @@ public class PtScheduleServiceImpl implements PtScheduleService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public com.xala.gym.dto.response.WeeklyStatsResponse getMemberWeeklyStats() {
+        User member = getCurrentUser();
+        LocalDateTime now = LocalDateTime.now();
+        // Lấy thứ Hai của tuần này
+        LocalDateTime startOfWeek = now.with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
+                                       .withHour(0).withMinute(0).withSecond(0).withNano(0);
+        // Lấy Chủ nhật của tuần này
+        LocalDateTime endOfWeek = now.with(java.time.temporal.TemporalAdjusters.nextOrSame(java.time.DayOfWeek.SUNDAY))
+                                     .withHour(23).withMinute(59).withSecond(59).withNano(999000000);
+
+        List<Booking> weeklyBookings = bookingRepository.findByMemberIdOrderByStartTimeDesc(member.getId()).stream()
+                .filter(b -> !b.getStartTime().isBefore(startOfWeek) && !b.getStartTime().isAfter(endOfWeek))
+                .filter(b -> "COMPLETED".equals(b.getStatus()))
+                .collect(Collectors.toList());
+
+        int totalMinutesThisWeek = 0;
+        
+        // Khởi tạo List 7 ngày: T2, T3, T4, T5, T6, T7, CN
+        String[] dayNames = {"T2", "T3", "T4", "T5", "T6", "T7", "CN"};
+        List<com.xala.gym.dto.response.WeeklyStatsResponse.DailyStat> dailyStats = new java.util.ArrayList<>();
+        
+        for (int i = 0; i < 7; i++) {
+            LocalDateTime day = startOfWeek.plusDays(i);
+            String dateStr = day.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM"));
+            dailyStats.add(new com.xala.gym.dto.response.WeeklyStatsResponse.DailyStat(dayNames[i], 0, dateStr));
+        }
+
+        for (Booking b : weeklyBookings) {
+            long durationMinutes = java.time.Duration.between(b.getStartTime(), b.getEndTime()).toMinutes();
+            totalMinutesThisWeek += durationMinutes;
+            
+            // Tìm index của ngày trong tuần (MONDAY = 1 -> index 0)
+            int index = b.getStartTime().getDayOfWeek().getValue() - 1;
+            if (index >= 0 && index < 7) {
+                int currentMins = dailyStats.get(index).getMinutes();
+                dailyStats.get(index).setMinutes(currentMins + (int)durationMinutes);
+            }
+        }
+
+        return com.xala.gym.dto.response.WeeklyStatsResponse.builder()
+                .totalMinutes(totalMinutesThisWeek)
+                .dailyStats(dailyStats)
+                .build();
+    }
+
     private User getCurrentUser() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByUsername(username)
@@ -519,6 +627,9 @@ public class PtScheduleServiceImpl implements PtScheduleService {
                 .ptPhone(emp != null ? emp.getPhone() : "N/A")
                 .ptSpecialty(emp != null ? emp.getPtSpecialty() : "General")
                 .adminNotes(b.getAdminNotes())
+                .exercises(b.getExercises())
+                .achievedGoals(b.getAchievedGoals())
+                .ptEvaluation(b.getPtEvaluation())
                 .build();
     }
 }

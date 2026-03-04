@@ -788,3 +788,45 @@
     background-color: #ef4444 !important;
     border-color: #ef4444 !important;
 }
+
+/* PT Evaluation Read-only in Admin Modal */
+.pt-evaluation-readonly-container {
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+}
+
+.eval-readonly-title {
+    font-size: 15px;
+    color: #1e293b;
+    margin: 0 0 16px 0;
+    font-weight: 700;
+}
+
+.eval-readonly-box {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.eval-read-group label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #64748b;
+    margin-bottom: 4px;
+    display: block;
+    text-transform: uppercase;
+}
+
+.eval-read-content {
+    background: white;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    font-size: 14px;
+    color: #334155;
+    white-space: pre-wrap;
+    line-height: 1.5;
+}

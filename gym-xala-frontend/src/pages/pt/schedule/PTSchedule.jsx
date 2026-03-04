@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getMySchedule, addBatchScheduleSlots, deleteScheduleSlot } from "../../../api/ptScheduleApi";
+import { getMySchedule, addBatchScheduleSlots, deleteScheduleSlot, saveSessionContent, markSessionCompleted } from "../../../api/ptScheduleApi";
 import "./pt-schedule.css";
 
 const PTSchedule = () => {
@@ -12,6 +12,12 @@ const PTSchedule = () => {
   const [startTime, setStartTime] = useState("08:00");
   const [endTime, setEndTime] = useState("09:00");
   const [upcomingDates, setUpcomingDates] = useState([]);
+
+  // Session content form state
+  const [contentModalOpen, setContentModalOpen] = useState(false);
+  const [selectedSessionForContent, setSelectedSessionForContent] = useState(null);
+  const [contentForm, setContentForm] = useState({ exercises: "", achievedGoals: "", ptEvaluation: "" });
+  const [savingContent, setSavingContent] = useState(false);
 
   useEffect(() => {
     loadSchedule();
@@ -92,6 +98,52 @@ const PTSchedule = () => {
     }
   };
 
+  const handleMarkCompleted = async (id) => {
+    if (!window.confirm("Bạn có chắc chắn xác nhận Học viên đã HOÀN THÀNH thao tác cho buổi tập này chưa?")) return;
+
+    try {
+      await markSessionCompleted(id);
+      await loadSchedule();
+      setTimeout(() => alert("✅ Đã xác nhận hoàn thành buổi tập."), 100);
+    } catch (error) {
+      console.error("Error marking slot completed:", error);
+      alert("❌ Lỗi khi xác nhận hoàn thành.");
+    }
+  };
+
+  const openContentModal = (slot) => {
+    setSelectedSessionForContent(slot);
+    setContentForm({
+      exercises: slot.exercises || "",
+      achievedGoals: slot.achievedGoals || "",
+      ptEvaluation: slot.ptEvaluation || ""
+    });
+    setContentModalOpen(true);
+  };
+
+  const closeContentModal = () => {
+    setContentModalOpen(false);
+    setSelectedSessionForContent(null);
+  };
+
+  const handleSaveContent = async (e) => {
+    e.preventDefault();
+    if (!selectedSessionForContent) return;
+
+    try {
+      setSavingContent(true);
+      await saveSessionContent(selectedSessionForContent.id, contentForm);
+      alert("✅ Lưu nội dung thành công!");
+      closeContentModal();
+      await loadSchedule();
+    } catch (error) {
+      console.error("Error saving content:", error);
+      alert("❌ Lỗi khi lưu nội dung.");
+    } finally {
+      setSavingContent(false);
+    }
+  };
+
   const formatDateTime = (isoStr) => {
     const d = new Date(isoStr);
     return d.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
@@ -137,6 +189,54 @@ const PTSchedule = () => {
 
   return (
     <div className="pt-schedule-wrapper">
+      {/* Modal Nhập Nội dung Buổi tập */}
+      {contentModalOpen && selectedSessionForContent && (
+        <div className="modal-overlay">
+          <div className="modal-content session-content-modal">
+            <h2>Nội dung buổi tập</h2>
+            <p>Học viên: <strong>{selectedSessionForContent.memberName}</strong></p>
+            <p>Thời gian: {formatDateTime(selectedSessionForContent.startTime)} - {formatDateShort(selectedSessionForContent.startTime)}</p>
+
+            <form onSubmit={handleSaveContent}>
+              <div className="form-group">
+                <label>Bài tập (Exercises)</label>
+                <textarea
+                  rows="3"
+                  value={contentForm.exercises}
+                  onChange={(e) => setContentForm({ ...contentForm, exercises: e.target.value })}
+                  placeholder="Kê khai các bài tập đã thực hiện..."
+                ></textarea>
+              </div>
+              <div className="form-group">
+                <label>Mục tiêu đạt được</label>
+                <textarea
+                  rows="2"
+                  value={contentForm.achievedGoals}
+                  onChange={(e) => setContentForm({ ...contentForm, achievedGoals: e.target.value })}
+                  placeholder="Học viên đã đạt được những gì?"
+                ></textarea>
+              </div>
+              <div className="form-group">
+                <label>Đánh giá kết quả</label>
+                <textarea
+                  rows="3"
+                  value={contentForm.ptEvaluation}
+                  onChange={(e) => setContentForm({ ...contentForm, ptEvaluation: e.target.value })}
+                  placeholder="Nhận xét Form tập, thể lực..."
+                ></textarea>
+              </div>
+
+              <div className="modal-actions">
+                <button type="button" className="btn-cancel" onClick={closeContentModal}>Hủy</button>
+                <button type="submit" className="btn-submit" disabled={savingContent}>
+                  {savingContent ? "Đang lưu..." : "Lưu Nội dung"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       <header className="pt-schedule-header">
         <h1>Lịch biểu Thông minh</h1>
         <p>PT nhấn chọn các ngày để đăng ký khung giờ rảnh hàng loạt.</p>
@@ -224,7 +324,17 @@ const PTSchedule = () => {
                           <span className="time-range">{formatDateTime(slot.startTime)} - {formatDateTime(slot.endTime)}</span>
                         </div>
                         <div className="slot-actions">
-                          <span className="status-indicator">{slot.status === "AVAILABLE" ? "Rảnh" : slot.status === "CONFIRMED" ? "Đã đặt" : "Bận"}</span>
+                          <span className="status-indicator">{slot.status === "AVAILABLE" ? "Rảnh" : slot.status === "CONFIRMED" ? "Đã đặt" : slot.status === "COMPLETED" ? "Đã tập" : "Bận"}</span>
+                          {slot.status === "CONFIRMED" && (
+                            <button onClick={() => handleMarkCompleted(slot.id)} className="btn-action-mini btn-complete">
+                              Hoàn thành
+                            </button>
+                          )}
+                          {(slot.status === "CONFIRMED" || slot.status === "COMPLETED") && (
+                            <button onClick={() => openContentModal(slot)} className="btn-action-mini btn-content">
+                              Nhập ND
+                            </button>
+                          )}
                           {slot.status === "AVAILABLE" && (
                             <button onClick={() => handleDelete(slot.id)} className="btn-del-mini" title="Xóa">×</button>
                           )}

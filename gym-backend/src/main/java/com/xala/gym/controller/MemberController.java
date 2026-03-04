@@ -50,5 +50,11 @@ public class MemberController {
 
         return ResponseEntity.ok("Upload avatar thành công");
     }
+
+    // ✅ API Lấy thống kê tuần của Member
+    @GetMapping("/stats/weekly")
+    public ResponseEntity<com.xala.gym.dto.response.WeeklyStatsResponse> getMemberWeeklyStats() {
+        return ResponseEntity.ok(ptScheduleService.getMemberWeeklyStats());
+    }
 }
 
