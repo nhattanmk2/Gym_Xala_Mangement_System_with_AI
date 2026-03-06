@@ -6,6 +6,7 @@
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- 1. Làm sạch dữ liệu cũ
+TRUNCATE TABLE ai_consultation_history;
 TRUNCATE TABLE ai_recommendation_log;
 TRUNCATE TABLE workout_session;
 TRUNCATE TABLE schedule;
@@ -21,6 +22,7 @@ TRUNCATE TABLE packages;
 TRUNCATE TABLE gym_location;
 TRUNCATE TABLE position;
 TRUNCATE TABLE role;
+TRUNCATE TABLE notifications;
 
 SET FOREIGN_KEY_CHECKS = 1;
 
@@ -48,17 +50,16 @@ INSERT INTO packages (id, name, description, price, duration_in_days, category, 
 (4, 'Combo Giảm Cân Thần Tốc', 'Chế độ tập luyện và dinh dưỡng đặc biệt trong 3 tháng.', 8000000, 90, 'Diet', 1);
 
 -- 6. Người dùng (Users)
--- Mật khẩu mặc định theo README:
--- admin: 123456 ($2a$10$7zB3UoBf8w1eI6G5Zf9v9.r0Z7mY5W5W5W5W5W5W5W5W5W5W5W5W - note: simplified hash for example, better use real BCrypt)
+-- admin/trainer01/member01: password123 ($2b$12$pqCGvmbKmxlObEfLTEwUF.2oj36wjrz38EJzBhd/DBhEtJrBS7v8S)
 -- Tôi sẽ dùng lại mã hash cũ nhưng chú ý cập nhật username/password cho khớp README
 INSERT INTO users (id, username, password, email, full_name, phone, enabled) VALUES 
-(1, 'admin', '$2a$10$7caqjtXqBZURMSLCaFKzPOmhrv6Xzflfpd4yBXPALApmXM.vRfHf6', 'admin@gymxala.com', 'Quản trị viên Hệ thống', '0987123456', 1),
-(2, 'trainer01', '$2a$10$7caqjtXqBZURMSLCaFKzPOmhrv6Xzflfpd4yBXPALApmXM.vRfHf6', 'pt01@gymxala.com', 'Nguyễn Văn Hùng', '0912345678', 1),
-(3, 'trainer02', '$2a$10$7caqjtXqBZURMSLCaFKzPOmhrv6Xzflfpd4yBXPALApmXM.vRfHf6', 'pt02@gymxala.com', 'Trần Thị Mai', '0912456789', 1),
-(4, 'trainer03', '$2a$10$7caqjtXqBZURMSLCaFKzPOmhrv6Xzflfpd4yBXPALApmXM.vRfHf6', 'pt03@gymxala.com', 'Lê Minh Thành', '0912567890', 1),
-(5, 'member01', '$2a$10$7caqjtXqBZURMSLCaFKzPOmhrv6Xzflfpd4yBXPALApmXM.vRfHf6', 'member01@gmail.com', 'Phạm Minh Đức', '0345678901', 1),
-(6, 'member02', '$2a$10$7caqjtXqBZURMSLCaFKzPOmhrv6Xzflfpd4yBXPALApmXM.vRfHf6', 'member02@gmail.com', 'Hoàng Bảo Ngọc', '0345678902', 1),
-(7, 'member03', '$2a$10$7caqjtXqBZURMSLCaFKzPOmhrv6Xzflfpd4yBXPALApmXM.vRfHf6', 'member03@gmail.com', 'Vũ Anh Tuấn', '0345678903', 1);
+(1, 'admin', '$2b$12$pqCGvmbKmxlObEfLTEwUF.2oj36wjrz38EJzBhd/DBhEtJrBS7v8S', 'admin@gymxala.com', 'Quản trị viên Hệ thống', '0987123456', 1),
+(2, 'trainer01', '$2b$12$pqCGvmbKmxlObEfLTEwUF.2oj36wjrz38EJzBhd/DBhEtJrBS7v8S', 'pt01@gymxala.com', 'Nguyễn Văn Hùng', '0912345678', 1),
+(3, 'trainer02', '$2b$12$pqCGvmbKmxlObEfLTEwUF.2oj36wjrz38EJzBhd/DBhEtJrBS7v8S', 'pt02@gymxala.com', 'Trần Thị Mai', '0912456789', 1),
+(4, 'trainer03', '$2b$12$pqCGvmbKmxlObEfLTEwUF.2oj36wjrz38EJzBhd/DBhEtJrBS7v8S', 'pt03@gymxala.com', 'Lê Minh Thành', '0912567890', 1),
+(5, 'member01', '$2b$12$pqCGvmbKmxlObEfLTEwUF.2oj36wjrz38EJzBhd/DBhEtJrBS7v8S', 'member01@gmail.com', 'Phạm Minh Đức', '0345678901', 1),
+(6, 'member02', '$2b$12$pqCGvmbKmxlObEfLTEwUF.2oj36wjrz38EJzBhd/DBhEtJrBS7v8S', 'member02@gmail.com', 'Hoàng Bảo Ngọc', '0345678902', 1),
+(7, 'member03', '$2b$12$pqCGvmbKmxlObEfLTEwUF.2oj36wjrz38EJzBhd/DBhEtJrBS7v8S', 'member03@gmail.com', 'Vũ Anh Tuấn', '0345678903', 1);
 
 -- 7. Phân quyền (User Roles)
 INSERT INTO user_role (user_id, role_id) VALUES 

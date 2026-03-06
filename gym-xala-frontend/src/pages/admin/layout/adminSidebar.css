@@ -3,6 +3,10 @@
   background: #1e1e2f;
   color: white;
   padding: 20px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  box-sizing: border-box;
 }
 
 .admin-sidebar .logo {

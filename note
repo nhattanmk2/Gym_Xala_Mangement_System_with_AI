@@ -1,0 +1,159 @@
+# Chức năng 1: Luồng Xác Thực, Đăng Ký và Phân Quyền (Authentication Flow)
+
+Đây là luồng "cửa ngõ" bảo vệ toàn bộ ứng dụng Gym Xala, kiểm soát việc ai được phép đăng nhập và sử dụng dịch vụ bộ API. 
+
+Mọi logic thực thi chính nằm ở `e:\gym-xala\gym-backend\src\main\java\com\xala\gym\service\AuthService.java`.
+
+### 1. Hàm `registerMember` (Đăng ký tài khoản)
+**Sự kiện:** Khách hàng điền form đăng ký trên web (họ tên, email, password, mục tiêu sức khỏe...).
+**Mục tiêu của API:** Tạo một bản nháp User chưa kích hoạt trong DB.
+**Chi tiết luồng gọi DB:**
+1. Code gọi `userRepository.findByUsername(username)`: Kiểm tra nếu username đã có trong MySQL, hệ thống ném thẳng lỗi.
+2. Code gọi `userRepository.existsByEmail(email)`: Chặn việc đăng ký nhiều acc với 1 mail.
+3. Code gọi `roleRepository.findByName(UserRole.ROLE_MEMBER)`: Trực tiếp lấy Role "MEMBER" từ DB để gán cứng cho người dùng mới này.
+4. Java sinh hàm Random một con số 6 chữ số: `int verificationCode = 100000 + new Random().nextInt(900000);`.
+5. Java set thêm các trường đặc biệt phục vụ cho AI sau này:
+   - `user.setHeight/Weight/GoalType/AvailabilitySlots`.
+   - Cấm không cho đăng nhập ngay (`user.setEnabled(false)`).
+6. Gọi `userRepository.save(user)` để INSERT bản ghi xuống DB. Cuối cùng trigger hàm gửi email (Async) mang `verificationCode` gửi đi.
+
+### 2. Hàm `verifyAccount` (Xác minh Email OTP)
+**Sự kiện:** Khách hàng mở email, nhập 6 chữ số OTP vừa nhận lên web.
+**Mục tiêu của API:** Kích hoạt User + Tự động sinh Hồ sơ Thành Viên (Member Profile).
+**Chi tiết luồng gọi DB:**
+1. Tìm lại User đang "ngủ đông" thông qua `userRepository.findByUsername`.
+2. DB kiểm tra: Nếu `user.getVerificationCode()` mà KHÁC với số trên Web gửi xuống -> Báo "Mã xác thực không đúng".
+3. Nếu đúng: `user.setEnabled(true)` (được phép Login sau này) và xóa trắng biến verificationCode thành null cho an toàn. Gọi `userRepository.save(user)` để UPDATE DB.
+4. **Phép màu tự động hóa:** Khác với các web bình thường, ở đây code tự sinh ra một `Member`:
+   - Lấy email, tên tuổi của `User` vừa rớt OTP xuống để copy sang bảng `members`.
+   - Bảng `members` có ID riêng biệt dành cho việc phân loại sau này.  
+   - Gọi `memberRepository.save(member)`. (Luồng này giúp việc mua khóa học trở nên cực mượt vì người dùng không cần phải tạo hồ sơ cá nhân lần 2 nữa).
+
+### 3. Hàm `login` (Đăng nhập)
+**Sự kiện:** Người dùng điền Username / Password.
+**Mục tiêu của API:** So sánh mã Hash, cấp chìa khóa JWT.
+**Chi tiết luồng gọi DB:**
+1. Code ủy quyền cho Spring Security (`authenticationManager.authenticate`) tự băm password ra hash và so với password trên MySQL DB.
+2. Kiểm tra `user.getEnabled()`. Nếu họ chưa Verify Email, đá lỗi "Tài khoản chưa xác thực".
+3. Tạo JWT: Gọi `jwtService.generateToken()`, khóa này xài công nghệ mã hóa bí mật lưu thông tin Username trong 1 đoạn chuỗi dài nhằng (VD: `eyJhbG.ci...`).
+4. Nếu người đăng nhập là PT (`ROLE_PT`), hệ thống sẽ gọi thêm `employeeRepository` để dò tìm PT này đang làm việc ở cơ sở (GymLocation) nào để trả thẳng tên chi nhánh về để Front-end hiển thị đúng Logo cơ sở.
+5. Trả JWT về cho web Browser. (Từ giờ, các API đặt lịch/thanh toán phía sau muốn qua cửa thì Web Browser phải gửi kèm cái JWT này ở Header mỗi gói tin `Bearer <Token>`).
+
+---
+
+# Chức năng 2: Thuật Toán Ghép Cặp PT và Tư Vấn AI (AI Matching Flow)
+
+Đây là tính năng cốt lõi tạo nên sự khác biệt của Gym Xala. Hệ thống đóng vai trò như một chuyên gia tư vấn ảo, vừa phân tích chỉ số cơ thể, vừa gợi ý khóa học, cuối cùng là "mai mối" Học viên với Huấn luyện viên phù hợp nhất.
+
+Mọi logic nằm ở 2 file: `AIConsultationServiceImpl.java` và `PtMatchingServiceImpl.java`.
+
+### 1. Hàm `getConsultation` (Tư vấn AI bằng Gemini)
+**Sự kiện:** Khách hàng mở khung chat AI, nhập chiều cao, cân nặng, mục tiêu (Giảm mỡ/Tăng cơ) rồi bấm "Nhận tư vấn".
+**Mục tiêu của API:** Trả về văn bản tư vấn đóng vai PT và List các gói tập (kèm theo PT) được khuyên dùng.
+**Chi tiết luồng gọi DB và Code:**
+1. **Lấy dữ liệu thô:** Code gọi `packageRepository.findAll()` để lôi toàn bộ các gói tập (Packages) đang mở bán lên.
+2. **Nén dữ liệu:** Để tránh gửi lượng text quá lớn sang AI, code dùng Java `stream().map()` lược bỏ bớt các trường ảnh minh hoạ nặng nề, chỉ giữ lại `id`, `name`, `price`, `description`. Tất cả được ép thành chuỗi JSON.
+3. **Nhồi Prompt:** Code xây dựng một chuỗi văn bản cứng (Prompt) ví dụ như *"Bạn là AI PT của Gym Xala... Hãy tính BMI cho khách hàng cao X nặng Y... Hãy chọn 1-3 gói tập từ mảng JSON kia..."*
+4. **Gọi External API:** Đẩy Prompt đó sang API của nền tảng Gemini (Google).
+5. **Bóc tách JSON:** Nhận thư trả lời dạng Markdown JSON từ Gemini. Code dùng `ObjectMapper.readValue()` để chuyển JSON này thành Object Java.
+6. **Lồng ghép PT Matching:** Với MỖI một gói tập (`packageId`) mà Gemini gợi ý, hệ thống KHÔNG dừng lại ở đó. Nó lập tức kích hoạt hàm `matchPt(...)` (được giải thích bên dưới) để tìm ra 3 PT "ngon nhất" gắn liền dính chặt vào gói tập đó tạo thành `RecommendedPackageDto`.
+7. **Lưu vết Lịch sử:** Cuối cùng, gọi `userRepository.findByUsername(username)` để lấy ID người chat, chắp vá câu chat và kết quả JSON thành Entity `AIConsultationHistory`, gọi hàm `save()` lưu xuống Database để khách xem lại sau này.
+
+### 2. Hàm `matchPt` (Thuật Toán Ghép Cặp PT Chuyên Sâu)
+**Sự kiện:** Được gọi ngầm ở phía trên, hoặc khi người dùng tự vào danh sách PT bấm nút "Lọc PT hợp rơ".
+**Mục tiêu của API:** Chấm điểm toàn bộ PT trong DB và vinh danh Top 3 người tương thích với mục tiêu của Member nhất.
+**Chi tiết luồng gọi DB và Code:**
+1. **Tìm Lịch Rảnh (Available Slots):** 
+   - Code không duyệt qua bảng Users để tìm PT, mà duyệt qua bảng Bookings (`pt_schedules`). 
+   - Hàm `bookingRepository.findByStatusOrderByStartTimeDesc("AVAILABLE")` moi lên toàn bộ các slot rảnh do chính các PT tự khai báo trên lịch của họ.
+2. **Bộ Lọc Cứng (Filter):**
+   - Loại bỏ các lịch rảnh ở quá khứ (`isAfter(now)`).
+   - Nếu Khách hàng dặn "Tôi rảnh từ 6h-8h sáng", mã Java sẽ filter thẳng tay bắt `b.getStartTime()` và `b.getEndTime()` của PT phải bao bọc được khung giờ của khách.
+   - Nếu khách khoanh vùng "Tôi chỉ tập ở Chi nhánh 2", code lấy mã PT `employeeRepository.findByUser_Id` để dò cơ sở (`getGymLocation().getId()`), nếu sai thì `continue;` vứt cờ qua lượt.
+3. **Chấm Điểm Chuyên Môn (Scoring - `calculateMatchScore`):**
+   - Có 1 con bot nhỏ chấm điểm bằng Text. Nếu `ptExperience` (Kinh nghiệm) ghi chữ "năm" -> Cọng 5 điểm.
+   - So khớp Keyword chéo: Lấy Điểm mạnh của PT (`ptSpecialty`) đọ với Loại của Gói tập (`category`). 
+      - Ví dụ: Gói tập là "MUSCLE" (Tăng cơ) -> Bot moi trong Bio của PT xem có chữ `tăng cơ` hoặc `bodybuilding` không. Nếu có -> **Cộng ngay 50 điểm**.
+      - Tương tự cho Yoga, Boxing, Giảm mỡ...
+   - Vớt vát: Lấy chính Tên gói tập (Ví dụ "Gói giảm mỡ bụng VIP") dò với Bio PT, nếu thấy hai chữ `giảm` trùng nhau -> Vớt **khuyến khích 20 điểm**.
+4. **Xếp Hạng (Ranking):**
+   - Từ list điểm lộn xộn, dùng `Java Comparator (.sort)` sắp xếp danh sách từ Điểm Cao -> Điểm Thấp.
+   - **Xử lý đồng điểm:** Nếu Điểm Match bằng nhau, code lôi số Sao đánh giá (`ptRating` lấy từ việc nhận xét buổi tập cũ) ra làm trọng tài phụ. 4.9 Sao sẽ nghiễm nhiên đứng trên 4.5 Sao.
+   - Trả về danh sách Top các PT thần thánh này.
+
+---
+
+# Chức năng 3: Admin Quản Trị Hệ Thống Và Giải Quyết Xung Đột Lịch (Admin Scheduling/Conflict Flow)
+
+Giám đốc / Quản lý của Gym Xala có một luồng làm việc riêng để giám sát số lượng lịch đặt và phê duyệt. Luồng này đòi hỏi những thuật toán khắt khe nhất để tránh tình trạng "Overbook" (Quá tải) hay xếp nhầm lịch.
+
+Mọi logic nằm ở `PtScheduleServiceImpl.java`.
+
+### 1. Hàm `bookSlot` (Hội Viên Gửi Yêu Cầu Đặt Lịch)
+**Sự kiện:** Khi khách hàng bấm "Đặt lịch ngay" vào slot rảnh của một PT.
+**Khó khăn:** Một chi nhánh có thể chạy nhiều lớp 1 lúc, cần kiểm soát sức chứa của phòng.
+**Chi tiết luồng gọi DB:**
+1. Code moi slot đó ra kiểm tra xem Status có đang là `AVAILABLE` không.
+2. Dò xem cơ sở mà PT đó đang làm việc `maxCapacity` là mấy (thường set mặc định là 3 khách/khung giờ).
+3. **Thuật toán đếm Limit:** `bookingRepository.countBookingsInBranchAtInterval` 
+   - Đếm số người đang giữ lịch `PENDING` và `CONFIRMED` ở phòng đó, vào đúng giờ đó.
+   - Nếu `count >= maxCap`: Ném thẳng Exception **"Chi nhánh đã đạt giới hạn sức chứa 3 người vào khung giờ này"**. Giao dịch bị hủy. Ngược lại thì gán user vào slot và chuyển status thành PENDING.
+4. Cuối cùng, một tín hiệu báo đẩy real-time sẽ được ngầm gửi đến PT qua Websocket (Hàm `sendNotification`).
+
+### 2. Hàm `adminUpdateSlot` (Admin Can Thiệp Sửa Lịch Trọng Tài)
+**Sự kiện:** PT có việc đột xuất, Admin nhảy vào kéo lê, rơ dời ngày giờ của Slot lịch đó.
+**Khó khăn:** Không được dời sang cái giờ cấm kị (Giờ PT đang nghỉ phép hoặc trùng lịch khách khác).
+**Chi tiết luồng gọi DB:**
+1. Code check cái lịch cũ xem có Status là `BUSY` (Nghỉ ốm cá nhân) không. Nếu CÓ, Admin không có quyền sửa. (Mã báo lỗi: "Lịch bận cá nhân PT không được sửa").
+2. **Kiểm tra lặp (Conflict Check):** Gọi Query `bookingRepository.findOverlappingSlots`. 
+   - Hàm này moi ra tất cả những lịch "vướng bận" của anh PT kia (bất chấp là Khách hàng đặt hay anh ấy tự báo ốm nửa buổi).
+   - Nếu cái khung giờ MỚI mà Admin sắp nhắm tới có chạm đuôi, cắn đầu, mép màng vào bất kỳ cái lịch nào lôi được ở trên, LẬP TỨC báo đỏ: **"Trùng lịch dạy/lịch rảnh khác của PT"**.
+3. **Kiểm tra Sức chứa LẠI từ đầu lần 2:** Dù Admin có quyền sinh sát, mã Java vẫn ép kiểm tra lại rule max 3 người tại cơ sở đó một lần nữa. (Nhỡ dời lịch qua cái giờ Đông khách thì sao?).
+4. Cứu dữ liệu thành công, code tự rẽ nhánh gửi thông báo Async cho cả Khách hàng và PT tương ứng để báo họ check lại App.
+
+### 3. Hàm `approveBooking` & `rejectBooking` (Duyệt Lịch)
+**Sự kiện:** Lướt bảng Dashboard Admin, bấm nút Tick V xanh.
+**Chi tiết luồng gọi DB:**
+1. Khi Duyệt (Approve), thay vì đổi Status mù quáng, code quét lại kiểm tra sức chứa phòng lần cuối (Lý do: Từ lúc khách hàng đệ đơn PENDING tới lúc Admin online duyệt, có khi đã có khách V.I.P khác chen chân mất). Đổi Status = `CONFIRMED`.
+2. Hủy (Reject): Code tháo móc `slot.setMember(null)` để gỡ tên người dùng đó ra, đem trả Slot về Status `AVAILABLE` để "Bán" tiếp cho khách khác.
+
+---
+
+# Chức năng 4: PT Nhập Kết Quả Tập Luyện & Đánh Giá Cuối Giờ (PT Checkout & Evaluation Flow)
+
+Sau khi buổi dạy khép lại, PT có nghĩa vụ nhập lại kết quả tập luyện vào hệ thống. Hành động này không chỉ giúp Member theo dõi tiến độ cơ bắp của bản thân, mà còn kích hoạt chuỗi sự kiện đóng sổ và Review sao.
+
+Mọi logic nằm ở `PtScheduleServiceImpl.java`.
+
+### 1. Hàm `saveSessionContent` (Lưu Sổ Ghi Chép Kết Quả)
+**Sự kiện:** Buổi học kết thúc. PT rút điện thoại, mở App, nhập 3 field: Bài tập đã dạy, Trọng lượng nâng được, Lời dặn dò.
+**Chi tiết luồng gọi DB:**
+1. Ràng buộc (Constraint): Hàm `bookingRepository.findById()` lấy slot lịch đó lên. System check xem anh PT đang log kết quả có phải đúng là người đứng lớp không? (Nếu 1 ông PT chi nhánh khác nghịch ngợm lấy ID nhập bậy bạ sẽ bị hệ thống báo lỗi ngay).
+2. Kiểm tra tiến trình: Nếu lịch đang ở trạng thái Canceled (Hủy) thì không thể nhập chữ vào được. Lịch bắt buộc phải là `CONFIRMED` hoặc `COMPLETED`.
+3. Java đẩy thông số nhận từ Front-end xuống lưu:
+    ```java
+    slot.setExercises(request.getExercises());         // Vd: "Squat, Deadlift"
+    slot.setAchievedGoals(request.getAchievedGoals()); // Vd: "Squat lên tạ 80kg (tăng 5kg)"
+    slot.setPtEvaluation(request.getPtEvaluation());   // Vd: "Dáng cong lưng, cần khắc phục"
+    ```
+4. **Biến Đổi Trạng Thái:** Một bước xử lý logic rất thông minh: Nếu PT chưa đánh dấu kết thúc buổi tập (Status = `CONFIRMED`), mã NÀY sẽ auto ép trạng thái thành `COMPLETED`:
+    ```java
+    if ("CONFIRMED".equals(slot.getStatus())) {
+        slot.setStatus("COMPLETED");
+    }
+    ```
+5. Kích Hoạt Trigger Thông Báo: Cuối cùng, một Notification bắn thẳng đến màn hình điện thoại/web của Member: *"PT xyz đã cập nhật kết quả và đánh giá buổi tập của bạn. Nhấn vào để xem chi tiết."*
+
+### 2. Sự Liên Đới Tới Member (Thống Kê Workout Analytics)
+**Sự kiện phụ:** Sau khi PT nhập liệu và biến lịch thành `COMPLETED`, hàng loạt Dashboard số liệu của Member được hưởng lợi trực tiếp.
+**Các Hàm liên quan gọi DB:**
+1. Hàm `getMemberWeeklyStats` (Thống kê tuần):
+    - Member bấm vào biểu đồ Bar-chart.
+    - Code gọi SQL Database kéo tất cả Bookings có trạng thái là `COMPLETED` rơi vào dải thời gian từ *Sáng Thứ 2 > Tối Chủ Nhật* tuần này.
+    - Phép toán Java quét qua từng Booking, tính phép trừ `Tgian_Kết_thúc - Tgian_Bắt_Đầu` ra Số **Phút** đã tập. Cộng dồn rồi ném về Front-end rải vào 7 cột (T2-CN) biến ra Biểu đồ cực đẹp mắt (VD: Tuần qua T2 tập 60p, T4 tập 45p).
+2. Hàm `getMemberTrainingHistory` (Xem lại nhận xét):
+    - Đơn giản lấy trực tiếp List các buổi tập `COMPLETED`. Ở đây, khách mở ra sẽ đọc được trực tiếp 3 Fields tâm huyết mà PT vừa hì hục gõ ở trên (Squat 80kg).
+3. Vòng rẽ nhánh Rating (Hệ thống AI thụ hưởng): Từ dữ liệu `COMPLETED` này, sau khi Member đọc lời phê, Member sẽ có quyền điền số Sao (5 sao, 4 sao) đánh giá lại PT. Thao tác này sẽ cập nhật `averageRating` của anh PT, trực tiếp tác động ngược lại **Luồng Số 2 (AI Matching)** để quyết định PT này có rớt Top hay không. Đóng lại vòng tuần hoàn khép kín.
+
+> **TỔNG KẾT:** App Gym Xala vận hành theo vòng lặp kim cương gồm 4 mắt xích:
+> AI phân tích Member (Chức năng 2) -> Member Đặt Booking lấy PT hợp rơ -> Admin theo dõi/Can thiệp phòng Overbook (Chức năng 3) -> Tập xong PT Checkout (Chức năng 4) -> Trả Kết quả / Feedback để Cập nhật Trí thông minh AI quay lại nuôi Bước đầu. Khép kín vòng đời phát triển!
