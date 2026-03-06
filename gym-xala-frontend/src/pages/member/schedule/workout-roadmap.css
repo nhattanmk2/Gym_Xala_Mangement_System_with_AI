@@ -232,3 +232,54 @@
     color: #64748b;
     font-weight: 600;
 }
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    .workout-roadmap-container {
+        padding: 1rem;
+    }
+
+    .roadmap-header {
+        flex-direction: column;
+        padding: 1.5rem;
+        gap: 20px;
+        text-align: center;
+    }
+
+    .progress-section {
+        width: 100%;
+    }
+
+    .header-content h1 {
+        font-size: 1.8rem;
+    }
+
+    .exercise-card {
+        gap: 1rem;
+    }
+
+    .card-right {
+        padding: 1rem;
+    }
+
+    .ex-main {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .check-btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .header-content h1 {
+        font-size: 1.5rem;
+    }
+
+    .step-number {
+        width: 32px;
+        height: 32px;
+        font-size: 0.9rem;
+    }
+}

@@ -454,3 +454,97 @@
   color: #71717a;
   margin-top: 4px;
 }
+
+/* RESPONSIVE */
+@media (max-width: 1024px) {
+  .member-container {
+    padding: 20px;
+  }
+
+  .banner-wrapper {
+    height: 300px;
+  }
+
+  .banner-content h2 {
+    font-size: 28px;
+  }
+}
+
+@media (max-width: 768px) {
+  .member-container {
+    gap: 30px;
+  }
+
+  .banner-wrapper {
+    height: 250px;
+    border-radius: 16px;
+  }
+
+  .banner-content {
+    left: 30px;
+    max-width: 300px;
+  }
+
+  .banner-content h2 {
+    font-size: 24px;
+  }
+
+  .banner-content p {
+    font-size: 14px;
+  }
+
+  .banner-btn {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+
+  .welcome-title {
+    font-size: 22px;
+  }
+
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-section {
+    padding: 20px;
+  }
+
+  .chart-container {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .banner-wrapper {
+    height: 200px;
+  }
+
+  .banner-content {
+    left: 20px;
+  }
+
+  .banner-content h2 {
+    font-size: 20px;
+  }
+
+  .banner-content p {
+    display: none;
+    /* Hide subtitle on very small screens */
+  }
+
+  .chatbot-icon {
+    width: 50px;
+    height: 50px;
+    bottom: 20px;
+    right: 20px;
+  }
+
+  .chatbot-popup {
+    bottom: 80px;
+    right: 10px;
+    left: 10px;
+    width: auto;
+    height: 450px;
+  }
+}

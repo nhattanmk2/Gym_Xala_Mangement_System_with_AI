@@ -367,4 +367,29 @@
     .search-btn {
         margin-top: 10px;
     }
+
+    .suggest-header h1 {
+        font-size: 1.8rem;
+    }
+
+    .pt-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .pt-card-header {
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .suggest-pt-container {
+        padding: 15px;
+    }
+
+    .search-section {
+        padding: 15px;
+    }
 }

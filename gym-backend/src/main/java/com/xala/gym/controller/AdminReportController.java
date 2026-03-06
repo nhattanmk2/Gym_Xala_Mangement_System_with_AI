@@ -12,6 +12,7 @@ import com.xala.gym.repository.MembershipCardRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/admin/reports")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
 public class AdminReportController {
 
     private final MembershipCardRepository membershipCardRepository;
@@ -40,9 +42,7 @@ public class AdminReportController {
         LocalDateTime start = startDate != null ? startDate.atStartOfDay() : LocalDateTime.now().minusMonths(1);
         LocalDateTime end = endDate != null ? endDate.atTime(23, 59, 59) : LocalDateTime.now();
 
-        List<MembershipCard> cards = membershipCardRepository.findAll().stream()
-                .filter(c -> c.getCreatedAt() != null && !c.getCreatedAt().isBefore(start) && !c.getCreatedAt().isAfter(end))
-                .collect(Collectors.toList());
+        List<MembershipCard> cards = membershipCardRepository.findAllByCreatedAtBetweenWithMemberAndPackage(start, end);
 
         List<ReportRevenueDto> report = cards.stream().map(c -> ReportRevenueDto.builder()
                 .id(c.getId())
@@ -66,9 +66,19 @@ public class AdminReportController {
         
         List<Map<String, Object>> rankingRaw = bookingRepository.getPtRankingByCompletedSessions(start);
         
+        // Batch load employees to avoid N+1
+        List<Long> ptUserIds = rankingRaw.stream()
+                .map(row -> ((Number) row.get("ptId")).longValue())
+                .collect(Collectors.toList());
+        
+        List<Employee> allEmployees = employeeRepository.findAll(); // Small enough to load once
+        Map<Long, Employee> empMap = allEmployees.stream()
+                .filter(e -> e.getUser() != null)
+                .collect(Collectors.toMap(e -> e.getUser().getId(), e -> e, (a, b) -> a));
+
         List<ReportPtPerformanceDto> report = rankingRaw.stream().map(row -> {
             Long ptUserId = ((Number) row.get("ptId")).longValue();
-            Employee emp = employeeRepository.findByUser_Id(ptUserId).orElse(null);
+            Employee emp = empMap.get(ptUserId);
             
             return ReportPtPerformanceDto.builder()
                     .ptId(ptUserId)
@@ -85,7 +95,7 @@ public class AdminReportController {
 
     @GetMapping("/member-summary")
     public ResponseEntity<List<ReportMemberSummaryDto>> getMemberSummary() {
-        List<MembershipCard> cards = membershipCardRepository.findAll();
+        List<MembershipCard> cards = membershipCardRepository.findAllWithMemberPackageAndLocation();
         
         List<ReportMemberSummaryDto> report = cards.stream().map(c -> ReportMemberSummaryDto.builder()
                 .cardId(c.getId())

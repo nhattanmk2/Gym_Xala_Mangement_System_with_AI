@@ -15,6 +15,17 @@ public interface MembershipCardRepository extends JpaRepository<MembershipCard, 
     List<MembershipCard> findByMember_User_Id(Long userId);
     Optional<MembershipCard> findFirstByMemberIdAndStatusOrderByEndDateDesc(Long memberId, String status);
 
+    long countByStatus(String status);
+
+    @Query("SELECT m FROM MembershipCard m JOIN FETCH m.member JOIN FETCH m.gymPackage WHERE m.createdAt >= :startDate AND m.createdAt <= :endDate")
+    List<MembershipCard> findAllByCreatedAtBetweenWithMemberAndPackage(
+            @Param("startDate") java.time.LocalDateTime startDate,
+            @Param("endDate") java.time.LocalDateTime endDate
+    );
+
+    @Query("SELECT m FROM MembershipCard m JOIN FETCH m.member JOIN FETCH m.gymPackage JOIN FETCH m.member.gymLocation")
+    List<MembershipCard> findAllWithMemberPackageAndLocation();
+
     @Query("SELECT COUNT(m) > 0 FROM MembershipCard m WHERE m.member.id = :memberId AND m.status = :status")
     boolean existsByMemberIdAndStatus(@Param("memberId") Long memberId, @Param("status") String status);
 

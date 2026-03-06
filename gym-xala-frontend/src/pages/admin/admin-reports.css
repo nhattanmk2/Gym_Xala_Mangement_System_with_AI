@@ -142,3 +142,64 @@
     background: rgba(244, 67, 54, 0.1);
     color: #f44336;
 }
+
+/* RESPONSIVE */
+@media (max-width: 1024px) {
+    .ad-reports-filters {
+        flex-wrap: wrap;
+    }
+
+    .ad-btn-export {
+        padding: 10px 16px;
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 768px) {
+    .ad-reports-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .ad-reports-header h1 {
+        font-size: 24px;
+    }
+
+    .ad-reports-filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-group input {
+        width: 100%;
+    }
+
+    .ad-reports-tabs {
+        overflow-x: auto;
+        white-space: nowrap;
+        padding-bottom: 5px;
+    }
+
+    .ad-tab-btn {
+        font-size: 14px;
+        padding: 6px 12px;
+    }
+
+    .ad-report-table-wrapper {
+        overflow-x: auto;
+    }
+
+    .ad-report-table th,
+    .ad-report-table td {
+        padding: 12px 10px;
+        font-size: 13px;
+        min-width: 120px;
+    }
+}
+
+@media (max-width: 480px) {
+    .ad-reports-container {
+        padding: 15px;
+    }
+}
