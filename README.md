@@ -5,13 +5,13 @@ Chào mừng bạn đến với tài liệu hướng dẫn vận hành hệ th�
 ---
 
 ## 1. Thông tin Đăng nhập Mẫu
-Sau khi import bộ dữ liệu (`gym_xala_db.sql`), bạn có thể sử dụng các tài khoản sau để thử nghiệm:
+Sau khi import bộ dữ liệu mẫu (`seed_data_professional.sql`), bạn có thể sử dụng các tài khoản sau để thử nghiệm:
 
 | Vai trò | Username | Password | Mục đích thử nghiệm |
 | :--- | :--- | :--- | :--- |
-| **Admin** | `admin` | `123456` | Quản lý toàn bộ hệ thống, báo cáo, nhân sự. |
-| **PT** | `pt_pro_4` | `ptpro4` | Xem lịch dạy, đánh giá học viên. |
-| **Member** | `member20` | `Password20` | Đăng ký gói tập, xem lộ trình, chatbot AI. |
+| **Admin** | `admin` | `password123` | Quản lý toàn bộ hệ thống, báo cáo, nhân sự. |
+| **PT** | `trainer01` | `password123` | Xem lịch dạy, đánh giá học viên. |
+| **Member** | `member01` | `password123` | Đăng ký gói tập, xem lộ trình, chatbot AI. |
 
 ---
 

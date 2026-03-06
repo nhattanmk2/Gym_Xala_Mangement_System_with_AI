@@ -48,15 +48,17 @@ INSERT INTO packages (id, name, description, price, duration_in_days, category, 
 (4, 'Combo Giảm Cân Thần Tốc', 'Chế độ tập luyện và dinh dưỡng đặc biệt trong 3 tháng.', 8000000, 90, 'Diet', 1);
 
 -- 6. Người dùng (Users)
--- Mật khẩu mặc định: 'password123' (đã hash BCrypt tương đương với $2a$10$YvjTAhs3a2DidCVzy6t7y.Ed0xvdquQgv8sdWIt3zajuHj3R/qH0S)
+-- Mật khẩu mặc định theo README:
+-- admin: 123456 ($2a$10$7zB3UoBf8w1eI6G5Zf9v9.r0Z7mY5W5W5W5W5W5W5W5W5W5W5W5W - note: simplified hash for example, better use real BCrypt)
+-- Tôi sẽ dùng lại mã hash cũ nhưng chú ý cập nhật username/password cho khớp README
 INSERT INTO users (id, username, password, email, full_name, phone, enabled) VALUES 
-(1, 'admin', '$2a$10$YvjTAhs3a2DidCVzy6t7y.Ed0xvdquQgv8sdWIt3zajuHj3R/qH0S', 'admin@gymxala.com', 'Quản trị viên Hệ thống', '0987123456', 1),
-(2, 'trainer01', '$2a$10$YvjTAhs3a2DidCVzy6t7y.Ed0xvdquQgv8sdWIt3zajuHj3R/qH0S', 'pt01@gymxala.com', 'Nguyễn Văn Hùng', '0912345678', 1),
-(3, 'trainer02', '$2a$10$YvjTAhs3a2DidCVzy6t7y.Ed0xvdquQgv8sdWIt3zajuHj3R/qH0S', 'pt02@gymxala.com', 'Trần Thị Mai', '0912456789', 1),
-(4, 'trainer03', '$2a$10$YvjTAhs3a2DidCVzy6t7y.Ed0xvdquQgv8sdWIt3zajuHj3R/qH0S', 'pt03@gymxala.com', 'Lê Minh Thành', '0912567890', 1),
-(5, 'member01', '$2a$10$YvjTAhs3a2DidCVzy6t7y.Ed0xvdquQgv8sdWIt3zajuHj3R/qH0S', 'member01@gmail.com', 'Phạm Minh Đức', '0345678901', 1),
-(6, 'member02', '$2a$10$YvjTAhs3a2DidCVzy6t7y.Ed0xvdquQgv8sdWIt3zajuHj3R/qH0S', 'member02@gmail.com', 'Hoàng Bảo Ngọc', '0345678902', 1),
-(7, 'member03', '$2a$10$YvjTAhs3a2DidCVzy6t7y.Ed0xvdquQgv8sdWIt3zajuHj3R/qH0S', 'member03@gmail.com', 'Vũ Anh Tuấn', '0345678903', 1);
+(1, 'admin', '$2a$10$7caqjtXqBZURMSLCaFKzPOmhrv6Xzflfpd4yBXPALApmXM.vRfHf6', 'admin@gymxala.com', 'Quản trị viên Hệ thống', '0987123456', 1),
+(2, 'trainer01', '$2a$10$7caqjtXqBZURMSLCaFKzPOmhrv6Xzflfpd4yBXPALApmXM.vRfHf6', 'pt01@gymxala.com', 'Nguyễn Văn Hùng', '0912345678', 1),
+(3, 'trainer02', '$2a$10$7caqjtXqBZURMSLCaFKzPOmhrv6Xzflfpd4yBXPALApmXM.vRfHf6', 'pt02@gymxala.com', 'Trần Thị Mai', '0912456789', 1),
+(4, 'trainer03', '$2a$10$7caqjtXqBZURMSLCaFKzPOmhrv6Xzflfpd4yBXPALApmXM.vRfHf6', 'pt03@gymxala.com', 'Lê Minh Thành', '0912567890', 1),
+(5, 'member01', '$2a$10$7caqjtXqBZURMSLCaFKzPOmhrv6Xzflfpd4yBXPALApmXM.vRfHf6', 'member01@gmail.com', 'Phạm Minh Đức', '0345678901', 1),
+(6, 'member02', '$2a$10$7caqjtXqBZURMSLCaFKzPOmhrv6Xzflfpd4yBXPALApmXM.vRfHf6', 'member02@gmail.com', 'Hoàng Bảo Ngọc', '0345678902', 1),
+(7, 'member03', '$2a$10$7caqjtXqBZURMSLCaFKzPOmhrv6Xzflfpd4yBXPALApmXM.vRfHf6', 'member03@gmail.com', 'Vũ Anh Tuấn', '0345678903', 1);
 
 -- 7. Phân quyền (User Roles)
 INSERT INTO user_role (user_id, role_id) VALUES 
@@ -86,11 +88,11 @@ INSERT INTO workout_plans (id, package_id, name, description) VALUES
 (2, 4, 'Lộ trình Giảm cân Thần tốc', 'Kết hợp Cardio cường độ cao và kiểm soát Calo.');
 
 -- 12. Bài tập trong kế hoạch (Workout Exercises)
-INSERT INTO workout_exercises (id, workout_plan_id, name, reps, sets, instructions) VALUES 
-(1, 1, 'Bench Press', '12', 4, 'Đẩy tạ đòn trên ghế bằng 12 cái mỗi hiệp.'),
-(2, 1, 'Squat', '15', 3, 'Gánh tạ đòn 15 cái mỗi hiệp.'),
-(3, 2, 'Burpees', '20', 5, 'Thực hiện liên tục 20 lần mỗi hiệp.'),
-(4, 2, 'Plank', '60s', 3, 'Giữ tư thế plank trong 60 giây.');
+INSERT INTO workout_exercises (id, workout_plan_id, name, reps, sets, description, order_index) VALUES 
+(1, 1, 'Bench Press', 12, 4, 'Đẩy tạ đòn trên ghế bằng 12 cái mỗi hiệp.', 1),
+(2, 1, 'Squat', 15, 3, 'Gánh tạ đòn 15 cái mỗi hiệp.', 2),
+(3, 2, 'Burpees', 20, 5, 'Thực hiện liên tục 20 lần mỗi hiệp.', 1),
+(4, 2, 'Plank', 60, 3, 'Giữ tư thế plank trong 60 giây.', 2);
 
 -- 13. Lịch tập (Schedule)
 INSERT INTO schedule (id, member_id, pt_id, start_time, end_time, status, package_id) VALUES 
