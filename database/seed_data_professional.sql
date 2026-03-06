@@ -10,6 +10,7 @@ TRUNCATE TABLE ai_consultation_history;
 TRUNCATE TABLE ai_recommendation_log;
 TRUNCATE TABLE workout_session;
 TRUNCATE TABLE schedule;
+TRUNCATE TABLE pt_schedules;
 TRUNCATE TABLE member_exercise_status;
 TRUNCATE TABLE workout_exercises;
 TRUNCATE TABLE workout_plans;
