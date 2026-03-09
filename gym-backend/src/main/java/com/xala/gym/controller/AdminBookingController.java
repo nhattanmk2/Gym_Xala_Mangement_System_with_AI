@@ -21,16 +21,4 @@ public class AdminBookingController {
     public ResponseEntity<List<PtScheduleResponse>> getPendingBookings() {
         return ResponseEntity.ok(ptScheduleService.getPendingBookings());
     }
-
-    @PutMapping("/{id}/approve")
-    public ResponseEntity<Void> approveBooking(@PathVariable Long id) {
-        ptScheduleService.approveBooking(id);
-        return ResponseEntity.ok().build();
-    }
-
-    @PutMapping("/{id}/reject")
-    public ResponseEntity<Void> rejectBooking(@PathVariable Long id) {
-        ptScheduleService.rejectBooking(id);
-        return ResponseEntity.ok().build();
-    }
 }

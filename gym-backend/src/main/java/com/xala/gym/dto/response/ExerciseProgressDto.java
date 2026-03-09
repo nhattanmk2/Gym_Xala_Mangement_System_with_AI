@@ -9,12 +9,13 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class WorkoutExerciseResponse {
-    private Long id;
-    private String name;
-    private String description;
+public class ExerciseProgressDto {
+    private Long sessionExerciseId;
+    private String exerciseName;
+    private String categoryName;
+    private String levelName;
     private Integer sets;
     private Integer reps;
-    private Integer orderIndex;
-    private Boolean isCompleted; // Used for member view
+    private Boolean isCompleted;
+    private String completedAt;
 }

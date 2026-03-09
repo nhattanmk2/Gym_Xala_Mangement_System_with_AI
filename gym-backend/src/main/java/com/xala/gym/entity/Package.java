@@ -24,6 +24,9 @@ public class Package {
 
     private Double price;
 
+    // Số buổi tập tối đa của gói
+    private Integer maxSessions;
+
     // Thời hạn gói (ngày)
     private Integer durationInDays;
 

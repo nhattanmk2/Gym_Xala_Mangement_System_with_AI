@@ -1,9 +1,0 @@
-package com.xala.gym.repository;
-
-import com.xala.gym.entity.WorkoutPlan;
-import org.springframework.data.jpa.repository.JpaRepository;
-import java.util.Optional;
-
-public interface WorkoutPlanRepository extends JpaRepository<WorkoutPlan, Long> {
-    Optional<WorkoutPlan> findByGymPackage_Id(Long packageId);
-}

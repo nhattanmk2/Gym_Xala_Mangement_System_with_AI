@@ -7,8 +7,12 @@ const getAuthHeader = () => {
     return { Authorization: `Bearer ${token}` };
 };
 
-export const getMySchedule = async () => {
-    const response = await axios.get(API_URL, { headers: getAuthHeader() });
+export const getMySchedule = async (startDate, endDate) => {
+    let url = API_URL;
+    if (startDate && endDate) {
+        url += `?startDate=${startDate}&endDate=${endDate}`;
+    }
+    const response = await axios.get(url, { headers: getAuthHeader() });
     return response.data;
 };
 
@@ -70,10 +74,12 @@ export const bookSlot = async (slotId) => {
     return res.data;
 };
 
-export const getMemberSchedules = async () => {
-    const res = await axios.get(`http://localhost:8080/api/member/schedule`, {
-        headers: getAuthHeader()
-    });
+export const getMemberSchedules = async (startDate, endDate) => {
+    let url = `http://localhost:8080/api/member/schedule`;
+    if (startDate && endDate) {
+        url += `?startDate=${startDate}&endDate=${endDate}`;
+    }
+    const res = await axios.get(url, { headers: getAuthHeader() });
     return res.data;
 };
 

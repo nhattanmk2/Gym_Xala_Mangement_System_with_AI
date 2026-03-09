@@ -11,10 +11,11 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class WorkoutPlanResponse {
-    private Long id;
-    private Long packageId;
+public class RoadmapProgress {
+    private Long roadmapId;
     private String name;
-    private String description;
-    private List<WorkoutExerciseResponse> exercises;
+    private Double percentage;
+    private Integer completedExercises;
+    private Integer totalExercises;
+    private List<SessionProgress> sessionProgresses;
 }

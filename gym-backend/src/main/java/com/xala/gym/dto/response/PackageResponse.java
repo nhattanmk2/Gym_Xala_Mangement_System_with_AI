@@ -15,6 +15,7 @@ public class PackageResponse {
     private String description;
     private Double price;
     private Integer durationInDays;
+    private Integer maxSessions;
     private String category;
     private byte[] image;
     private String promotion;

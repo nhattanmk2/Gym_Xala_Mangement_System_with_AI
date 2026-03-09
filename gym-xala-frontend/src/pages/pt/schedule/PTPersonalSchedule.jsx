@@ -7,6 +7,9 @@ const PTPersonalSchedule = () => {
     const [loading, setLoading] = useState(true);
     const [adding, setAdding] = useState(false);
 
+    const [startDate, setStartDate] = useState("");
+    const [endDate, setEndDate] = useState("");
+
     const [selectedDates, setSelectedDates] = useState([]);
     const [startTime, setStartTime] = useState("08:00");
     const [endTime, setEndTime] = useState("09:00");
@@ -20,7 +23,7 @@ const PTPersonalSchedule = () => {
     const loadSchedule = async () => {
         try {
             setLoading(true);
-            const data = await getMySchedule();
+            const data = await getMySchedule(startDate, endDate);
             setSchedule(data);
         } catch (error) {
             console.error("Error loading schedule:", error);
@@ -28,6 +31,12 @@ const PTPersonalSchedule = () => {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        if ((startDate && endDate) || (!startDate && !endDate)) {
+            loadSchedule();
+        }
+    }, [startDate, endDate]);
 
     const generateUpcomingDates = () => {
         const dates = [];
@@ -112,8 +121,25 @@ const PTPersonalSchedule = () => {
     return (
         <div className="pt-schedule-wrapper busy-theme">
             <header className="pt-schedule-header">
-                <h1>📑 Quản lý Lịch bận (Cá nhân)</h1>
-                <p>Đánh dấu các khoảng thời gian bạn bận việc riêng để hệ thống không xếp lịch dạy.</p>
+                <div>
+                    <h1>📑 Quản lý Lịch bận (Cá nhân)</h1>
+                    <p>Đánh dấu các khoảng thời gian bạn bận việc riêng để hệ thống không xếp lịch dạy.</p>
+                </div>
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    <input
+                        type="date"
+                        value={startDate}
+                        onChange={(e) => setStartDate(e.target.value)}
+                        style={{ padding: '8px', border: '1px solid #cbd5e1', borderRadius: '8px' }}
+                    />
+                    <span style={{ color: '#64748b' }}>đến</span>
+                    <input
+                        type="date"
+                        value={endDate}
+                        onChange={(e) => setEndDate(e.target.value)}
+                        style={{ padding: '8px', border: '1px solid #cbd5e1', borderRadius: '8px' }}
+                    />
+                </div>
             </header>
 
             <div className="pt-schedule-grid">

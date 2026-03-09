@@ -1,28 +1,28 @@
 package com.xala.gym.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Entity
-@Table(name = "workout_plans")
+@Table(name = "workout_roadmap")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class WorkoutPlan {
+public class WorkoutRoadmap {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "package_id", nullable = false)
+    @JsonIgnore
     private Package gymPackage;
 
     @Column(nullable = false)
@@ -31,7 +31,10 @@ public class WorkoutPlan {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @OneToMany(mappedBy = "workoutPlan", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<WorkoutExercise> exercises = new ArrayList<>();
+    @Column(name = "order_index")
+    private Integer orderIndex;
+
+    @OneToMany(mappedBy = "roadmap", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OrderBy("orderIndex ASC")
+    private List<WorkoutSession> sessions;
 }

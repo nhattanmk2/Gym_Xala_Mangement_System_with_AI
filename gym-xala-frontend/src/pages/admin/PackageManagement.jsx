@@ -1,17 +1,19 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import AdminLayout from "./layout/AdminLayout";
 import {
   getAllPackages,
   createPackage,
   updatePackage,
   deletePackage,
-  togglePackageActive,
-  getWorkoutPlan,
-  saveWorkoutPlan
+  togglePackageActive
 } from "../../api/adminPackageApi";
+import { getCategories, getExercisesByCategory, getLevelsByExercise } from "../../api/adminExerciseApi";
+import { getAllEquipment } from "../../api/adminEquipmentApi";
 import "./packageManagement.css";
 
 const PackageManagement = () => {
+  const navigate = useNavigate();
   const [packages, setPackages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState("table"); // 'table' or 'cards'
@@ -26,21 +28,50 @@ const PackageManagement = () => {
     durationInDays: "",
     category: "GENERAL",
     active: true,
-    promotion: ""
+    promotion: "",
+    maxSessions: "",
+    roadmaps: []
   });
 
-  // Roadmap State
+  // Auxiliary data for dropdowns
+  const [categories, setCategories] = useState([]);
+  const [equipmentList, setEquipmentList] = useState([]);
+  const [exerciseOptions, setExerciseOptions] = useState([]);
+  const [levelOptions, setLevelOptions] = useState([]);
+
+  // Modal control for nesting
   const [showRoadmapModal, setShowRoadmapModal] = useState(false);
-  const [activeRoadmapPkg, setActiveRoadmapPkg] = useState(null);
-  const [workoutPlan, setWorkoutPlan] = useState({
-    name: "",
-    description: "",
-    exercises: []
+  const [showSessionModal, setShowSessionModal] = useState(false);
+  const [showExerciseModal, setShowExerciseModal] = useState(false);
+
+  // Draft states for currently adding items
+  const [currentRoadmap, setCurrentRoadmap] = useState({ name: "", description: "", sessions: [] });
+  const [currentSession, setCurrentSession] = useState({ name: "", exercises: [] });
+  const [currentExercise, setCurrentExercise] = useState({
+    categoryId: "",
+    standardExerciseId: "",
+    exerciseLevelId: ""
   });
+  const [activeRoadmapIndex, setActiveRoadmapIndex] = useState(-1);
+  const [activeSessionIndex, setActiveSessionIndex] = useState(-1);
 
   useEffect(() => {
     fetchPackages();
+    fetchAuxData();
   }, []);
+
+  const fetchAuxData = async () => {
+    try {
+      const [catRes, equipRes] = await Promise.all([
+        getCategories(),
+        getAllEquipment()
+      ]);
+      setCategories(catRes.data);
+      setEquipmentList(equipRes.data);
+    } catch (err) {
+      console.error("Error fetching aux data:", err);
+    }
+  };
 
   const fetchPackages = async () => {
     try {
@@ -63,9 +94,11 @@ const PackageManagement = () => {
         description: pkg.description,
         price: pkg.price.toString(),
         durationInDays: pkg.durationInDays.toString(),
+        maxSessions: pkg.maxSessions ? pkg.maxSessions.toString() : "",
         category: pkg.category,
         active: pkg.active,
-        promotion: pkg.promotion || ""
+        promotion: pkg.promotion || "",
+        roadmaps: pkg.roadmaps || []
       });
       setImagePreview(pkg.image ? `data:image/png;base64,${pkg.image}` : "");
     } else {
@@ -77,7 +110,9 @@ const PackageManagement = () => {
         durationInDays: "",
         category: "GENERAL",
         active: true,
-        promotion: ""
+        promotion: "",
+        maxSessions: "",
+        roadmaps: []
       });
       setImagePreview("");
     }
@@ -129,6 +164,10 @@ const PackageManagement = () => {
       alert("Thời gian phải ít nhất 1 ngày");
       return;
     }
+    if (formData.maxSessions && parseInt(formData.maxSessions) < 0) {
+      alert("Số buổi tập tối đa không được âm");
+      return;
+    }
 
     try {
       const data = new FormData();
@@ -176,65 +215,76 @@ const PackageManagement = () => {
     }
   };
 
-  const handleOpenRoadmap = async (pkg) => {
-    try {
-      setLoading(true);
-      setActiveRoadmapPkg(pkg);
-      const plan = await getWorkoutPlan(pkg.id);
-      if (plan) {
-        setWorkoutPlan(plan);
-      } else {
-        setWorkoutPlan({
-          name: `Lộ trình ${pkg.name}`,
-          description: `Lộ trình tập luyện chi tiết cho gói ${pkg.name}`,
-          exercises: []
-        });
-      }
-      setShowRoadmapModal(true);
-    } catch (error) {
-      console.error("Error fetching roadmap:", error);
-      alert("Không thể tải lộ trình tập luyện.");
-    } finally {
-      setLoading(false);
-    }
+  // --- Roadmap & Nested UI Logic ---
+
+  const handleAddRoadmap = () => {
+    setCurrentRoadmap({ name: "", description: "", sessions: [] });
+    setShowRoadmapModal(true);
   };
 
-  const handleAddExercise = () => {
-    const newExercise = {
-      name: "",
-      description: "",
-      sets: 3,
-      reps: 12,
-      orderIndex: workoutPlan.exercises.length
-    };
-    setWorkoutPlan({
-      ...workoutPlan,
-      exercises: [...workoutPlan.exercises, newExercise]
-    });
+  const saveRoadmapDraft = () => {
+    if (!currentRoadmap.name) return alert("Nhập tên lộ trình");
+    const newRoadmaps = [...formData.roadmaps, { ...currentRoadmap, orderIndex: formData.roadmaps.length + 1 }];
+    setFormData({ ...formData, roadmaps: newRoadmaps });
+    setShowRoadmapModal(false);
   };
 
-  const handleExerciseChange = (index, field, value) => {
-    const updatedExercises = [...workoutPlan.exercises];
-    updatedExercises[index] = { ...updatedExercises[index], [field]: value };
-    setWorkoutPlan({ ...workoutPlan, exercises: updatedExercises });
+  const handleAddSession = (rmIndex) => {
+    setActiveRoadmapIndex(rmIndex);
+    setCurrentSession({ name: "", exercises: [] });
+    setShowSessionModal(true);
   };
 
-  const handleRemoveExercise = (index) => {
-    const updatedExercises = workoutPlan.exercises.filter((_, i) => i !== index);
-    setWorkoutPlan({ ...workoutPlan, exercises: updatedExercises });
+  const saveSessionDraft = () => {
+    if (!currentSession.name) return alert("Nhập tên buổi tập");
+    const newRoadmaps = [...formData.roadmaps];
+    const roadmap = newRoadmaps[activeRoadmapIndex];
+    roadmap.sessions = [...(roadmap.sessions || []), { ...currentSession, orderIndex: (roadmap.sessions?.length || 0) + 1 }];
+    setFormData({ ...formData, roadmaps: newRoadmaps });
+    setShowSessionModal(false);
   };
 
-  const handleSaveRoadmap = async (e) => {
-    e.preventDefault();
-    try {
-      await saveWorkoutPlan(activeRoadmapPkg.id, workoutPlan);
-      alert("Lưu lộ trình tập luyện thành công!");
-      setShowRoadmapModal(false);
-    } catch (error) {
-      console.error("Error saving roadmap:", error);
-      alert("Lỗi khi lưu lộ trình tập luyện.");
-    }
+  const handleAddExercise = (rmIndex, sessIndex) => {
+    setActiveRoadmapIndex(rmIndex);
+    setActiveSessionIndex(sessIndex);
+    setCurrentExercise({ categoryId: "", standardExerciseId: "", exerciseLevelId: "" });
+    setShowExerciseModal(true);
   };
+
+  const onCategoryChange = async (catId) => {
+    setCurrentExercise({ ...currentExercise, categoryId: catId, standardExerciseId: "", exerciseLevelId: "" });
+    const res = await getExercisesByCategory(catId);
+    setExerciseOptions(res.data);
+  };
+
+  const onExerciseChange = async (exId) => {
+    setCurrentExercise({ ...currentExercise, standardExerciseId: exId, exerciseLevelId: "" });
+    const res = await getLevelsByExercise(exId);
+    setLevelOptions(res.data);
+  };
+
+  const saveExerciseDraft = () => {
+    if (!currentExercise.exerciseLevelId) return alert("Chọn mức độ bài tập");
+    const newRoadmaps = [...formData.roadmaps];
+    const sess = newRoadmaps[activeRoadmapIndex].sessions[activeSessionIndex];
+    sess.exercises = [...(sess.exercises || []), {
+      exerciseLevelId: parseInt(currentExercise.exerciseLevelId),
+      orderIndex: (sess.exercises?.length || 0) + 1
+    }];
+    setFormData({ ...formData, roadmaps: newRoadmaps });
+    setShowExerciseModal(false);
+  };
+
+  const removeRoadmap = (idx) => {
+    const news = formData.roadmaps.filter((_, i) => i !== idx);
+    setFormData({ ...formData, roadmaps: news });
+  };
+
+  const handleOpenRoadmap = (pkg) => {
+    navigate(`/admin/packages/${pkg.id}/roadmap`);
+  };
+
+
 
   const PackageCard = ({ pkg }) => (
     <div style={{
@@ -278,7 +328,9 @@ const PackageManagement = () => {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid #f1f5f9", paddingTop: "12px" }}>
           <div>
             <div style={{ fontSize: "1.2rem", fontWeight: "800", color: "#2563eb" }}>{pkg.price?.toLocaleString()}đ</div>
-            <div style={{ fontSize: "0.75rem", color: "#94a3b8" }}>{pkg.durationInDays} ngày</div>
+            <div style={{ fontSize: "0.75rem", color: "#94a3b8" }}>
+              {pkg.durationInDays} ngày {pkg.maxSessions ? `• ${pkg.maxSessions} buổi` : ""}
+            </div>
           </div>
           <div style={{ display: "flex", gap: "5px" }}>
             <button onClick={() => handleOpenRoadmap(pkg)} title="Lộ trình tập" style={{ background: "#eff6ff", border: "1px solid #bfdbfe", padding: "6px", borderRadius: "6px", cursor: "pointer" }}>📋</button>
@@ -339,9 +391,9 @@ const PackageManagement = () => {
                   <tr>
                     <th style={{ padding: "18px", textAlign: "left", fontSize: "0.85rem", fontWeight: "700", color: "#475569" }}>Ảnh</th>
                     <th style={{ padding: "18px", textAlign: "left", fontSize: "0.85rem", fontWeight: "700", color: "#475569" }}>Tên gói</th>
-                    <th style={{ padding: "18px", textAlign: "left", fontSize: "0.85rem", fontWeight: "700", color: "#475569" }}>Loại</th>
+                    <th style={{ padding: "18px", textAlign: "left", fontSize: "0.85rem", fontWeight: "700", color: "#475569" }}>Lợi ích</th>
                     <th style={{ padding: "18px", textAlign: "left", fontSize: "0.85rem", fontWeight: "700", color: "#475569" }}>Giá (VNĐ)</th>
-                    <th style={{ padding: "18px", textAlign: "left", fontSize: "0.85rem", fontWeight: "700", color: "#475569" }}>Thời hạn</th>
+                    <th style={{ padding: "18px", textAlign: "left", fontSize: "0.85rem", fontWeight: "700", color: "#475569" }}>Thời hạn / Số buổi</th>
                     <th style={{ padding: "18px", textAlign: "center", fontSize: "0.85rem", fontWeight: "700", color: "#475569" }}>Trạng thái</th>
                     <th style={{ padding: "18px", textAlign: "center", fontSize: "0.85rem", fontWeight: "700", color: "#475569" }}>Hành động</th>
                   </tr>
@@ -366,7 +418,14 @@ const PackageManagement = () => {
                         <span style={{ fontSize: "0.75rem", background: "#f1f5f9", padding: "3px 10px", borderRadius: "12px", color: "#64748b", fontWeight: "600" }}>{pkg.category}</span>
                       </td>
                       <td style={{ padding: "18px", fontWeight: "700", color: "#0f172a" }}>{pkg.price?.toLocaleString()}</td>
-                      <td style={{ padding: "18px", color: "#64748b" }}>{pkg.durationInDays} ngày</td>
+                      <td style={{ padding: "18px", color: "#64748b", fontSize: "0.85rem" }}>
+                        <div>{pkg.durationInDays} ngày</div>
+                        {pkg.maxSessions && (
+                          <div style={{ fontSize: "0.75rem", color: "#2563eb", marginTop: "4px", fontWeight: "600" }}>
+                            {pkg.maxSessions} buổi
+                          </div>
+                        )}
+                      </td>
                       <td style={{ padding: "18px", textAlign: "center" }}>
                         <button
                           onClick={() => handleToggle(pkg.id)}
@@ -472,6 +531,15 @@ const PackageManagement = () => {
                       placeholder="30"
                     />
                   </div>
+                  <div className="form-group" style={{ flex: 1 }}>
+                    <label>Số buổi tập (Tùy chọn)</label>
+                    <input
+                      type="number"
+                      value={formData.maxSessions}
+                      onChange={(e) => setFormData({ ...formData, maxSessions: e.target.value })}
+                      placeholder="VD: 15"
+                    />
+                  </div>
                 </div>
 
                 <div className="form-group">
@@ -504,103 +572,7 @@ const PackageManagement = () => {
           </div>
         )}
 
-        {showRoadmapModal && (
-          <div className="modal-overlay">
-            <div className="modal-content roadmap-modal" style={{ maxWidth: "600px", padding: "24px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-                <h3 style={{ margin: 0 }}>Lộ trình tập luyện: {activeRoadmapPkg?.name}</h3>
-                <button onClick={() => setShowRoadmapModal(false)} style={{ background: "none", border: "none", fontSize: "1.8rem", cursor: "pointer", color: "#94a3b8" }}>&times;</button>
-              </div>
 
-              <form onSubmit={handleSaveRoadmap}>
-                <div className="form-group" style={{ marginBottom: "15px" }}>
-                  <label style={{ display: "block", marginBottom: "5px", fontWeight: "600" }}>Tên lộ trình</label>
-                  <input
-                    style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #e2e8f0" }}
-                    type="text"
-                    value={workoutPlan.name}
-                    onChange={(e) => setWorkoutPlan({ ...workoutPlan, name: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="form-group" style={{ marginBottom: "20px" }}>
-                  <label style={{ display: "block", marginBottom: "5px", fontWeight: "600" }}>Mô tả lộ trình</label>
-                  <textarea
-                    style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #e2e8f0" }}
-                    value={workoutPlan.description}
-                    onChange={(e) => setWorkoutPlan({ ...workoutPlan, description: e.target.value })}
-                    rows="2"
-                  />
-                </div>
-
-                <div className="exercise-list-section">
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "15px" }}>
-                    <h4 style={{ margin: 0, color: "#1e293b" }}>Danh sách bài tập ({workoutPlan.exercises.length})</h4>
-                    <button type="button" onClick={handleAddExercise} style={{ background: "#2563eb", color: "white", border: "none", padding: "8px 16px", borderRadius: "8px", cursor: "pointer", fontSize: "0.85rem", fontWeight: "600", transition: "all 0.2s" }}>+ Thêm bài tập</button>
-                  </div>
-
-                  <div className="exercise-items" style={{ maxHeight: "35vh", overflowY: "auto", padding: "4px", paddingRight: "10px" }}>
-                    {workoutPlan.exercises.length === 0 && (
-                      <div style={{ textAlign: "center", padding: "40px 20px", color: "#94a3b8", background: "#f8fafc", borderRadius: "12px", border: "2px dashed #e2e8f0" }}>
-                        Chưa có bài tập nào. Hãy bắt đầu xây dựng lộ trình!
-                      </div>
-                    )}
-                    {workoutPlan.exercises.map((ex, idx) => (
-                      <div key={idx} style={{ background: "#fff", padding: "16px", borderRadius: "12px", marginBottom: "12px", border: "1px solid #e2e8f0", boxShadow: "0 1px 2px rgba(0,0,0,0.05)" }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
-                          <span style={{ fontWeight: "700", color: "#64748b", fontSize: "0.9rem" }}>Bài tập #{idx + 1}</span>
-                          <button type="button" onClick={() => handleRemoveExercise(idx)} style={{ background: "#fff1f2", color: "#ef4444", border: "none", width: "28px", height: "28px", borderRadius: "6px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>🗑️</button>
-                        </div>
-                        <div className="exercise-item-body">
-                          <input
-                            style={{ width: "100%", marginBottom: "12px", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1" }}
-                            type="text"
-                            placeholder="Tên bài tập (VD: Hít đất, Squat...)"
-                            value={ex.name}
-                            onChange={(e) => handleExerciseChange(idx, "name", e.target.value)}
-                            required
-                          />
-                          <div style={{ display: "flex", gap: "12px", marginBottom: "12px" }}>
-                            <div style={{ flex: 1 }}>
-                              <label style={{ display: "block", fontSize: "0.75rem", color: "#64748b", marginBottom: "4px" }}>Số hiệp</label>
-                              <input
-                                style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1" }}
-                                type="number"
-                                value={ex.sets}
-                                onChange={(e) => handleExerciseChange(idx, "sets", parseInt(e.target.value))}
-                              />
-                            </div>
-                            <div style={{ flex: 1 }}>
-                              <label style={{ display: "block", fontSize: "0.75rem", color: "#64748b", marginBottom: "4px" }}>Số lần/hiệp</label>
-                              <input
-                                style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1" }}
-                                type="number"
-                                value={ex.reps}
-                                onChange={(e) => handleExerciseChange(idx, "reps", parseInt(e.target.value))}
-                              />
-                            </div>
-                          </div>
-                          <textarea
-                            style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1", resize: "none" }}
-                            placeholder="Ghi chú kỹ thuật hoặc mô tả..."
-                            value={ex.description}
-                            onChange={(e) => handleExerciseChange(idx, "description", e.target.value)}
-                            rows="2"
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="modal-actions" style={{ marginTop: "24px", paddingTop: "20px", borderTop: "1px solid #f1f5f9" }}>
-                  <button type="button" className="btn-cancel" onClick={() => setShowRoadmapModal(false)}>Hủy bỏ</button>
-                  <button type="submit" className="btn-submit" style={{ background: "#2563eb", color: "#white" }}>Lưu lộ trình</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
       </div>
     </AdminLayout>
   );

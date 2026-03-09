@@ -8,7 +8,7 @@ import java.util.List;
 public interface PtScheduleService {
     PtScheduleResponse addSlot(PtScheduleRequest request);
     List<PtScheduleResponse> batchAdd(List<PtScheduleRequest> requests);
-    List<PtScheduleResponse> getMySchedule();
+    List<PtScheduleResponse> getMySchedule(java.time.LocalDate startDate, java.time.LocalDate endDate);
     List<PtScheduleResponse> getAvailableSlots(Long ptId);
     List<PtScheduleResponse> getAdminSchedules(Integer branchId, String ptName, String status);
     void deleteSlot(Long id);
@@ -22,7 +22,7 @@ public interface PtScheduleService {
     void rejectBooking(Long slotId);
     void cancelBookingByMember(Long slotId);
     List<PtScheduleResponse> getPendingBookings();
-    List<PtScheduleResponse> getMemberBookings();
+    List<PtScheduleResponse> getMemberBookings(java.time.LocalDate startDate, java.time.LocalDate endDate);
     List<PtClientResponse> getMyClients();
     PtScheduleResponse getScheduleById(Long id);
     PtScheduleResponse saveSessionContent(Long slotId, com.xala.gym.dto.request.WorkoutSessionContentRequest request);

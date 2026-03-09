@@ -18,8 +18,10 @@ public class PtScheduleController {
     private final PtScheduleService ptScheduleService;
 
     @GetMapping
-    public ResponseEntity<List<PtScheduleResponse>> getMySchedules() {
-        return ResponseEntity.ok(ptScheduleService.getMySchedule());
+    public ResponseEntity<List<PtScheduleResponse>> getMySchedules(
+            @RequestParam(required = false) java.time.LocalDate startDate,
+            @RequestParam(required = false) java.time.LocalDate endDate) {
+        return ResponseEntity.ok(ptScheduleService.getMySchedule(startDate, endDate));
     }
 
     // ✅ Xem danh sách học viên của PT
@@ -63,6 +65,18 @@ public class PtScheduleController {
     @PostMapping("/book/{id}")
     public ResponseEntity<PtScheduleResponse> bookSlot(@PathVariable Long id) {
         return ResponseEntity.ok(ptScheduleService.bookSlot(id));
+    }
+
+    @PutMapping("/{id}/approve")
+    public ResponseEntity<Void> approveBooking(@PathVariable Long id) {
+        ptScheduleService.approveBooking(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{id}/reject")
+    public ResponseEntity<Void> rejectBooking(@PathVariable Long id) {
+        ptScheduleService.rejectBooking(id);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/history/{memberId}")

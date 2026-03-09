@@ -51,6 +51,10 @@ public class Employee {
     @Column(name = "pt_rating")
     private Double ptRating; // Đánh giá trung bình
 
+    @Builder.Default
+    @Column(name = "max_trainees_per_slot")
+    private Integer maxTraineesPerSlot = 3; // Mặc định mỗi PT chứa 3 học viên / slot
+
     @Lob
     @Column(name = "avatar", columnDefinition = "LONGBLOB")
     private byte[] avatar;

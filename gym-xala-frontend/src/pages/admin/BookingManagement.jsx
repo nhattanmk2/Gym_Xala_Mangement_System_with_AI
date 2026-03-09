@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import AdminLayout from "./layout/AdminLayout";
-import { getPendingBookings, approveBooking, rejectBooking } from "../../api/adminBookingApi";
+import { getPendingBookings } from "../../api/adminBookingApi";
 import "./bookingManagement.css";
 
 const BookingManagement = () => {
@@ -21,31 +21,6 @@ const BookingManagement = () => {
       console.error("Error fetching bookings:", error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleApprove = async (id) => {
-    try {
-      setActionLoading(id);
-      await approveBooking(id);
-      fetchData();
-    } catch (error) {
-      alert("Lỗi khi duyệt: " + error.message);
-    } finally {
-      setActionLoading(null);
-    }
-  };
-
-  const handleReject = async (id) => {
-    if (!window.confirm("Bạn có chắc muốn từ chối yêu cầu này?")) return;
-    try {
-      setActionLoading(id);
-      await rejectBooking(id);
-      fetchData();
-    } catch (error) {
-      alert("Lỗi khi từ chối: " + error.message);
-    } finally {
-      setActionLoading(null);
     }
   };
 
@@ -106,20 +81,7 @@ const BookingManagement = () => {
                   </div>
 
                   <div className="booking-card-actions">
-                    <button
-                      className="btn-reject"
-                      onClick={() => handleReject(booking.id)}
-                      disabled={actionLoading === booking.id}
-                    >
-                      Từ chối
-                    </button>
-                    <button
-                      className="btn-approve"
-                      onClick={() => handleApprove(booking.id)}
-                      disabled={actionLoading === booking.id}
-                    >
-                      {actionLoading === booking.id ? "Đang duyệt..." : "Duyệt lịch"}
-                    </button>
+                    <span className="wait-pt-note" style={{ fontStyle: 'italic', color: '#666', fontSize: '0.9rem' }}>Chờ PT phê duyệt</span>
                   </div>
                 </div>
               ))

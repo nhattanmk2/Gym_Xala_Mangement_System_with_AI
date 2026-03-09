@@ -36,6 +36,9 @@ public class MembershipCard {
     @Column(nullable = false)
     private String status; // ACTIVE, EXPIRED, CANCELED
 
+    // Số buổi tập còn lại
+    private Integer remainingSessions;
+
     private LocalDateTime createdAt;
 
     @PrePersist

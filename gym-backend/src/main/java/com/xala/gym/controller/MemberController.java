@@ -25,8 +25,10 @@ public class MemberController {
 
     // ✅ API Get My Schedule
     @GetMapping("/schedule")
-    public ResponseEntity<java.util.List<com.xala.gym.dto.response.PtScheduleResponse>> getMySchedule() {
-        return ResponseEntity.ok(ptScheduleService.getMemberBookings());
+    public ResponseEntity<java.util.List<com.xala.gym.dto.response.PtScheduleResponse>> getMySchedule(
+            @RequestParam(required = false) java.time.LocalDate startDate,
+            @RequestParam(required = false) java.time.LocalDate endDate) {
+        return ResponseEntity.ok(ptScheduleService.getMemberBookings(startDate, endDate));
     }
 
     // ✅ API Get Schedule Details

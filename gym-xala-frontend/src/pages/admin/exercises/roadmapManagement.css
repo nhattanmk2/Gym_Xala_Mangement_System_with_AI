@@ -1,0 +1,203 @@
+.roadmap-mgmt {
+    padding: 20px;
+}
+
+.mgmt-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.mgmt-header h1 {
+    flex: 1;
+    color: #fff;
+    font-size: 1.5rem;
+}
+
+.back-btn {
+    background: #2c2c2e;
+    color: #fff;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.add-btn {
+    background: #d0fd3e;
+    color: #000;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.roadmap-card {
+    background: #1c1c1e;
+    border: 1px solid #2c2c2e;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 25px;
+}
+
+.roadmap-info h2 {
+    color: #d0fd3e;
+    margin-bottom: 5px;
+}
+
+.roadmap-info p {
+    color: #a3a3a3;
+    margin-bottom: 15px;
+}
+
+.add-session-btn {
+    background: rgba(208, 253, 62, 0.1);
+    color: #d0fd3e;
+    border: 1px solid #d0fd3e;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.del-btn-text {
+    background: none;
+    border: none;
+    color: #ff453a;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.sessions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.session-item {
+    background: #2c2c2e;
+    border-radius: 10px;
+    padding: 15px;
+    position: relative;
+}
+
+.sess-head {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.ex-tag {
+    background: #3a3a3c;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.ex-tag button {
+    background: none;
+    border: none;
+    color: #ff453a;
+    cursor: pointer;
+    margin-left: 5px;
+}
+
+.add-ex-btn {
+    width: 100%;
+    background: transparent;
+    border: 1px dashed #545456;
+    color: #a3a3a3;
+    padding: 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.ex-picker {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 10;
+    background: #3a3a3c;
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.level-options {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.level-options button {
+    background: #d0fd3e;
+    color: #000;
+    border: none;
+    padding: 5px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-picker {
+    background: #545456;
+    border: none;
+    color: #fff;
+    padding: 5px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* Modal styles */
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+}
+
+.modal-content {
+    background: #1c1c1e;
+    padding: 30px;
+    border-radius: 15px;
+    width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.modal-btns {
+    display: flex;
+    gap: 10px;
+}
+
+.modal-btns button {
+    flex: 1;
+    background: #d0fd3e;
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.modal-btns button.cancel {
+    background: #3a3a3c;
+    color: #fff;
+}

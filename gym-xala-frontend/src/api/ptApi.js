@@ -47,3 +47,19 @@ export const getAllPTs = async (branchId) => {
     });
     return res.data;
 };
+
+export const approveBooking = async (id) => {
+    const token = getToken();
+    const res = await axios.put(`${BASE_URL}/schedule/${id}/approve`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+    return res.data;
+};
+
+export const rejectBooking = async (id) => {
+    const token = getToken();
+    const res = await axios.put(`${BASE_URL}/schedule/${id}/reject`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+    return res.data;
+};

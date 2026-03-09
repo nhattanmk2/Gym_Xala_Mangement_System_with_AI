@@ -122,6 +122,7 @@ public class AIConsultationService {
                                     .description(pkgDto.getPackageInfo().getDescription())
                                     .price(pkgDto.getPackageInfo().getPrice())
                                     .durationInDays(pkgDto.getPackageInfo().getDurationInDays())
+                                    .maxSessions(pkgDto.getPackageInfo().getMaxSessions())
                                     .category(pkgDto.getPackageInfo().getCategory())
                                     .promotion(pkgDto.getPackageInfo().getPromotion())
                                     // Bố trí lại image = null
@@ -226,6 +227,7 @@ public class AIConsultationService {
                 .description(pkg.getDescription())
                 .price(pkg.getPrice())
                 .durationInDays(pkg.getDurationInDays()) // days
+                .maxSessions(pkg.getMaxSessions())
                 .category(pkg.getCategory())
                 .image(pkg.getImage())
                 .promotion(pkg.getPromotion())

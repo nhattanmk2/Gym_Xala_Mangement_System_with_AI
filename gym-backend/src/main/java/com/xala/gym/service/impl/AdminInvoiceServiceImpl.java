@@ -66,6 +66,9 @@ public class AdminInvoiceServiceImpl implements AdminInvoiceService {
 
             if (card.getGymPackage() != null && card.getGymPackage().getDurationInDays() != null) {
                 card.setEndDate(today.plusDays(card.getGymPackage().getDurationInDays()));
+                if (card.getGymPackage().getMaxSessions() != null) {
+                    card.setRemainingSessions(card.getGymPackage().getMaxSessions());
+                }
             } else {
                 // Mặc định 30 ngày nếu dữ liệu gói bị thiếu
                 card.setEndDate(today.plusDays(30));

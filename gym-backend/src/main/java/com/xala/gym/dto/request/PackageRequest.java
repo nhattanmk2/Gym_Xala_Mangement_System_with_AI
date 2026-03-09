@@ -16,7 +16,9 @@ public class PackageRequest {
     @NotNull(message = "Thời gian không được để trống")
     @Min(value = 1, message = "Thời gian phải ít nhất 1 ngày")
     private Integer durationInDays;
+    private Integer maxSessions;
     private String category;
     private Boolean active;
     private String promotion;
+    private java.util.List<WorkoutRoadmapRequest> roadmaps;
 }

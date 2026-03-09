@@ -1,8 +1,9 @@
 package com.xala.gym.service.impl;
 
-import com.xala.gym.dto.request.PackageRequest;
+import com.xala.gym.dto.request.*;
+import com.xala.gym.entity.*;
 import com.xala.gym.entity.Package;
-import com.xala.gym.repository.PackageRepository;
+import com.xala.gym.repository.*;
 import com.xala.gym.service.AdminPackageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -10,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -17,6 +19,10 @@ import java.util.List;
 public class AdminPackageServiceImpl implements AdminPackageService {
 
     private final PackageRepository packageRepository;
+    private final WorkoutRoadmapRepository roadmapRepository;
+    private final WorkoutSessionRepository sessionRepository;
+    private final SessionExerciseRepository sessionExerciseRepository;
+    private final ExerciseLevelRepository levelRepository;
 
     @Override
     public List<Package> getAllPackages() {
@@ -37,7 +43,13 @@ public class AdminPackageServiceImpl implements AdminPackageService {
         if (image != null && !image.isEmpty()) {
             pkg.setImage(image.getBytes());
         }
-        return packageRepository.save(pkg);
+        Package savedPkg = packageRepository.save(pkg);
+        
+        if (request.getRoadmaps() != null) {
+            saveRoadmaps(savedPkg, request.getRoadmaps());
+        }
+        
+        return savedPkg;
     }
 
     @Override
@@ -48,7 +60,55 @@ public class AdminPackageServiceImpl implements AdminPackageService {
         if (image != null && !image.isEmpty()) {
             pkg.setImage(image.getBytes());
         }
-        return packageRepository.save(pkg);
+        
+        // Clear existing roadmaps for full update (simplification)
+        List<WorkoutRoadmap> oldRoadmaps = roadmapRepository.findByGymPackageId(id);
+        roadmapRepository.deleteAll(oldRoadmaps);
+        
+        Package savedPkg = packageRepository.save(pkg);
+        
+        if (request.getRoadmaps() != null) {
+            saveRoadmaps(savedPkg, request.getRoadmaps());
+        }
+        
+        return savedPkg;
+    }
+
+    private void saveRoadmaps(Package pkg, List<WorkoutRoadmapRequest> roadmapRequests) {
+        for (WorkoutRoadmapRequest rr : roadmapRequests) {
+            WorkoutRoadmap roadmap = WorkoutRoadmap.builder()
+                    .gymPackage(pkg)
+                    .name(rr.getName())
+                    .description(rr.getDescription())
+                    .orderIndex(rr.getOrderIndex())
+                    .build();
+            WorkoutRoadmap savedRm = roadmapRepository.save(roadmap);
+
+            if (rr.getSessions() != null) {
+                for (WorkoutSessionRequest sr : rr.getSessions()) {
+                    WorkoutSession session = WorkoutSession.builder()
+                            .roadmap(savedRm)
+                            .name(sr.getName())
+                            .orderIndex(sr.getOrderIndex())
+                            .build();
+                    WorkoutSession savedSess = sessionRepository.save(session);
+
+                    if (sr.getExercises() != null) {
+                        for (SessionExerciseRequest er : sr.getExercises()) {
+                            ExerciseLevel level = levelRepository.findById(er.getExerciseLevelId()).orElse(null);
+                            if (level != null) {
+                                SessionExercise se = SessionExercise.builder()
+                                        .session(savedSess)
+                                        .exerciseLevel(level)
+                                        .orderIndex(er.getOrderIndex())
+                                        .build();
+                                sessionExerciseRepository.save(se);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     @Override
@@ -80,6 +140,7 @@ public class AdminPackageServiceImpl implements AdminPackageService {
         pkg.setPrice(request.getPrice());
         pkg.setDurationInDays(request.getDurationInDays());
         pkg.setCategory(request.getCategory());
+        pkg.setMaxSessions(request.getMaxSessions());
         pkg.setPromotion(request.getPromotion());
         if (request.getActive() != null) {
             pkg.setActive(request.getActive());

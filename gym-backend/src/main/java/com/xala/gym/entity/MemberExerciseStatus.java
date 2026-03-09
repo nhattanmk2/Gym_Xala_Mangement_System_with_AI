@@ -1,5 +1,6 @@
 package com.xala.gym.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class MemberExerciseStatus {
 
     @Id
@@ -25,8 +27,8 @@ public class MemberExerciseStatus {
     private MembershipCard membershipCard;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "exercise_id", nullable = false)
-    private WorkoutExercise exercise;
+    @JoinColumn(name = "session_exercise_id", nullable = false)
+    private SessionExercise sessionExercise;
 
     @Builder.Default
     @Column(nullable = false)

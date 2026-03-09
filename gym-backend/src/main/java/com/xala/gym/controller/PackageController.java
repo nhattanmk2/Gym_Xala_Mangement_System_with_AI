@@ -45,6 +45,7 @@ public class PackageController {
                 .price(pkg.getPrice())
                 .durationInDays(pkg.getDurationInDays())
                 .category(pkg.getCategory())
+                .maxSessions(pkg.getMaxSessions())
                 .image(pkg.getImage())
                 .promotion(pkg.getPromotion())
                 .build();

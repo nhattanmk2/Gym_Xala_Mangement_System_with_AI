@@ -1,19 +1,11 @@
 package com.xala.gym.service.impl;
 
 import com.xala.gym.dto.request.PtScheduleRequest;
-import com.xala.gym.dto.response.PtScheduleResponse;
-import com.xala.gym.entity.Booking;
-import com.xala.gym.entity.Employee;
-import com.xala.gym.entity.GymLocation;
-import com.xala.gym.entity.User;
-import com.xala.gym.repository.BookingRepository;
-import com.xala.gym.repository.EmployeeRepository;
-import com.xala.gym.repository.UserRepository;
-import com.xala.gym.repository.MembershipCardRepository;
-import com.xala.gym.repository.MemberExerciseStatusRepository;
+import com.xala.gym.dto.response.*;
+import com.xala.gym.entity.*;
+import com.xala.gym.repository.*;
 import com.xala.gym.service.PtScheduleService;
 import com.xala.gym.service.NotificationService;
-import com.xala.gym.dto.response.PtClientResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -83,10 +75,17 @@ public class PtScheduleServiceImpl implements PtScheduleService {
     }
 
     @Override
-    public List<PtScheduleResponse> getMySchedule() {
+    public List<PtScheduleResponse> getMySchedule(java.time.LocalDate startDate, java.time.LocalDate endDate) {
         User pt = getCurrentUser();
-        return bookingRepository.findByPersonalTrainerIdOrderByStartTimeAsc(pt.getId())
-                .stream()
+        List<Booking> bookings;
+        if (startDate != null && endDate != null) {
+            bookings = bookingRepository.findByPersonalTrainerIdAndStartTimeBetweenOrderByStartTimeAsc(
+                    pt.getId(), startDate.atStartOfDay(), endDate.plusDays(1).atStartOfDay()
+            );
+        } else {
+            bookings = bookingRepository.findByPersonalTrainerIdOrderByStartTimeAsc(pt.getId());
+        }
+        return bookings.stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
@@ -256,13 +255,41 @@ public class PtScheduleServiceImpl implements PtScheduleService {
         }
 
         Integer maxCap = ptEmp.getGymLocation().getMaxCapacity();
-        if (maxCap == null) maxCap = 3; // Giới hạn theo yêu cầu: 3 người
+        if (maxCap == null) maxCap = 50;
 
         Integer branchId = ptEmp.getGymLocation().getId();
-        long currentOccupancy = bookingRepository.countBookingsInBranchAtInterval(branchId, slot.getStartTime(), slot.getEndTime());
+        long currentBranchOccupancy = bookingRepository.countBookingsInBranchAtInterval(branchId, slot.getStartTime(), slot.getEndTime());
 
-        if (currentOccupancy >= maxCap) {
+        if (currentBranchOccupancy >= maxCap) {
             throw new RuntimeException("Chi nhánh này đã đạt giới hạn sức chứa " + maxCap + " người vào khung giờ này.");
+        }
+
+        // Kiểm tra sức chứa của PT tại 1 slot
+        Integer ptMaxTrainees = ptEmp.getMaxTraineesPerSlot();
+        if (ptMaxTrainees == null) ptMaxTrainees = 3;
+        
+        long ptCurrentOccupancy = bookingRepository.countByPersonalTrainer_IdAndStartTimeAndEndTimeAndStatusIn(
+            ptEmp.getUser().getId(), slot.getStartTime(), slot.getEndTime(), java.util.Arrays.asList("PENDING", "CONFIRMED"));
+            
+        if (ptCurrentOccupancy >= ptMaxTrainees) {
+            throw new RuntimeException("PT này đã đạt giới hạn " + ptMaxTrainees + " học viên trong khung giờ này.");
+        }
+
+        // Kiểm tra số buổi tập
+        java.util.Optional<com.xala.gym.entity.MembershipCard> activeCardOpt = 
+            membershipCardRepository.findFirstByMemberIdAndStatusOrderByEndDateDesc(member.getId(), "ACTIVE");
+            
+        if (activeCardOpt.isEmpty()) {
+            throw new RuntimeException("Bạn chưa đăng ký hoặc không có thẻ tập nào đang hoạt động.");
+        }
+        com.xala.gym.entity.MembershipCard activeCard = activeCardOpt.get();
+        if (activeCard.getRemainingSessions() != null && activeCard.getRemainingSessions() <= 0) {
+            throw new RuntimeException("Bạn đã hết số buổi tập trong gói. Vui lòng gia hạn để tiếp tục đặt lịch.");
+        }
+        
+        if (activeCard.getRemainingSessions() != null) {
+            activeCard.setRemainingSessions(activeCard.getRemainingSessions() - 1);
+            membershipCardRepository.save(activeCard);
         }
 
         slot.setMember(member);
@@ -286,6 +313,11 @@ public class PtScheduleServiceImpl implements PtScheduleService {
     public void approveBooking(Long slotId) {
         Booking slot = bookingRepository.findById(slotId)
                 .orElseThrow(() -> new RuntimeException("Yêu cầu không tồn tại"));
+
+        User pt = getCurrentUser();
+        if (!slot.getPersonalTrainer().getId().equals(pt.getId())) {
+            throw new RuntimeException("Bạn không có quyền phê duyệt lịch tập này.");
+        }
         
         // Kiểm tra sức chứa trước khi phê duyệt
         Employee ptEmp = employeeRepository.findByUser_Id(slot.getPersonalTrainer().getId())
@@ -293,31 +325,36 @@ public class PtScheduleServiceImpl implements PtScheduleService {
         
         if (ptEmp.getGymLocation() != null) {
             Integer maxCap = ptEmp.getGymLocation().getMaxCapacity();
-            if (maxCap == null) maxCap = 3; // Giới hạn theo yêu cầu: 3 người
+            if (maxCap == null) maxCap = 50;
             
-            long currentOccupancy = bookingRepository.countBookingsInBranchAtInterval(
+            long currentBranchOccupancy = bookingRepository.countBookingsInBranchAtInterval(
                 ptEmp.getGymLocation().getId(), slot.getStartTime(), slot.getEndTime());
             
-            // Vì booking này đang là PENDING nên nó ĐÃ ĐƯỢC tính trong currentOccupancy.
-            // Nếu currentOccupancy > maxCap thì nghĩa là đã vượt ngưỡng.
-            if (currentOccupancy > maxCap) {
+            // Vì booking này đang là PENDING nên nó ĐÃ ĐƯỢC tính trong currentBranchOccupancy.
+            if (currentBranchOccupancy > maxCap) {
                 throw new RuntimeException("Không thể phê duyệt vì chi nhánh đã đạt giới hạn sức chứa (" + maxCap + ") tại thời điểm này.");
             }
+        }
+        
+        // Kiểm tra số lượng học viên của PT (bao gồm cả PENDING và CONFIRMED cùng slot)
+        Integer ptMaxTrainees = ptEmp.getMaxTraineesPerSlot();
+        if (ptMaxTrainees == null) ptMaxTrainees = 3;
+        
+        long ptCurrentOccupancy = bookingRepository.countByPersonalTrainer_IdAndStartTimeAndEndTimeAndStatusIn(
+            ptEmp.getUser().getId(), slot.getStartTime(), slot.getEndTime(), java.util.Arrays.asList("PENDING", "CONFIRMED"));
+            
+        if (ptCurrentOccupancy > ptMaxTrainees) {
+            throw new RuntimeException("Không thể phê duyệt vì bạn đã đạt giới hạn " + ptMaxTrainees + " học viên trong khung giờ này.");
         }
 
         slot.setStatus("CONFIRMED");
         bookingRepository.save(slot);
 
-        // Thông báo cho cả Member và PT
+        // Thông báo cho Member
         notificationService.sendNotification(
             slot.getMember().getId(),
-            "Lịch tập của bạn đã được Admin phê duyệt!",
+            "Lịch tập của bạn đã được PT phê duyệt!",
             "BOOKING_APPROVED"
-        );
-        notificationService.sendNotification(
-            slot.getPersonalTrainer().getId(),
-            "Lịch dạy với học viên " + slot.getMember().getFullName() + " đã được xác nhận.",
-            "BOOKING_CONFIRMED"
         );
     }
 
@@ -326,8 +363,25 @@ public class PtScheduleServiceImpl implements PtScheduleService {
     public void rejectBooking(Long slotId) {
         Booking slot = bookingRepository.findById(slotId)
                 .orElseThrow(() -> new RuntimeException("Yêu cầu không tồn tại"));
+
+        User pt = getCurrentUser();
+        if (!slot.getPersonalTrainer().getId().equals(pt.getId())) {
+            throw new RuntimeException("Bạn không có quyền từ chối lịch tập này.");
+        }
         
         User member = slot.getMember();
+        
+        // Hoàn lại buổi tập
+        java.util.Optional<com.xala.gym.entity.MembershipCard> activeCardOpt = 
+            membershipCardRepository.findFirstByMemberIdAndStatusOrderByEndDateDesc(member.getId(), "ACTIVE");
+        if (activeCardOpt.isPresent()) {
+            com.xala.gym.entity.MembershipCard activeCard = activeCardOpt.get();
+            if (activeCard.getRemainingSessions() != null) {
+                activeCard.setRemainingSessions(activeCard.getRemainingSessions() + 1);
+                membershipCardRepository.save(activeCard);
+            }
+        }
+
         slot.setMember(null);
         slot.setStatus("AVAILABLE"); // Trả lại trạng thái rảnh
         bookingRepository.save(slot);
@@ -359,6 +413,17 @@ public class PtScheduleServiceImpl implements PtScheduleService {
         java.time.Duration timeUntilStart = java.time.Duration.between(LocalDateTime.now(), slot.getStartTime());
         if (timeUntilStart.toHours() < 24) {
             throw new RuntimeException("Không thể hủy! Chỉ được phép hủy lịch trước thời gian bắt đầu ít nhất 24 giờ. Vui lòng liên hệ Admin.");
+        }
+
+        // Hoàn lại buổi tập cho user
+        java.util.Optional<com.xala.gym.entity.MembershipCard> activeCardOpt = 
+            membershipCardRepository.findFirstByMemberIdAndStatusOrderByEndDateDesc(member.getId(), "ACTIVE");
+        if (activeCardOpt.isPresent()) {
+            com.xala.gym.entity.MembershipCard activeCard = activeCardOpt.get();
+            if (activeCard.getRemainingSessions() != null) {
+                activeCard.setRemainingSessions(activeCard.getRemainingSessions() + 1);
+                membershipCardRepository.save(activeCard);
+            }
         }
 
         slot.setStatus("CANCELLED");
@@ -444,10 +509,17 @@ public class PtScheduleServiceImpl implements PtScheduleService {
     }
 
     @Override
-    public List<PtScheduleResponse> getMemberBookings() {
+    public List<PtScheduleResponse> getMemberBookings(java.time.LocalDate startDate, java.time.LocalDate endDate) {
         User currentUser = getCurrentUser();
-        return bookingRepository.findByMemberIdOrderByStartTimeDesc(currentUser.getId())
-                .stream()
+        List<Booking> bookings;
+        if (startDate != null && endDate != null) {
+            bookings = bookingRepository.findByMemberIdAndStartTimeBetweenOrderByStartTimeDesc(
+                    currentUser.getId(), startDate.atStartOfDay(), endDate.plusDays(1).atStartOfDay()
+            );
+        } else {
+            bookings = bookingRepository.findByMemberIdOrderByStartTimeDesc(currentUser.getId());
+        }
+        return bookings.stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
@@ -518,20 +590,26 @@ public class PtScheduleServiceImpl implements PtScheduleService {
     }
 
     @Override
-    public List<com.xala.gym.dto.response.MemberExerciseProgressResponse> getMemberExerciseProgress(Long memberId) {
+    public List<MemberExerciseProgressResponse> getMemberExerciseProgress(Long memberId) {
         User pt = getCurrentUser();
         // Return exercise progress for the member.
         return memberExerciseStatusRepository.findByMembershipCard_Member_IdOrderByCompletedAtDesc(memberId)
                 .stream()
-                .map(status -> com.xala.gym.dto.response.MemberExerciseProgressResponse.builder()
+                .map(status -> {
+                    SessionExercise se = status.getSessionExercise();
+                    ExerciseLevel el = se.getExerciseLevel();
+                    StandardExercise std = el.getStandardExercise();
+                    
+                    return MemberExerciseProgressResponse.builder()
                         .id(status.getId())
-                        .exerciseName(status.getExercise().getName())
-                        .description(status.getExercise().getDescription())
-                        .sets(status.getExercise().getSets())
-                        .reps(status.getExercise().getReps())
+                        .exerciseName(std.getName())
+                        .description(std.getDescription())
+                        .sets(el.getSets())
+                        .reps(el.getReps())
                         .isCompleted(status.getIsCompleted())
                         .completedAt(status.getCompletedAt())
-                        .build())
+                        .build();
+                })
                 .collect(Collectors.toList());
     }
 

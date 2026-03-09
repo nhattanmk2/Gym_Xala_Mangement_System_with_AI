@@ -17,6 +17,8 @@ import AdminInvoices from "./pages/admin/invoices/AdminInvoices";
 import AdminSchedules from "./pages/admin/schedules/AdminSchedules";
 import AdminReports from "./pages/admin/AdminReports";
 import AdminLayout from "./pages/admin/layout/AdminLayout";
+import ExerciseCatalog from "./pages/admin/exercises/ExerciseCatalog";
+import RoadmapManagement from "./pages/admin/exercises/RoadmapManagement";
 
 import MemberLayout from "./pages/member/MemberLayout";
 import MemberBooking from "./pages/member/booking/MemberBooking";
@@ -24,7 +26,7 @@ import MemberPackages from "./pages/member/packages/MemberPackages";
 import PackageDetail from "./pages/member/packages/PackageDetail";
 import MemberProfile from "./pages/member/profile/MemberProfile";
 import MemberSchedule from "./pages/member/schedule/MemberSchedule";
-import WorkoutRoadmap from "./pages/member/schedule/WorkoutRoadmap";
+import WorkoutProgress from "./pages/member/schedule/WorkoutProgress";
 import MyPackage from "./pages/member/packages/MyPackage";
 import AIConsultation from "./pages/member/consultation/AIConsultation";
 import SuggestPT from "./pages/member/booking/SuggestPT";
@@ -129,6 +131,22 @@ function App() {
             </ProtectedRoute>
           } />
 
+        <Route
+          path="/admin/exercises"
+          element={
+            <ProtectedRoute allowRoles={["ROLE_ADMIN"]}>
+              <ExerciseCatalog />
+            </ProtectedRoute>
+          } />
+
+        <Route
+          path="/admin/packages/:packageId/roadmap"
+          element={
+            <ProtectedRoute allowRoles={["ROLE_ADMIN"]}>
+              <RoadmapManagement />
+            </ProtectedRoute>
+          } />
+
         {/* PT */}
         <Route
           path="/pt"
@@ -162,7 +180,7 @@ function App() {
           <Route path="packages/:id" element={<PackageDetail />} />
           <Route path="profile" element={<MemberProfile />} />
           <Route path="schedule" element={<MemberSchedule />} />
-          <Route path="roadmap" element={<WorkoutRoadmap />} />
+          <Route path="roadmap" element={<WorkoutProgress />} />
           <Route path="my-package" element={<MyPackage />} />
           <Route path="ai-consultation" element={<AIConsultation />} />
           <Route path="suggest-pt" element={<SuggestPT />} />

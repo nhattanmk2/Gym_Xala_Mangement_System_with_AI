@@ -12,6 +12,8 @@ const MemberSchedule = () => {
   // Filters for LIST view
   const [timeFilter, setTimeFilter] = useState("UPCOMING"); // 'TODAY', 'UPCOMING', 'PAST'
   const [statusFilter, setStatusFilter] = useState("ALL");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   // Calendar state
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -28,7 +30,7 @@ const MemberSchedule = () => {
   const fetchSchedules = async () => {
     try {
       setLoading(true);
-      const data = await getMemberSchedules();
+      const data = await getMemberSchedules(startDate, endDate);
       setSchedules(data);
     } catch (error) {
       console.error("Error fetching member schedule:", error);
@@ -36,6 +38,13 @@ const MemberSchedule = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    // Chỉ trigger khi cả hai có giá trị hoặc cả hai đều rỗng (nếu muốn fetch tự động)
+    if ((startDate && endDate) || (!startDate && !endDate)) {
+      fetchSchedules();
+    }
+  }, [startDate, endDate]);
 
   const handleCardClick = async (id) => {
     try {
@@ -244,6 +253,22 @@ const MemberSchedule = () => {
                 <option value="COMPLETED">Hoàn thành</option>
                 <option value="CANCELLED">Đã hủy</option>
               </select>
+            </div>
+
+            <div className="filter-group date-filters" style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="status-select"
+              />
+              <span style={{ color: '#64748b' }}>đến</span>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="status-select"
+              />
             </div>
           </div>
 

@@ -1,11 +1,14 @@
 import { useState, useEffect } from "react";
 import { getMySchedule, addBatchScheduleSlots, deleteScheduleSlot, saveSessionContent, markSessionCompleted } from "../../../api/ptScheduleApi";
+import { approveBooking, rejectBooking } from "../../../api/ptApi";
 import "./pt-schedule.css";
 
 const PTSchedule = () => {
   const [schedule, setSchedule] = useState([]);
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   // Form state
   const [selectedDates, setSelectedDates] = useState([]);
@@ -27,7 +30,7 @@ const PTSchedule = () => {
   const loadSchedule = async () => {
     try {
       setLoading(true);
-      const data = await getMySchedule();
+      const data = await getMySchedule(startDate, endDate);
       setSchedule(data);
     } catch (error) {
       console.error("Error loading schedule:", error);
@@ -35,6 +38,12 @@ const PTSchedule = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if ((startDate && endDate) || (!startDate && !endDate)) {
+      loadSchedule();
+    }
+  }, [startDate, endDate]);
 
   const generateUpcomingDates = () => {
     const dates = [];
@@ -108,6 +117,29 @@ const PTSchedule = () => {
     } catch (error) {
       console.error("Error marking slot completed:", error);
       alert("❌ Lỗi khi xác nhận hoàn thành.");
+    }
+  };
+
+  const handleApprove = async (id) => {
+    try {
+      await approveBooking(id);
+      await loadSchedule();
+      setTimeout(() => alert("✅ Đã phê duyệt lịch tập."), 100);
+    } catch (error) {
+      console.error("Error approving booking:", error);
+      alert("❌ Lỗi khi duyệt: " + (error.response?.data || error.message));
+    }
+  };
+
+  const handleReject = async (id) => {
+    if (!window.confirm("Bạn có chắc muốn từ chối yêu cầu lịch tập này?")) return;
+    try {
+      await rejectBooking(id);
+      await loadSchedule();
+      setTimeout(() => alert("✅ Đã từ chối lịch tập."), 100);
+    } catch (error) {
+      console.error("Error rejecting booking:", error);
+      alert("❌ Lỗi khi từ chối: " + (error.response?.data || error.message));
     }
   };
 
@@ -238,8 +270,25 @@ const PTSchedule = () => {
       )}
 
       <header className="pt-schedule-header">
-        <h1>Lịch biểu Thông minh</h1>
-        <p>PT nhấn chọn các ngày để đăng ký khung giờ rảnh hàng loạt.</p>
+        <div>
+          <h1>Lịch biểu Thông minh</h1>
+          <p>PT nhấn chọn các ngày để đăng ký khung giờ rảnh hàng loạt.</p>
+        </div>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <input
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            style={{ padding: '8px', border: '1px solid #cbd5e1', borderRadius: '8px' }}
+          />
+          <span style={{ color: '#64748b' }}>đến</span>
+          <input
+            type="date"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            style={{ padding: '8px', border: '1px solid #cbd5e1', borderRadius: '8px' }}
+          />
+        </div>
       </header>
 
       <div className="pt-schedule-grid">
@@ -324,7 +373,17 @@ const PTSchedule = () => {
                           <span className="time-range">{formatDateTime(slot.startTime)} - {formatDateTime(slot.endTime)}</span>
                         </div>
                         <div className="slot-actions">
-                          <span className="status-indicator">{slot.status === "AVAILABLE" ? "Rảnh" : slot.status === "CONFIRMED" ? "Đã đặt" : slot.status === "COMPLETED" ? "Đã tập" : "Bận"}</span>
+                          <span className="status-indicator">{slot.status === "AVAILABLE" ? "Rảnh" : slot.status === "CONFIRMED" ? "Đã đặt" : slot.status === "COMPLETED" ? "Đã tập" : slot.status === "PENDING" ? "Chờ duyệt" : "Bận"}</span>
+                          {slot.status === "PENDING" && (
+                            <>
+                              <button onClick={() => handleApprove(slot.id)} className="btn-action-mini btn-complete" style={{ backgroundColor: '#28a745', marginRight: '5px' }}>
+                                Duyệt
+                              </button>
+                              <button onClick={() => handleReject(slot.id)} className="btn-action-mini btn-del-mini" style={{ backgroundColor: '#dc3545', color: 'white', padding: '2px 8px', borderRadius: '4px', border: 'none' }}>
+                                Từ chối
+                              </button>
+                            </>
+                          )}
                           {slot.status === "CONFIRMED" && (
                             <button onClick={() => handleMarkCompleted(slot.id)} className="btn-action-mini btn-complete">
                               Hoàn thành

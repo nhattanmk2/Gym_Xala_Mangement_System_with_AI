@@ -113,8 +113,8 @@ export default function MemberLayout() {
             to="/member/roadmap"
             className={({ isActive }) => (isActive ? "nav-item active" : "nav-item")}
           >
-            <span className="nav-icon">📋</span>
-            <span className="nav-text">Lộ trình tập</span>
+            <span className="nav-icon">📈</span>
+            <span className="nav-text">Tiến độ tập luyện</span>
           </NavLink>
           <NavLink
             to="/member/ai-consultation"
