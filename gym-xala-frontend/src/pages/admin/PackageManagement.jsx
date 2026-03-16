@@ -10,6 +10,7 @@ import {
 } from "../../api/adminPackageApi";
 import { getCategories, getExercisesByCategory, getLevelsByExercise } from "../../api/adminExerciseApi";
 import { getAllEquipment } from "../../api/adminEquipmentApi";
+import { getAllPts } from "../../api/adminPtApi";
 import "./packageManagement.css";
 
 const PackageManagement = () => {
@@ -30,7 +31,8 @@ const PackageManagement = () => {
     active: true,
     promotion: "",
     maxSessions: "",
-    roadmaps: []
+    roadmaps: [],
+    ptIds: []
   });
 
   // Auxiliary data for dropdowns
@@ -38,6 +40,7 @@ const PackageManagement = () => {
   const [equipmentList, setEquipmentList] = useState([]);
   const [exerciseOptions, setExerciseOptions] = useState([]);
   const [levelOptions, setLevelOptions] = useState([]);
+  const [allPts, setAllPts] = useState([]);
 
   // Modal control for nesting
   const [showRoadmapModal, setShowRoadmapModal] = useState(false);
@@ -62,14 +65,33 @@ const PackageManagement = () => {
 
   const fetchAuxData = async () => {
     try {
-      const [catRes, equipRes] = await Promise.all([
+      // Fetch data one by one or with individual catch to avoid blocking the whole block
+      const [catRes, equipRes, ptsRes] = await Promise.allSettled([
         getCategories(),
-        getAllEquipment()
+        getAllEquipment(),
+        getAllPts()
       ]);
-      setCategories(catRes.data);
-      setEquipmentList(equipRes.data);
+
+      if (catRes.status === "fulfilled") {
+        setCategories(catRes.value.data);
+      } else {
+        console.error("Error fetching categories:", catRes.reason);
+      }
+
+      if (equipRes.status === "fulfilled") {
+        setEquipmentList(equipRes.value.data);
+      } else {
+        console.error("Error fetching equipment:", equipRes.reason);
+      }
+
+      if (ptsRes.status === "fulfilled") {
+        console.log("PTs loaded successfully:", ptsRes.value);
+        setAllPts(ptsRes.value);
+      } else {
+        console.error("Error fetching PTs:", ptsRes.reason);
+      }
     } catch (err) {
-      console.error("Error fetching aux data:", err);
+      console.error("Unexpected error in fetchAuxData:", err);
     }
   };
 
@@ -98,7 +120,8 @@ const PackageManagement = () => {
         category: pkg.category,
         active: pkg.active,
         promotion: pkg.promotion || "",
-        roadmaps: pkg.roadmaps || []
+        roadmaps: pkg.roadmaps || [],
+        ptIds: pkg.personalTrainers ? pkg.personalTrainers.map(pt => pt.id) : []
       });
       setImagePreview(pkg.image ? `data:image/png;base64,${pkg.image}` : "");
     } else {
@@ -112,7 +135,8 @@ const PackageManagement = () => {
         active: true,
         promotion: "",
         maxSessions: "",
-        roadmaps: []
+        roadmaps: [],
+        ptIds: []
       });
       setImagePreview("");
     }
@@ -561,6 +585,41 @@ const PackageManagement = () => {
                     onChange={(e) => setFormData({ ...formData, promotion: e.target.value })}
                     placeholder="VD: Tặng áo thun + Bình nước Gym Xala..."
                   />
+                </div>
+
+                <div className="form-group">
+                  <label>Chỉ định Huấn luyện viên (PT)</label>
+                  <select
+                    multiple
+                    className="pt-select-dropdown"
+                    value={formData.ptIds}
+                    onChange={(e) => {
+                      const selectedOptions = Array.from(e.target.selectedOptions, option => parseInt(option.value));
+                      setFormData({ ...formData, ptIds: selectedOptions });
+                    }}
+                    style={{
+                      width: "100%",
+                      padding: "10px",
+                      borderRadius: "8px",
+                      border: "1px solid #e2e8f0",
+                      height: "150px",
+                      fontSize: "0.9rem",
+                      outline: "none"
+                    }}
+                  >
+                    {allPts.length === 0 ? (
+                      <option disabled>Đang tải hoặc chưa có dữ liệu PT...</option>
+                    ) : (
+                      allPts.map(pt => (
+                        <option key={pt.id} value={pt.id}>
+                          {pt.name} - {pt.ptSpecialty || 'Chung'} ({pt.gymLocationName || 'N/A'})
+                        </option>
+                      ))
+                    )}
+                  </select>
+                  <p style={{ fontSize: "0.75rem", color: "#64748b", marginTop: "5px" }}>
+                    Nhấn giữ <b>Ctrl</b> (Windows) hoặc <b>Command</b> (Mac) để chọn nhiều PT.
+                  </p>
                 </div>
 
                 <div className="modal-actions">

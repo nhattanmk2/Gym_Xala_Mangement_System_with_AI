@@ -48,6 +48,14 @@ export const getAllPTs = async (branchId) => {
     return res.data;
 };
 
+export const getAvailablePtsForMember = async () => {
+    const token = getToken();
+    const res = await axios.get(`${BASE_URL}/member-available`, {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+    return res.data;
+};
+
 export const approveBooking = async (id) => {
     const token = getToken();
     const res = await axios.put(`${BASE_URL}/schedule/${id}/approve`, {}, {

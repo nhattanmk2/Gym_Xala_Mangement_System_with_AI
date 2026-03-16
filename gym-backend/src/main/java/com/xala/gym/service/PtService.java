@@ -12,4 +12,5 @@ public interface PtService {
     List<Position> getAllPositions();
     List<GymLocation> getAllLocations();
     List<AdminPtResponse> getAllPts(Integer branchId);
+    List<AdminPtResponse> getAvailablePtsForMember();
 }

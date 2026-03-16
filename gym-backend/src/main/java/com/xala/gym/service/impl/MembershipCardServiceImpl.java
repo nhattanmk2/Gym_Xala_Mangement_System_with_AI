@@ -2,13 +2,16 @@ package com.xala.gym.service.impl;
 
 import com.xala.gym.dto.request.MembershipRegistrationRequest;
 import com.xala.gym.dto.response.MembershipCardResponse;
+import com.xala.gym.dto.response.AdminPtResponse;
 import com.xala.gym.entity.Member;
 import com.xala.gym.entity.MembershipCard;
 import com.xala.gym.entity.Package;
+import com.xala.gym.entity.Employee;
 import com.xala.gym.repository.MemberRepository;
 import com.xala.gym.repository.MembershipCardRepository;
 import com.xala.gym.repository.PackageRepository;
 import com.xala.gym.repository.UserRepository;
+import com.xala.gym.repository.EmployeeRepository;
 import com.xala.gym.service.MembershipCardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,6 +31,7 @@ public class MembershipCardServiceImpl implements MembershipCardService {
     private final MemberRepository memberRepository;
     private final PackageRepository packageRepository;
     private final UserRepository userRepository;
+    private final EmployeeRepository employeeRepository;
 
     @Override
     @Transactional
@@ -104,15 +108,69 @@ public class MembershipCardServiceImpl implements MembershipCardService {
         cardRepository.save(card);
     }
 
+    @Override
+    @Transactional
+    public void assignPt(String username, Long cardId, Long ptId) {
+        Member member = memberRepository.findByUserUsername(username)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy member cho: " + username));
+
+        MembershipCard card = cardRepository.findById(cardId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy thông tin gói tập với ID: " + cardId));
+
+        if (!card.getMember().getId().equals(member.getId())) {
+            throw new IllegalStateException("Bạn không có quyền gán PT cho gói tập này");
+        }
+
+        if (!"ACTIVE".equals(card.getStatus()) && !"PENDING".equals(card.getStatus())) {
+            throw new IllegalStateException("Gói tập hiện không ở trạng thái cho phép gán PT");
+        }
+
+        Employee pt = employeeRepository.findByUser_Id(ptId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy Huấn luyện viên với ID: " + ptId));
+
+        // Kiểm tra xem PT có trong danh sách PT của gói này không
+        boolean isPtInPackage = card.getGymPackage().getPersonalTrainers().stream()
+                .anyMatch(p -> p.getId().equals(ptId));
+
+        if (!isPtInPackage) {
+            throw new IllegalArgumentException("Huấn luyện viên này không phụ trách gói tập của bạn.");
+        }
+
+        card.setAssignedPt(pt);
+        cardRepository.save(card);
+    }
+
     private MembershipCardResponse mapToResponse(MembershipCard card) {
-        return MembershipCardResponse.builder()
+        MembershipCardResponse.MembershipCardResponseBuilder builder = MembershipCardResponse.builder()
                 .id(card.getId())
                 .packageId(card.getGymPackage().getId())
                 .packageName(card.getGymPackage().getName())
                 .category(card.getGymPackage().getCategory())
                 .startDate(card.getStartDate())
                 .endDate(card.getEndDate())
-                .status(card.getStatus())
-                .build();
+                .status(card.getStatus());
+
+        if (card.getAssignedPt() != null && card.getAssignedPt().getUser() != null) {
+            builder.assignedPtId(card.getAssignedPt().getUser().getId());
+            builder.assignedPtName(card.getAssignedPt().getName());
+            if (card.getAssignedPt().getGymLocation() != null) {
+                builder.assignedPtLocationName(card.getAssignedPt().getGymLocation().getName());
+            }
+        }
+
+        if (card.getGymPackage() != null && card.getGymPackage().getPersonalTrainers() != null) {
+            builder.availablePts(card.getGymPackage().getPersonalTrainers().stream()
+                    .map(pt -> AdminPtResponse.builder()
+                            .id(pt.getUser() != null ? pt.getUser().getId() : pt.getId()) // Use User ID for scheduling
+                            .userId(pt.getUser() != null ? pt.getUser().getId() : null)
+                            .name(pt.getName())
+                            .ptSpecialty(pt.getPtSpecialty())
+                            .avatar(pt.getAvatar() != null ? java.util.Base64.getEncoder().encodeToString(pt.getAvatar()) : null)
+                            .ptRating(pt.getUser() != null ? pt.getUser().getAverageRating() : null)
+                            .build())
+                    .collect(java.util.stream.Collectors.toList()));
+        }
+
+        return builder.build();
     }
 }

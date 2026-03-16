@@ -21,4 +21,5 @@ public class PackageRequest {
     private Boolean active;
     private String promotion;
     private java.util.List<WorkoutRoadmapRequest> roadmaps;
+    private java.util.List<Long> ptIds;
 }

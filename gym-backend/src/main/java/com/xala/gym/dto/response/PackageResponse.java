@@ -19,4 +19,5 @@ public class PackageResponse {
     private String category;
     private byte[] image;
     private String promotion;
+    private java.util.List<AdminPtResponse> personalTrainers;
 }

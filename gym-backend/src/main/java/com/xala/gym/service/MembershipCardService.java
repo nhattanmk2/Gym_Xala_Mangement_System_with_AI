@@ -10,4 +10,5 @@ public interface MembershipCardService {
     List<MembershipCardResponse> getMyCards(String username);
     MembershipCardResponse getCurrentCard(String username);
     void cancelCard(String username, Long cardId);
+    void assignPt(String username, Long cardId, Long ptId);
 }

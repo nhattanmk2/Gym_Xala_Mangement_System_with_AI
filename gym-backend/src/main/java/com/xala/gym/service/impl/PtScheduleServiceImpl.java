@@ -25,6 +25,7 @@ public class PtScheduleServiceImpl implements PtScheduleService {
     private final NotificationService notificationService;
     private final MembershipCardRepository membershipCardRepository;
     private final MemberExerciseStatusRepository memberExerciseStatusRepository;
+    private final MemberRepository memberRepository;
 
     @Override
     @Transactional
@@ -275,9 +276,13 @@ public class PtScheduleServiceImpl implements PtScheduleService {
             throw new RuntimeException("PT này đã đạt giới hạn " + ptMaxTrainees + " học viên trong khung giờ này.");
         }
 
+        // Lấy ID Member từ User hiện tại
+        com.xala.gym.entity.Member currentMember = memberRepository.findByUser_Id(member.getId())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy thông tin Member cho tài khoản này."));
+
         // Kiểm tra số buổi tập
         java.util.Optional<com.xala.gym.entity.MembershipCard> activeCardOpt = 
-            membershipCardRepository.findFirstByMemberIdAndStatusOrderByEndDateDesc(member.getId(), "ACTIVE");
+            membershipCardRepository.findFirstByMemberIdAndStatusOrderByEndDateDesc(currentMember.getId(), "ACTIVE");
             
         if (activeCardOpt.isEmpty()) {
             throw new RuntimeException("Bạn chưa đăng ký hoặc không có thẻ tập nào đang hoạt động.");
@@ -287,12 +292,21 @@ public class PtScheduleServiceImpl implements PtScheduleService {
             throw new RuntimeException("Bạn đã hết số buổi tập trong gói. Vui lòng gia hạn để tiếp tục đặt lịch.");
         }
         
+        // Kiểm tra xem PT được chọn có nằm trong gói tập này không
+        boolean isPtInPackage = activeCard.getGymPackage().getPersonalTrainers().stream()
+                .anyMatch(pt -> pt.getUser().getId().equals(slot.getPersonalTrainer().getId()));
+                
+        if (!isPtInPackage) {
+             throw new RuntimeException("PT này không thuộc gói tập hiện tại của bạn.");
+        }
+
         if (activeCard.getRemainingSessions() != null) {
             activeCard.setRemainingSessions(activeCard.getRemainingSessions() - 1);
             membershipCardRepository.save(activeCard);
         }
 
         slot.setMember(member);
+        slot.setGymPackage(activeCard.getGymPackage());
         slot.setStatus("PENDING"); // Đợi Admin duyệt
         
         Booking saved = bookingRepository.save(slot);
@@ -369,16 +383,20 @@ public class PtScheduleServiceImpl implements PtScheduleService {
             throw new RuntimeException("Bạn không có quyền từ chối lịch tập này.");
         }
         
-        User member = slot.getMember();
+        User memberUser = slot.getMember();
         
-        // Hoàn lại buổi tập
-        java.util.Optional<com.xala.gym.entity.MembershipCard> activeCardOpt = 
-            membershipCardRepository.findFirstByMemberIdAndStatusOrderByEndDateDesc(member.getId(), "ACTIVE");
-        if (activeCardOpt.isPresent()) {
-            com.xala.gym.entity.MembershipCard activeCard = activeCardOpt.get();
-            if (activeCard.getRemainingSessions() != null) {
-                activeCard.setRemainingSessions(activeCard.getRemainingSessions() + 1);
-                membershipCardRepository.save(activeCard);
+        // Hoàn lại buổi tập - Cần lấy ID Member
+        com.xala.gym.entity.Member member = memberRepository.findByUser_Id(memberUser.getId()).orElse(null);
+        
+        if (member != null) {
+            java.util.Optional<com.xala.gym.entity.MembershipCard> activeCardOpt = 
+                membershipCardRepository.findFirstByMemberIdAndStatusOrderByEndDateDesc(member.getId(), "ACTIVE");
+            if (activeCardOpt.isPresent()) {
+                com.xala.gym.entity.MembershipCard activeCard = activeCardOpt.get();
+                if (activeCard.getRemainingSessions() != null) {
+                    activeCard.setRemainingSessions(activeCard.getRemainingSessions() + 1);
+                    membershipCardRepository.save(activeCard);
+                }
             }
         }
 
@@ -415,14 +433,18 @@ public class PtScheduleServiceImpl implements PtScheduleService {
             throw new RuntimeException("Không thể hủy! Chỉ được phép hủy lịch trước thời gian bắt đầu ít nhất 24 giờ. Vui lòng liên hệ Admin.");
         }
 
-        // Hoàn lại buổi tập cho user
-        java.util.Optional<com.xala.gym.entity.MembershipCard> activeCardOpt = 
-            membershipCardRepository.findFirstByMemberIdAndStatusOrderByEndDateDesc(member.getId(), "ACTIVE");
-        if (activeCardOpt.isPresent()) {
-            com.xala.gym.entity.MembershipCard activeCard = activeCardOpt.get();
-            if (activeCard.getRemainingSessions() != null) {
-                activeCard.setRemainingSessions(activeCard.getRemainingSessions() + 1);
-                membershipCardRepository.save(activeCard);
+        // Hoàn lại buổi tập cho user - Cần lấy ID Member
+        com.xala.gym.entity.Member currentMember = memberRepository.findByUser_Id(member.getId()).orElse(null);
+        
+        if (currentMember != null) {
+            java.util.Optional<com.xala.gym.entity.MembershipCard> activeCardOpt = 
+                membershipCardRepository.findFirstByMemberIdAndStatusOrderByEndDateDesc(currentMember.getId(), "ACTIVE");
+            if (activeCardOpt.isPresent()) {
+                com.xala.gym.entity.MembershipCard activeCard = activeCardOpt.get();
+                if (activeCard.getRemainingSessions() != null) {
+                    activeCard.setRemainingSessions(activeCard.getRemainingSessions() + 1);
+                    membershipCardRepository.save(activeCard);
+                }
             }
         }
 
@@ -528,34 +550,57 @@ public class PtScheduleServiceImpl implements PtScheduleService {
     public List<PtClientResponse> getMyClients() {
         User pt = getCurrentUser();
         
-        // Find existing distinct members that this PT has booked sessions with
-        List<com.xala.gym.entity.Member> distinctMembers = bookingRepository.findDistinctMembersByPtId(pt.getId());
+        // 1. Members who have booked sessions with this PT
+        List<com.xala.gym.entity.Member> bookedMembers = bookingRepository.findDistinctMembersByPtId(pt.getId());
+        
+        // 2. Members who have assigned this PT to their membership package (ACTIVE or PENDING)
+        List<com.xala.gym.entity.MembershipCard> assignedCards = membershipCardRepository.findByAssignedPt_User_Id(pt.getId());
 
-        return distinctMembers.stream().map(member -> {
-            
-            // Look up the active gym package
-            String activePackageName = "Chưa đăng ký gói tập";
+        // Merge both sources using Member ID as key to ensure uniqueness and handle Hibernate proxies
+        java.util.Map<Long, com.xala.gym.entity.Member> memberMap = new java.util.HashMap<>();
+        
+        for (com.xala.gym.entity.Member m : bookedMembers) {
+            if (m != null && m.getId() != null) {
+                memberMap.put(m.getId(), m);
+            }
+        }
+        
+        for (com.xala.gym.entity.MembershipCard card : assignedCards) {
+            if (card.getMember() != null && card.getMember().getId() != null) {
+                memberMap.put(card.getMember().getId(), card.getMember());
+            }
+        }
+
+        return memberMap.values().stream().map(member -> {
+            // Look up the active OR pending gym package to show in the list
+            String packageName = "Chưa kết nối gói tập";
             java.time.LocalDate packageEndDate = null;
 
-            // We depend on membershipCardRepository here
-            java.util.Optional<com.xala.gym.entity.MembershipCard> activeCardOpt = 
+            // Priority: ACTIVE then PENDING
+            java.util.Optional<com.xala.gym.entity.MembershipCard> cardOpt = 
                 membershipCardRepository.findFirstByMemberIdAndStatusOrderByEndDateDesc(member.getId(), "ACTIVE");
             
-            if (activeCardOpt.isPresent() && activeCardOpt.get().getGymPackage() != null) {
-                activePackageName = activeCardOpt.get().getGymPackage().getName();
-                packageEndDate = activeCardOpt.get().getEndDate();
+            if (cardOpt.isEmpty()) {
+                cardOpt = membershipCardRepository.findFirstByMemberIdAndStatusOrderByEndDateDesc(member.getId(), "PENDING");
+            }
+            
+            if (cardOpt.isPresent() && cardOpt.get().getGymPackage() != null) {
+                packageName = cardOpt.get().getGymPackage().getName() + 
+                        ("PENDING".equals(cardOpt.get().getStatus()) ? " (Chờ duyệt)" : "");
+                packageEndDate = cardOpt.get().getEndDate();
             }
 
             return PtClientResponse.builder()
                 .memberId(member.getId())
-                .memberName(member.getName() != null ? member.getName() : "Khách hàng")
+                .memberName(member.getName() != null ? member.getName() : 
+                           (member.getUser() != null ? member.getUser().getFullName() : "Học viên"))
                 .email(member.getEmail())
                 .phone(member.getPhone())
                 .height(member.getHeight())
                 .weight(member.getWeight())
                 .bmi(member.getBmi())
                 .goalType(member.getGoalType() != null ? member.getGoalType().name() : null)
-                .activePackageName(activePackageName)
+                .activePackageName(packageName)
                 .packageEndDate(packageEndDate)
                 .build();
         }).collect(Collectors.toList());

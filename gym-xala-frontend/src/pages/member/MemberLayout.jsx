@@ -82,13 +82,6 @@ export default function MemberLayout() {
             <span className="nav-text">Trang chủ</span>
           </NavLink>
           <NavLink
-            to="/member/booking"
-            className={({ isActive }) => (isActive ? "nav-item active" : "nav-item")}
-          >
-            <span className="nav-icon">📅</span>
-            <span className="nav-text">Đặt lịch</span>
-          </NavLink>
-          <NavLink
             to="/member/packages"
             className={({ isActive }) => (isActive ? "nav-item active" : "nav-item")}
           >
@@ -117,6 +110,13 @@ export default function MemberLayout() {
             <span className="nav-text">Tiến độ tập luyện</span>
           </NavLink>
           <NavLink
+            to="/member/booking"
+            className={({ isActive }) => (isActive ? "nav-item active" : "nav-item")}
+          >
+            <span className="nav-icon">📅</span>
+            <span className="nav-text">Đặt lịch</span>
+          </NavLink>
+          <NavLink
             to="/member/ai-consultation"
             className={({ isActive }) => (isActive ? "nav-item active" : "nav-item")}
             style={{
@@ -126,17 +126,6 @@ export default function MemberLayout() {
           >
             <span className="nav-icon">✨</span>
             <span className="nav-text" style={{ color: '#d0fd3e', fontWeight: 'bold' }}>Tư Vấn Thể Trạng AI</span>
-          </NavLink>
-          <NavLink
-            to="/member/suggest-pt"
-            className={({ isActive }) => (isActive ? "nav-item active" : "nav-item")}
-            style={{
-              background: 'linear-gradient(90deg, rgba(0, 229, 255, 0.1) 0%, rgba(0, 119, 255, 0.1) 100%)',
-              borderLeftColor: '#00e5ff'
-            }}
-          >
-            <span className="nav-icon">🤖</span>
-            <span className="nav-text" style={{ color: '#00e5ff', fontWeight: 'bold' }}>Tìm kiếm PT theo lịch rảnh</span>
           </NavLink>
           <NavLink
             to="/member/profile"

@@ -42,4 +42,11 @@ public class MemberPackageController {
         membershipCardService.cancelCard(username, id);
         return ResponseEntity.ok().build();
     }
+
+    @PutMapping("/{cardId}/assign-pt/{ptId}")
+    public ResponseEntity<Void> assignPt(@PathVariable Long cardId, @PathVariable Long ptId) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        membershipCardService.assignPt(username, cardId, ptId);
+        return ResponseEntity.ok().build();
+    }
 }

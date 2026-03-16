@@ -1,67 +1,25 @@
-# Hướng dẫn Vận hành Hệ thống Quản lý Gym Xala
+# Hướng dẫn Luồng Chọn Huấn luyện viên (PT) và Đặt lịch tập
 
-Chào mừng bạn đến với tài liệu hướng dẫn vận hành hệ thống Gym Xala. Tài liệu này cung cấp các thông tin cần thiết để quản trị viên, huấn luyện viên (PT) và hội viên sử dụng hệ thống một cách hiệu quả.
+Tài liệu này ghi nhớ luồng nghiệp vụ gán PT và đặt lịch tập sau khi đăng ký gói tập tại Gym Xala.
 
----
+## 1. Luồng dành cho Quản trị viên (Admin)
+1. Truy cập vào trang **Quản lý Gói tập** (Package Management).
+2. Khi tạo mới hoặc chỉnh sửa một gói tập, Admin chọn danh sách các **Huấn luyện viên phụ trách** cho gói đó.
+3. Chỉ những PT được chọn mới xuất hiện trong danh sách để Member đăng ký.
 
-## 1. Thông tin Đăng nhập Mẫu
-Sau khi import bộ dữ liệu mẫu (`seed_data_professional.sql`), bạn có thể sử dụng các tài khoản sau để thử nghiệm:
+## 2. Luồng dành cho Thành viên (Member)
+1. **Đăng ký**: Thành viên chọn gói tập và đăng ký.
+2. **Chọn PT**: Tại mục **"Gói tập của tôi"**, nếu gói tập chưa có PT, nhấn **"✨ Chọn Huấn luyện viên"**. Hệ thống chỉ hiển thị PT được Admin gán cho gói đó.
+3. **Đặt lịch tập**: Thành viên truy cập mục **"📅 Đặt lịch"**.
+   - Nếu chưa chọn PT: Hệ thống hiển thị cảnh báo và nút điều hướng về trang chọn PT.
+   - Nếu đã có PT: Hệ thống tự động hiển thị các khung giờ rảnh của PT đó.
+   - Chọn khung giờ và nhấn **"Đặt ngay"**. Trạng thái lịch sẽ là `PENDING`.
 
-| Vai trò | Username | Password | Mục đích thử nghiệm |
-| :--- | :--- | :--- | :--- |
-| **Admin** | `admin` | `password123` | Quản lý toàn bộ hệ thống, báo cáo, nhân sự. |
-| **PT** | `trainer01` | `password123` | Xem lịch dạy, đánh giá học viên. |
-| **Member** | `member01` | `password123` | Đăng ký gói tập, xem lộ trình, chatbot AI. |
+## 3. Luồng dành cho Huấn luyện viên (PT)
+1. **Đăng ký lịch**: PT sử dụng mục **"Lịch biểu"** để tạo các khung giờ rảnh.
+2. **Duyệt lịch**: Khi có Member đặt lịch, PT sẽ thấy yêu cầu `PENDING`. PT có thể nhấn **"Duyệt"** hoặc **"Từ chối"**.
 
----
-
-## 2. Hướng dẫn dành cho Quản trị viên (Admin)
-
-### Quản lý Nhân sự & Hội viên
-- Truy cập vào menu **Quản lý Hội viên** hoặc **Quản lý PT** để xem danh sách.
-- Bạn có thể **Nâng cấp** một Hội viên lên thành PT nếu họ đủ điều kiện.
-- **Khóa/Mở khóa** tài khoản khi cần thiết.
-
-### Quản lý Gói tập
-- Admin có quyền thêm mới, chỉnh sửa hoặc tạm dừng các gói tập (Packages).
-- Các gói tập được thiết lập sẽ hiển thị trực tiếp trên trang chủ cho khách hàng đăng ký.
-
-### Xem Báo cáo & Thống kê
-- Hệ thống cung cấp biểu đồ tăng trưởng hội viên và doanh thu theo tháng.
-- Admin có thể xem **Xếp hạng PT** dựa trên số buổi dạy và đánh giá từ học viên.
-
----
-
-## 3. Hướng dẫn dành cho Huấn luyện viên (PT)
-
-### Quản lý Lịch dạy
-- PT đăng nhập và vào trang **Dashboard PT** để xem các khung giờ đã được hội viên đăng ký.
-- Quản lý trạng thái buổi tập (Hoàn thành/Hủy).
-
-### Đánh giá & Ghi nhận kết quả
-- Sau mỗi buổi tập, PT thực hiện nhập **Đánh giá (Evaluation)** và ghi nhận các bài tập học viên đã thực hiện.
-- Thông tin này sẽ giúp học viên theo dõi được sự tiến bộ của mình.
-
----
-
-## 4. Hướng dẫn dành cho Hội viên (Member)
-
-### Chatbot AI Tư vấn
-- Sử dụng tính năng **Chatbot AI** ở góc màn hình để nhận tư vấn về sức khỏe và gợi ý gói tập phù hợp dựa trên chỉ số BMI.
-
-### Đăng ký & Theo dõi Lộ trình
-- Hội viên có thể đăng ký các gói tập và chọn PT yêu thích.
-- Trang **Lộ trình tập luyện** hiển thị các bài tập được PT thiết kế riêng cho gói tập đó.
-
----
-
-## 5. Lưu ý Kỹ thuật
-
-### Cách làm sạch và nạp dữ liệu mẫu
-1. Sử dụng công cụ quản lý cơ sở dữ liệu (ví dụ: MySQL Workbench, DBeaver).
-2. Mở tệp `e:/gym-xala/database/seed_data_professional.sql`.
-3. Thực thi (Execute) toàn bộ tệp SQL này để làm mới dữ liệu hệ thống.
-
-### Bảo mật hệ thống
-- Hệ thống đã được thiết lập phân quyền nghiêm ngặt (**RBAC**). 
-- Các tài khoản không có quyền Admin sẽ bị từ chối truy cập (Lỗi 403) nếu cố tình truy cập vào các đường dẫn quản trị.
+## 4. Quy tắc Kỹ thuật (Technical Rules)
+- **Ràng buộc**: Member chỉ được chọn PT thuộc gói và chỉ được đặt lịch khi đã gán PT.
+- **API**: Sử dụng `/api/pt/schedule/available/{ptId}` để lấy lịch trống và `/api/pt/schedule/book/{id}` để đặt.
+- **Dữ liệu**: `availablePts` được trả về kèm `MembershipCardResponse` để tối ưu UI/UX.

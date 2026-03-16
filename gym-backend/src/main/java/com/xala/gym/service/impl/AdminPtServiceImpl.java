@@ -36,16 +36,18 @@ public class AdminPtServiceImpl implements AdminPtService {
         String searchPhone = phone == null ? "" : phone.trim();
 
         log.info("Searching PTs in DB with name LIKE '%{}%' and phone LIKE '%{}%'", searchName, searchPhone);
-        List<User> pts = userRepository.searchPTs(searchName, searchPhone);
+        List<Employee> pts = employeeRepository.searchPTs(searchName, searchPhone);
         
         return pts.stream()
                 .map(this::mapToAdminPtResponse)
                 .toList();
     }
 
-    private AdminPtResponse mapToAdminPtResponse(User u) {
+    private AdminPtResponse mapToAdminPtResponse(Employee e) {
+        User u = e.getUser();
         AdminPtResponse resp = AdminPtResponse.builder()
-                .id(u.getId())
+                .id(e.getId())
+                .userId(u.getId())
                 .name(u.getFullName())
                 .username(u.getUsername())
                 .email(u.getEmail())
@@ -55,28 +57,43 @@ public class AdminPtServiceImpl implements AdminPtService {
                 .status(u.getEnabled())
                 .build();
 
-        employeeRepository.findByUser_Id(u.getId()).ifPresent(e -> {
-            if (e.getPosition() != null) {
-                resp.setPositionId(e.getPosition().getId());
-                resp.setPositionName(e.getPosition().getName());
-            }
-            if (e.getGymLocation() != null) {
-                resp.setGymLocationId(e.getGymLocation().getId());
-                resp.setGymLocationName(e.getGymLocation().getName());
-            }
-            if (e.getAvatar() != null) {
-                resp.setAvatar(Base64.getEncoder().encodeToString(e.getAvatar()));
-            }
-        });
+        if (e.getPosition() != null) {
+            resp.setPositionId(e.getPosition().getId());
+            resp.setPositionName(e.getPosition().getName());
+        }
+        if (e.getGymLocation() != null) {
+            resp.setGymLocationId(e.getGymLocation().getId());
+            resp.setGymLocationName(e.getGymLocation().getName());
+        }
+        if (e.getAvatar() != null) {
+            resp.setAvatar(Base64.getEncoder().encodeToString(e.getAvatar()));
+        }
 
         return resp;
+    }
+
+    private AdminPtResponse mapUserToAdminPtResponse(User u) {
+        Employee e = employeeRepository.findByUser_Id(u.getId()).orElse(null);
+        if (e == null) {
+            // Fallback for cases where employee record is missing
+            return AdminPtResponse.builder()
+                    .userId(u.getId())
+                    .name(u.getFullName())
+                    .username(u.getUsername())
+                    .email(u.getEmail())
+                    .phone(u.getPhone())
+                    .status(u.getEnabled())
+                    .build();
+        }
+        return mapToAdminPtResponse(e);
     }
 
     @Override
     @Transactional
     public void downgradeToMember(Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy Huấn luyện viên (User)"));
+        Employee employee = employeeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy Huấn luyện viên (Employee)"));
+        User user = employee.getUser();
 
         // 1. Cập nhật quyền ROLE_PT -> ROLE_MEMBER
         Role ptRole = roleRepository.findByName(UserRole.ROLE_PT)
@@ -90,42 +107,32 @@ public class AdminPtServiceImpl implements AdminPtService {
         }
         userRepository.save(user);
 
-        // 2. Tìm Employee hiện tại (để lấy dữ liệu)
-        Optional<Employee> empOpt = employeeRepository.findByUser_Id(id);
-        
-        // 3. Đảm bảo có bản ghi Member (Nếu đã có thì update, không thì create)
-        Member member = memberRepository.findByUser_Id(id).orElse(new Member());
+        // 3. Đảm bảo có bản ghi Member
+        Member member = memberRepository.findByUser_Id(user.getId()).orElse(new Member());
         member.setUser(user);
-        
-        if (empOpt.isPresent()) {
-            Employee employee = empOpt.get();
-            member.setName(employee.getName());
-            member.setPhone(employee.getPhone());
-            member.setGymLocation(employee.getGymLocation());
-            member.setAvatar(employee.getAvatar());
-        } else {
-            member.setName(user.getFullName());
-            member.setPhone(user.getPhone());
-        }
+        member.setName(employee.getName());
+        member.setPhone(employee.getPhone());
+        member.setGymLocation(employee.getGymLocation());
+        member.setAvatar(employee.getAvatar());
         member.setEmail(user.getEmail());
         member.setStatus(true);
         memberRepository.save(member);
 
-        // 4. We keep the employee record if it has dependencies (history),
-        // but it won't show in the PT List because searchPTs filters by ROLE_PT.
+        // 4. We keep the employee record if it has dependencies
     }
 
     @Override
     @Transactional
     public void deletePtCompletely(Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy Huấn luyện viên (User)"));
+        Employee employee = employeeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy Huấn luyện viên (Employee)"));
+        User user = employee.getUser();
 
-        // 1. Tìm và xóa Member liên quan (nếu có)
-        memberRepository.findByUser_Id(id).ifPresent(memberRepository::delete);
+        // 1. Xóa Member liên quan
+        memberRepository.findByUser_Id(user.getId()).ifPresent(memberRepository::delete);
 
-        // 2. Tìm và xóa Employee liên quan (nếu có)
-        employeeRepository.findByUser_Id(id).ifPresent(employeeRepository::delete);
+        // 2. Xóa Employee
+        employeeRepository.delete(employee);
 
         // 3. Xoá vĩnh viễn user
         userRepository.delete(user);
@@ -179,21 +186,22 @@ public class AdminPtServiceImpl implements AdminPtService {
 
         employeeRepository.save(employee);
 
-        return mapToAdminPtResponse(user);
+        return mapToAdminPtResponse(employee);
     }
 
     @Override
     public AdminPtResponse getPtDetail(Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy Huấn luyện viên"));
-        return mapToAdminPtResponse(user);
+        Employee employee = employeeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy Huấn luyện viên (Employee)"));
+        return mapToAdminPtResponse(employee);
     }
 
     @Override
     @Transactional
     public AdminPtResponse updatePt(Long id, AdminUpdatePtRequest request, byte[] avatarFile) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy Huấn luyện viên"));
+        Employee employee = employeeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy Huấn luyện viên (Employee)"));
+        User user = employee.getUser();
 
         // Update User info
         user.setFullName(request.getFullName());
@@ -205,13 +213,6 @@ public class AdminPtServiceImpl implements AdminPtService {
         userRepository.save(user);
 
         // Update Employee info
-        Employee employee = employeeRepository.findByUser_Id(id)
-                .orElseGet(() -> {
-                    Employee e = new Employee();
-                    e.setUser(user);
-                    return e;
-                });
-        
         employee.setName(request.getFullName());
         employee.setPhone(request.getPhone());
         employee.setPtSpecialty(request.getPtSpecialty());
@@ -234,6 +235,6 @@ public class AdminPtServiceImpl implements AdminPtService {
 
         employeeRepository.save(employee);
 
-        return mapToAdminPtResponse(user);
+        return mapToAdminPtResponse(employee);
     }
 }

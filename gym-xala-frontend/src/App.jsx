@@ -175,7 +175,6 @@ function App() {
           }
         >
           <Route path="dashboard" element={<MemberDashboard />} />
-          <Route path="booking" element={<MemberBooking />} />
           <Route path="packages" element={<MemberPackages />} />
           <Route path="packages/:id" element={<PackageDetail />} />
           <Route path="profile" element={<MemberProfile />} />
@@ -183,6 +182,7 @@ function App() {
           <Route path="roadmap" element={<WorkoutProgress />} />
           <Route path="my-package" element={<MyPackage />} />
           <Route path="ai-consultation" element={<AIConsultation />} />
+          <Route path="booking" element={<MemberBooking />} />
           <Route path="suggest-pt" element={<SuggestPT />} />
         </Route>
 

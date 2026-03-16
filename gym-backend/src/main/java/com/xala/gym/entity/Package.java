@@ -42,4 +42,12 @@ public class Package {
 
     @Column(columnDefinition = "TEXT")
     private String promotion;
+
+    @ManyToMany
+    @JoinTable(
+            name = "package_pts",
+            joinColumns = @JoinColumn(name = "package_id"),
+            inverseJoinColumns = @JoinColumn(name = "employee_id")
+    )
+    private java.util.Set<Employee> personalTrainers = new java.util.HashSet<>();
 }

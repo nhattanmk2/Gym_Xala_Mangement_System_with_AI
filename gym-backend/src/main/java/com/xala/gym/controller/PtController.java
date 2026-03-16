@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/pt")
@@ -56,5 +57,10 @@ public class PtController {
     @GetMapping("/all")
     public ResponseEntity<List<AdminPtResponse>> getAllPts(@RequestParam(value = "branchId", required = false) Integer branchId) {
         return ResponseEntity.ok(ptService.getAllPts(branchId));
+    }
+
+    @GetMapping("/member-available")
+    public ResponseEntity<List<AdminPtResponse>> getAvailablePtsForMember() {
+        return ResponseEntity.ok(ptService.getAvailablePtsForMember());
     }
 }

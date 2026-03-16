@@ -27,3 +27,8 @@ export const cancelPackage = async (cardId) => {
     const res = await axios.put(`${BASE_URL}/cancel/${cardId}`, {}, getHeaders());
     return res.data;
 };
+
+export const assignPt = async (cardId, ptId) => {
+    const res = await axios.put(`${BASE_URL}/${cardId}/assign-pt/${ptId}`, {}, getHeaders());
+    return res.data;
+};

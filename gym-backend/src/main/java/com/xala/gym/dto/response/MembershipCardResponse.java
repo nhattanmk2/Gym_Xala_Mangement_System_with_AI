@@ -20,4 +20,8 @@ public class MembershipCardResponse {
     private LocalDate endDate;
     private String status;
     private Integer remainingSessions;
+    private Long assignedPtId;
+    private String assignedPtName;
+    private String assignedPtLocationName;
+    private java.util.List<AdminPtResponse> availablePts;
 }

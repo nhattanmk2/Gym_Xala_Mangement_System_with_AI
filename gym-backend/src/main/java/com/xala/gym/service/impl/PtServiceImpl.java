@@ -16,6 +16,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.xala.gym.repository.MembershipCardRepository;
+import com.xala.gym.entity.MembershipCard;
 
 import java.util.Base64;
 import java.util.List;
@@ -28,6 +30,7 @@ public class PtServiceImpl implements PtService {
     private final EmployeeRepository employeeRepository;
     private final PositionRepository positionRepository;
     private final GymLocationRepository gymLocationRepository;
+    private final MembershipCardRepository membershipCardRepository;
 
     @Override
     public AdminPtResponse getMyProfile() {
@@ -100,6 +103,25 @@ public class PtServiceImpl implements PtService {
                 .collect(java.util.stream.Collectors.toList());
     }
 
+    @Override
+    public List<AdminPtResponse> getAvailablePtsForMember() {
+        User user = getCurrentUser();
+        // Lấy các thẻ đang/chưa hoạt động nhưng vẫn valid (VD ACTIVE, PENDING)
+        List<MembershipCard> cards = membershipCardRepository.findByMember_User_Id(user.getId());
+        
+        java.util.Set<Employee> allowedPts = new java.util.HashSet<>();
+        for (MembershipCard card : cards) {
+            // Chỉ lấy PT từ các package mà thẻ đang có giá trị sử dụng
+            if ("ACTIVE".equals(card.getStatus()) || "PENDING".equals(card.getStatus())) {
+                allowedPts.addAll(card.getGymPackage().getPersonalTrainers());
+            }
+        }
+
+        return allowedPts.stream()
+                .map(emp -> mapToAdminPtResponse(emp.getUser())) // Lưu ý: mapToAdminPtResponse cần User, mà Employee có liên kết User
+                .collect(java.util.stream.Collectors.toList());
+    }
+
     private User getCurrentUser() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByUsername(username)
@@ -107,8 +129,10 @@ public class PtServiceImpl implements PtService {
     }
 
     private AdminPtResponse mapToAdminPtResponse(User u) {
+        Employee e = employeeRepository.findByUser_Id(u.getId()).orElse(null);
         AdminPtResponse resp = AdminPtResponse.builder()
-                .id(u.getId())
+                .id(e != null ? e.getId() : null)
+                .userId(u.getId())
                 .name(u.getFullName())
                 .username(u.getUsername())
                 .email(u.getEmail())
@@ -118,7 +142,7 @@ public class PtServiceImpl implements PtService {
                 .status(u.getEnabled())
                 .build();
 
-        employeeRepository.findByUser_Id(u.getId()).ifPresent(e -> {
+        if (e != null) {
             if (e.getPosition() != null) {
                 resp.setPositionId(e.getPosition().getId());
                 resp.setPositionName(e.getPosition().getName());
@@ -132,7 +156,7 @@ public class PtServiceImpl implements PtService {
             }
             resp.setPtExperience(e.getPtExperience());
             resp.setPtBio(e.getPtBio());
-        });
+        }
 
         return resp;
     }

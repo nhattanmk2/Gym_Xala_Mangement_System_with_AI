@@ -23,6 +23,7 @@ public class AdminPackageServiceImpl implements AdminPackageService {
     private final WorkoutSessionRepository sessionRepository;
     private final SessionExerciseRepository sessionExerciseRepository;
     private final ExerciseLevelRepository levelRepository;
+    private final EmployeeRepository employeeRepository;
 
     @Override
     public List<Package> getAllPackages() {
@@ -144,6 +145,17 @@ public class AdminPackageServiceImpl implements AdminPackageService {
         pkg.setPromotion(request.getPromotion());
         if (request.getActive() != null) {
             pkg.setActive(request.getActive());
+        }
+
+        if (request.getPtIds() != null && !request.getPtIds().isEmpty()) {
+            java.util.Set<Employee> pts = new java.util.HashSet<>(employeeRepository.findAllById(request.getPtIds()));
+            pkg.setPersonalTrainers(pts);
+        } else {
+            if (pkg.getPersonalTrainers() != null) {
+                pkg.getPersonalTrainers().clear();
+            } else {
+                pkg.setPersonalTrainers(new java.util.HashSet<>());
+            }
         }
     }
 }

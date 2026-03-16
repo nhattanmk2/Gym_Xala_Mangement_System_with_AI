@@ -14,6 +14,8 @@ public interface MembershipCardRepository extends JpaRepository<MembershipCard, 
     List<MembershipCard> findByMemberId(Long memberId);
     List<MembershipCard> findByMember_User_Id(Long userId);
     Optional<MembershipCard> findFirstByMemberIdAndStatusOrderByEndDateDesc(Long memberId, String status);
+    @Query("SELECT mc FROM MembershipCard mc WHERE mc.assignedPt.user.id = :userId")
+    List<MembershipCard> findByAssignedPt_User_Id(@Param("userId") Long userId);
 
     long countByStatus(String status);
 

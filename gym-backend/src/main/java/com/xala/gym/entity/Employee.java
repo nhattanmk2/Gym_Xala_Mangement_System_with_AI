@@ -53,7 +53,7 @@ public class Employee {
 
     @Builder.Default
     @Column(name = "max_trainees_per_slot")
-    private Integer maxTraineesPerSlot = 3; // Mặc định mỗi PT chứa 3 học viên / slot
+    private Integer maxTraineesPerSlot = 1; // Mặc định mỗi PT chứa 3 học viên / slot
 
     @Lob
     @Column(name = "avatar", columnDefinition = "LONGBLOB")

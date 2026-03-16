@@ -10,7 +10,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AdminPtResponse {
-    private Long id;
+    private Long id; // This should be Employee ID
+    private Long userId;
     private String name;
     private String username;
     private String email;

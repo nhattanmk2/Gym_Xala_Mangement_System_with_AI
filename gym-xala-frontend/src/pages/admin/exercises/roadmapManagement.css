@@ -11,63 +11,83 @@
 
 .mgmt-header h1 {
     flex: 1;
-    color: #fff;
+    color: #1e293b;
     font-size: 1.5rem;
+    margin: 0;
 }
 
 .back-btn {
-    background: #2c2c2e;
-    color: #fff;
-    border: none;
+    background: white;
+    color: #64748b;
+    border: 1px solid #e2e8f0;
     padding: 8px 15px;
     border-radius: 6px;
     cursor: pointer;
+    font-weight: 600;
+}
+
+.back-btn:hover {
+    background: #f1f5f9;
 }
 
 .add-btn {
-    background: #d0fd3e;
-    color: #000;
+    background: #2563eb;
+    color: white;
     border: none;
     padding: 10px 20px;
     border-radius: 8px;
     font-weight: bold;
     cursor: pointer;
+    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+}
+
+.add-btn:hover {
+    background: #1d4ed8;
 }
 
 .roadmap-card {
-    background: #1c1c1e;
-    border: 1px solid #2c2c2e;
+    background: white;
+    border: 1px solid #f1f5f9;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     border-radius: 12px;
     padding: 20px;
     margin-bottom: 25px;
 }
 
 .roadmap-info h2 {
-    color: #d0fd3e;
+    color: #2563eb;
     margin-bottom: 5px;
+    margin-top: 0;
 }
 
 .roadmap-info p {
-    color: #a3a3a3;
+    color: #64748b;
     margin-bottom: 15px;
 }
 
 .add-session-btn {
-    background: rgba(208, 253, 62, 0.1);
-    color: #d0fd3e;
-    border: 1px solid #d0fd3e;
+    background: #eff6ff;
+    color: #2563eb;
+    border: 1px solid #bfdbfe;
     padding: 6px 12px;
     border-radius: 6px;
     cursor: pointer;
     margin-right: 10px;
+    font-weight: 600;
 }
 
 .del-btn-text {
     background: none;
     border: none;
-    color: #ff453a;
+    color: #ef4444;
     cursor: pointer;
     text-decoration: underline;
+    padding: 6px 12px;
+    border-radius: 6px;
+}
+
+.del-btn-text:hover {
+    background: #fff1f2;
 }
 
 .sessions-grid {
@@ -78,46 +98,75 @@
 }
 
 .session-item {
-    background: #2c2c2e;
+    background: white;
+    border: 1px solid #e2e8f0;
     border-radius: 10px;
     padding: 15px;
     position: relative;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
 
 .sess-head {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     margin-bottom: 10px;
 }
 
+.sess-head h3 {
+    margin: 0;
+    color: #1e293b;
+    font-size: 1.1rem;
+}
+
 .ex-tag {
-    background: #3a3a3c;
+    background: #f1f5f9;
+    color: #475569;
     padding: 5px 10px;
     border-radius: 15px;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     margin-bottom: 5px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    border: 1px solid #e2e8f0;
 }
 
 .ex-tag button {
     background: none;
     border: none;
-    color: #ff453a;
+    color: #ef4444;
     cursor: pointer;
     margin-left: 5px;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ex-tag button:hover {
+    background: #fee2e2;
 }
 
 .add-ex-btn {
     width: 100%;
-    background: transparent;
-    border: 1px dashed #545456;
-    color: #a3a3a3;
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    color: #64748b;
     padding: 8px;
     border-radius: 6px;
     cursor: pointer;
     margin-top: 10px;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.add-ex-btn:hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+    color: #475569;
 }
 
 .ex-picker {
@@ -125,11 +174,12 @@
     top: 100%;
     left: 0;
     z-index: 10;
-    background: #3a3a3c;
+    background: white;
+    border: 1px solid #e2e8f0;
     width: 100%;
     padding: 10px;
     border-radius: 8px;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -142,62 +192,92 @@
 }
 
 .level-options button {
-    background: #d0fd3e;
-    color: #000;
-    border: none;
-    padding: 5px;
-    border-radius: 4px;
-    font-size: 0.8rem;
-    font-weight: bold;
+    background: #f8fafc;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+    padding: 8px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
     cursor: pointer;
+    text-align: left;
+}
+
+.level-options button:hover {
+    background: #eff6ff;
+    color: #2563eb;
+    border-color: #bfdbfe;
 }
 
 .close-picker {
-    background: #545456;
-    border: none;
-    color: #fff;
+    background: white;
+    border: 1px solid #e2e8f0;
+    color: #64748b;
     padding: 5px;
     border-radius: 4px;
     cursor: pointer;
+    font-weight: 600;
 }
 
-/* Modal styles */
+.close-picker:hover {
+    background: #f1f5f9;
+}
+
+/* Modal styles sync with PackageManagement */
 .modal {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.5);
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 100;
+    z-index: 1000;
 }
 
 .modal-content {
-    background: #1c1c1e;
-    padding: 30px;
-    border-radius: 15px;
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
     width: 400px;
+    max-width: 95%;
     display: flex;
     flex-direction: column;
     gap: 15px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    color: #1e293b;
+}
+
+.modal-content h3 {
+    margin-top: 0;
+    margin-bottom: 5px;
+    color: #1e293b;
 }
 
 .modal-btns {
     display: flex;
     gap: 10px;
+    margin-top: 10px;
 }
 
 .modal-btns button {
     flex: 1;
-    background: #d0fd3e;
+    background: #2563eb;
+    color: white;
     border: none;
     padding: 10px;
     border-radius: 8px;
     font-weight: bold;
     cursor: pointer;
+    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
 }
 
 .modal-btns button.cancel {
-    background: #3a3a3c;
-    color: #fff;
+    background: white;
+    color: #64748b;
+    border: 1px solid #e2e8f0;
+    box-shadow: none;
+}
+
+.modal-btns button.cancel:hover {
+    background: #f8fafc;
 }

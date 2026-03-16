@@ -1,17 +1,17 @@
 .admin-dashboard-container {
     padding: 20px;
     font-family: 'Inter', sans-serif;
-    color: #e0e0e0;
+    color: #1e293b;
 }
 
 .ad-header h1 {
     font-size: 28px;
-    color: #00e5ff;
+    color: #2563eb;
     margin-bottom: 5px;
 }
 
 .ad-header p {
-    color: #aaa;
+    color: #64748b;
     font-size: 14px;
     margin-bottom: 30px;
 }
@@ -20,7 +20,7 @@
     text-align: center;
     padding: 50px;
     font-size: 18px;
-    color: #d0fd3e;
+    color: #2563eb;
 }
 
 /* CARDS */
@@ -32,41 +32,42 @@
 }
 
 .ad-stat-card {
-    background: #1e1e1e;
+    background: white;
     border-radius: 12px;
     padding: 20px;
     display: flex;
     align-items: center;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #f1f5f9;
     border-left: 5px solid transparent;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .ad-stat-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 .ad-stat-card.revenue {
-    border-color: #d0fd3e;
+    border-left-color: #2563eb;
 }
 
 .ad-stat-card.members {
-    border-color: #00e5ff;
+    border-left-color: #0ea5e9;
 }
 
 .ad-stat-card.pts {
-    border-color: #ff3366;
+    border-left-color: #f43f5e;
 }
 
 .ad-stat-card.packages {
-    border-color: #a855f7;
+    border-left-color: #8b5cf6;
 }
 
 .ad-card-icon {
     font-size: 40px;
     margin-right: 20px;
-    background: rgba(255, 255, 255, 0.05);
+    background: #f8fafc;
     width: 60px;
     height: 60px;
     display: flex;
@@ -78,15 +79,16 @@
 .ad-card-info h3 {
     margin: 0;
     font-size: 13px;
-    color: #aaa;
+    color: #64748b;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    font-weight: 600;
 }
 
 .ad-card-info h2 {
     margin: 5px 0 0 0;
     font-size: 24px;
-    color: #fff;
+    color: #1e293b;
     font-weight: 700;
 }
 
@@ -99,18 +101,19 @@
 
 .ad-branch-stats,
 .ad-pending-stats {
-    background: #1e1e1e;
+    background: white;
     border-radius: 12px;
     padding: 20px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #f1f5f9;
 }
 
 .ad-details-section h3 {
     margin-top: 0;
     margin-bottom: 20px;
     font-size: 18px;
-    color: #e0e0e0;
-    border-bottom: 1px solid #333;
+    color: #1e293b;
+    border-bottom: 1px solid #f1f5f9;
     padding-bottom: 10px;
 }
 
@@ -124,19 +127,20 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: #2a2a2a;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
     padding: 12px 15px;
     border-radius: 8px;
 }
 
 .ad-branch-name {
     font-weight: 600;
-    color: #fff;
+    color: #1e293b;
 }
 
 .ad-branch-count {
-    background: rgba(0, 229, 255, 0.1);
-    color: #00e5ff;
+    background: #eff6ff;
+    color: #2563eb;
     padding: 4px 12px;
     border-radius: 20px;
     font-weight: bold;
@@ -147,11 +151,11 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    background: rgba(255, 193, 7, 0.1);
-    border: 1px solid rgba(255, 193, 7, 0.3);
+    background: #fffbeb;
+    border: 1px solid #fcd34d;
     padding: 15px;
     border-radius: 8px;
-    color: #ffc107;
+    color: #b45309;
 }
 
 .attention-icon {
@@ -161,6 +165,7 @@
 .attention-text strong {
     font-size: 18px;
     margin-left: 5px;
+    color: #92400e;
 }
 
 /* RESPONSIVE */
@@ -181,17 +186,19 @@
 .ad-filter-select {
     padding: 8px 16px;
     border-radius: 8px;
-    background: #2a2a2a;
-    color: #fff;
-    border: 1px solid #444;
+    background: white;
+    color: #1e293b;
+    border: 1px solid #e2e8f0;
     outline: none;
     cursor: pointer;
     font-size: 14px;
     transition: border-color 0.2s;
 }
 
-.ad-filter-select:hover {
-    border-color: #00e5ff;
+.ad-filter-select:hover,
+.ad-filter-select:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 /* MIDDLE SECTION (CHART & LEADERBOARD) */
@@ -204,10 +211,11 @@
 
 .ad-chart-wrapper,
 .ad-leaderboard-wrapper {
-    background: #1e1e1e;
+    background: white;
     border-radius: 12px;
     padding: 20px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #f1f5f9;
     min-width: 0;
     /* Prevents overflow in grid */
 }
@@ -217,8 +225,8 @@
     margin-top: 0;
     margin-bottom: 20px;
     font-size: 18px;
-    color: #e0e0e0;
-    border-bottom: 1px solid #333;
+    color: #1e293b;
+    border-bottom: 1px solid #f1f5f9;
     padding-bottom: 10px;
 }
 
@@ -238,42 +246,43 @@
 .pt-ranking-item {
     display: flex;
     align-items: center;
-    background: #2a2a2a;
+    background: white;
+    border: 1px solid #e2e8f0;
     padding: 12px 15px;
     border-radius: 8px;
     gap: 15px;
-    transition: transform 0.2s;
+    transition: transform 0.2s, background 0.2s;
 }
 
 .pt-ranking-item:hover {
     transform: translateX(5px);
-    background: #333;
+    background: #f8fafc;
 }
 
 .pt-rank-number {
     font-size: 18px;
     font-weight: bold;
-    color: #00e5ff;
+    color: #2563eb;
     width: 40px;
     text-align: center;
-    background: rgba(0, 229, 255, 0.1);
+    background: #eff6ff;
     padding: 8px 0;
     border-radius: 8px;
 }
 
 .pt-rank-info h4 {
     margin: 0 0 5px 0;
-    color: #fff;
+    color: #1e293b;
     font-size: 15px;
 }
 
 .pt-rank-stats {
     font-size: 13px;
-    color: #aaa;
+    color: #64748b;
 }
 
 .no-pt-data {
-    color: #888;
+    color: #94a3b8;
     text-align: center;
     padding: 20px 0;
     font-style: italic;

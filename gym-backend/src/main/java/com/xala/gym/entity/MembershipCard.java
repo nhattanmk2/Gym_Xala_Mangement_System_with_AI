@@ -29,6 +29,10 @@ public class MembershipCard {
     @JoinColumn(name = "package_id", nullable = false)
     private Package gymPackage;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "assigned_pt_id")
+    private Employee assignedPt;
+
     private LocalDate startDate;
 
     private LocalDate endDate;
