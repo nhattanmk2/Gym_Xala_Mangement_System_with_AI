@@ -72,6 +72,10 @@ public class AdminInvoiceServiceImpl implements AdminInvoiceService {
             } else {
                 // Mặc định 30 ngày nếu dữ liệu gói bị thiếu
                 card.setEndDate(today.plusDays(30));
+                // Đảm bảo số buổi tập vẫn được gán
+                if (card.getGymPackage() != null && card.getGymPackage().getMaxSessions() != null) {
+                    card.setRemainingSessions(card.getGymPackage().getMaxSessions());
+                }
             }
         }
 

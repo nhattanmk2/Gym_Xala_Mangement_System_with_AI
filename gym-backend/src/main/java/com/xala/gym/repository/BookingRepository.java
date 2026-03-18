@@ -60,6 +60,8 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     List<Booking> findByMemberIdAndPersonalTrainerIdOrderByStartTimeDesc(Long memberId, Long ptId);
 
+    long countByMember_IdAndGymPackage_IdAndStatusIn(Long memberId, Long packageId, List<String> statuses);
+
     long countByPersonalTrainer_IdAndStartTimeAndEndTimeAndStatusIn(Long ptId, LocalDateTime startTime, LocalDateTime endTime, List<String> statuses);
 
     @Query("SELECT COUNT(b) FROM Booking b WHERE b.personalTrainer.id = :ptId AND b.status = 'COMPLETED' AND MONTH(b.startTime) = :month AND YEAR(b.startTime) = :year")

@@ -148,7 +148,9 @@ public class MembershipCardServiceImpl implements MembershipCardService {
                 .category(card.getGymPackage().getCategory())
                 .startDate(card.getStartDate())
                 .endDate(card.getEndDate())
-                .status(card.getStatus());
+                .status(card.getStatus())
+                .maxSessions(card.getGymPackage() != null ? card.getGymPackage().getMaxSessions() : 0)
+                .remainingSessions(card.getRemainingSessions());
 
         if (card.getAssignedPt() != null && card.getAssignedPt().getUser() != null) {
             builder.assignedPtId(card.getAssignedPt().getUser().getId());

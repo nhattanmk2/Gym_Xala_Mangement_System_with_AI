@@ -13,6 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,6 +28,9 @@ public class PtScheduleServiceImpl implements PtScheduleService {
     private final MembershipCardRepository membershipCardRepository;
     private final MemberExerciseStatusRepository memberExerciseStatusRepository;
     private final MemberRepository memberRepository;
+    private final WorkoutRoadmapRepository roadmapRepository;
+    private final WorkoutSessionRepository sessionRepository;
+    private final SessionExerciseRepository sessionExerciseRepository;
 
     @Override
     @Transactional
@@ -514,12 +519,82 @@ public class PtScheduleServiceImpl implements PtScheduleService {
         slot.setStatus("COMPLETED");
         bookingRepository.save(slot);
 
+        // --- AUTOMATIC PROGRESS UPDATE ---
+        // Khi PT xác nhận hoàn thành buổi tập, tự động đánh dấu các bài tập trong roadmap là đã xong
+        try {
+            updateMemberExerciseProgress(slot.getMember(), slot.getGymPackage());
+        } catch (Exception e) {
+            System.err.println("[PROGRESS UPDATE ERROR] " + e.getMessage());
+            // Không throw exception để tránh rollback việc mark hoàn thành buổi tập
+        }
+
         // Gửi thông báo cho học viên
         notificationService.sendNotification(
             slot.getMember().getId(),
             "PT " + pt.getFullName() + " đã xác nhận bạn hoàn thành buổi tập. Chúc mừng bạn đã nỗ lực!",
             "WORKOUT_COMPLETED"
         );
+    }
+
+    @Override
+    public void updateMemberExerciseProgress(User memberUser, com.xala.gym.entity.Package gymPackage) {
+        if (memberUser == null || gymPackage == null) return;
+
+        // 1. Tìm Member và MembershipCard ACTIVE
+        com.xala.gym.entity.Member member = memberRepository.findByUser_Id(memberUser.getId()).orElse(null);
+        if (member == null) return;
+
+        MembershipCard activeCard = membershipCardRepository.findFirstByMemberIdAndStatusOrderByEndDateDesc(member.getId(), "ACTIVE")
+                .orElse(null);
+        if (activeCard == null) return;
+
+        // 2. Lấy danh sách Roadmap của gói tập
+        List<WorkoutRoadmap> roadmaps = roadmapRepository.findByGymPackageIdOrderByOrderIndexAsc(gymPackage.getId());
+        
+        // 3. Lấy tất cả status hiện tại của member cho thẻ này
+        List<MemberExerciseStatus> statuses = memberExerciseStatusRepository.findByMembershipCard_Id(activeCard.getId());
+        Set<Long> completedExerciseIds = statuses.stream()
+                .filter(MemberExerciseStatus::getIsCompleted)
+                .map(s -> s.getSessionExercise().getId())
+                .collect(Collectors.toSet());
+
+        // 4. Tìm SESSION ĐẦU TIÊN có bài tập chưa hoàn thành
+        WorkoutSession targetSession = null;
+        for (WorkoutRoadmap rm : roadmaps) {
+            List<WorkoutSession> sessions = sessionRepository.findByRoadmapIdOrderByOrderIndexAsc(rm.getId());
+            for (WorkoutSession sess : sessions) {
+                List<SessionExercise> exercises = sessionExerciseRepository.findBySessionIdOrderByOrderIndexAsc(sess.getId());
+                boolean hasUncompleted = exercises.stream()
+                        .anyMatch(ex -> !completedExerciseIds.contains(ex.getId()));
+                
+                if (hasUncompleted) {
+                    targetSession = sess;
+                    break;
+                }
+            }
+            if (targetSession != null) break;
+        }
+
+        // 5. Nếu tìm thấy session, đánh dấu TẤT CẢ bài tập trong đó là hoàn thành
+        if (targetSession != null) {
+            List<SessionExercise> exercisesToComplete = sessionExerciseRepository.findBySessionIdOrderByOrderIndexAsc(targetSession.getId());
+            LocalDateTime now = LocalDateTime.now();
+            
+            for (SessionExercise se : exercisesToComplete) {
+                if (!completedExerciseIds.contains(se.getId())) {
+                    MemberExerciseStatus status = memberExerciseStatusRepository.findByMembershipCard_IdAndSessionExercise_Id(activeCard.getId(), se.getId())
+                            .orElse(MemberExerciseStatus.builder()
+                                    .membershipCard(activeCard)
+                                    .sessionExercise(se)
+                                    .build());
+                    
+                    status.setIsCompleted(true);
+                    status.setCompletedAt(now);
+                    memberExerciseStatusRepository.save(status);
+                }
+            }
+            System.out.println("[PROGRESS] Tự động hoàn thành session: " + targetSession.getName() + " cho member: " + memberUser.getFullName());
+        }
     }
 
     @Override

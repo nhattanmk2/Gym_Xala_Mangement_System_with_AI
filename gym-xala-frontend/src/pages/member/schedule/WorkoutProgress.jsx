@@ -70,11 +70,19 @@ const WorkoutProgress = () => {
                     <div className="stats-row">
                         <div className="stat-box">
                             <span className="label">Đã tập</span>
-                            <span className="val">{card?.maxSessions - card?.remainingSessions} buổi</span>
+                            <span className="val">
+                                {card?.remainingSessions !== null && card?.remainingSessions !== undefined
+                                    ? (card?.maxSessions || 0) - card.remainingSessions 
+                                    : 0} buổi
+                            </span>
                         </div>
                         <div className="stat-box">
                             <span className="label">Còn lại</span>
-                            <span className="val">{card?.remainingSessions} buổi</span>
+                            <span className="val">
+                                {card?.remainingSessions !== null && card?.remainingSessions !== undefined 
+                                    ? card.remainingSessions 
+                                    : (card?.maxSessions || 0)} buổi
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -108,7 +116,15 @@ const WorkoutProgress = () => {
 
             <div className="roadmaps-container">
                 <h2 className="section-title">Chi tiết lộ trình</h2>
-                {progress.roadmaps.map((rm, rmIdx) => (
+                
+                {(!progress.roadmaps || progress.roadmaps.length === 0) && (
+                    <div className="empty-roadmap-message" style={{ textAlign: "center", padding: "2rem", color: "#a0a0a0" }}>
+                        <p>Chưa có lộ trình nào được thiết lập cho gói tập này trong cơ sở dữ liệu.</p>
+                        <p style={{ fontSize: "0.9rem", marginTop: "0.5rem" }}>Vui lòng liên hệ Admin hoặc PT để bổ sung lộ trình.</p>
+                    </div>
+                )}
+
+                {progress.roadmaps && progress.roadmaps.map((rm, rmIdx) => (
                     <div key={rm.roadmapId} className={`roadmap-accordion ${expandedRoadmap === rm.roadmapId ? 'open' : ''}`}>
                         <div className="roadmap-header-row" onClick={() => setExpandedRoadmap(expandedRoadmap === rm.roadmapId ? null : rm.roadmapId)}>
                             <div className="rm-title-group">

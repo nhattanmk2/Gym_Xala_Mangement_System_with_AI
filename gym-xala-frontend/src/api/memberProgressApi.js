@@ -8,6 +8,12 @@ const getHeader = () => ({
     }
 });
 
-export const getMemberProgress = (membershipCardId) => axios.get(`${API_URL}/member/progress/${membershipCardId}`, getHeader());
-export const toggleExerciseStatus = (membershipCardId, sessionExerciseId) =>
-    axios.post(`${API_URL}/member/progress/${membershipCardId}/toggle/${sessionExerciseId}`, {}, getHeader());
+export const getMemberProgress = async (membershipCardId) => {
+    const res = await axios.get(`${API_URL}/member/progress/${membershipCardId}`, getHeader());
+    return res.data;
+}
+
+export const toggleExerciseStatus = async (membershipCardId, sessionExerciseId) => {
+    const res = await axios.post(`${API_URL}/member/progress/${membershipCardId}/toggle/${sessionExerciseId}`, {}, getHeader());
+    return res.data;
+};

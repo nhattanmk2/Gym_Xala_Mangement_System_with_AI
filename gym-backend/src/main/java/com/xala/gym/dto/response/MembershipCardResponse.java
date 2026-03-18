@@ -19,6 +19,7 @@ public class MembershipCardResponse {
     private LocalDate startDate;
     private LocalDate endDate;
     private String status;
+    private Integer maxSessions;
     private Integer remainingSessions;
     private Long assignedPtId;
     private String assignedPtName;

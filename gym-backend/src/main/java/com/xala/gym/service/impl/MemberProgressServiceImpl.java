@@ -5,6 +5,7 @@ import com.xala.gym.entity.*;
 import com.xala.gym.repository.*;
 import com.xala.gym.service.MemberProgressService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -14,6 +15,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MemberProgressServiceImpl implements MemberProgressService {
 
     private final MemberExerciseStatusRepository statusRepository;
@@ -23,19 +25,34 @@ public class MemberProgressServiceImpl implements MemberProgressService {
     private final MembershipCardRepository membershipCardRepository;
 
     @Override
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public MemberProgressResponse getMemberProgress(Long membershipCardId) {
+        log.info("Fetching progress for membership card: {}", membershipCardId);
         MembershipCard card = membershipCardRepository.findById(membershipCardId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy Membership Card: " + membershipCardId));
 
         Long packageId = card.getGymPackage().getId();
+        log.info("Package ID: {}", packageId);
 
         // 1. Lấy tất cả roadmap của package
         List<WorkoutRoadmap> roadmaps = roadmapRepository.findByGymPackageIdOrderByOrderIndexAsc(packageId);
+        log.info("Found {} roadmaps", roadmaps.size());
 
         // 2. Lấy tất cả status của member
         List<MemberExerciseStatus> statuses = statusRepository.findByMembershipCard_Id(membershipCardId);
+        log.info("Found {} status records", statuses.size());
+
         Map<Long, MemberExerciseStatus> statusMap = statuses.stream()
-                .collect(Collectors.toMap(s -> s.getSessionExercise().getId(), s -> s));
+                .filter(s -> s.getSessionExercise() != null)
+                .collect(Collectors.toMap(
+                        s -> s.getSessionExercise().getId(),
+                        s -> s,
+                        (existing, replacement) -> {
+                            if (existing.getIsCompleted() && !replacement.getIsCompleted()) return existing;
+                            if (!existing.getIsCompleted() && replacement.getIsCompleted()) return replacement;
+                            return existing; // default to first
+                        }
+                ));
 
         List<RoadmapProgress> roadmapProgressList = new ArrayList<>();
         Map<String, int[]> categoryStats = new HashMap<>(); // key: categoryName, value: [completed, total]
@@ -61,9 +78,15 @@ public class MemberProgressServiceImpl implements MemberProgressService {
 
                 for (SessionExercise se : sessionExercises) {
                     MemberExerciseStatus status = statusMap.get(se.getId());
-                    boolean isCompleted = (status != null && status.getIsCompleted());
-                    String completedAt = (isCompleted && status.getCompletedAt() != null) 
-                            ? status.getCompletedAt().format(formatter) : null;
+                    boolean isCompleted = (status != null && Boolean.TRUE.equals(status.getIsCompleted()));
+                    String completedAt = null;
+                    if (isCompleted && status != null) {
+                        if (status.getCompletedAt() != null) {
+                            completedAt = status.getCompletedAt().format(formatter);
+                        } else {
+                            completedAt = "Đã xong";
+                        }
+                    }
 
                     if (isCompleted) {
                         completedSessionExercises++;
@@ -152,6 +175,7 @@ public class MemberProgressServiceImpl implements MemberProgressService {
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional
     public void toggleExerciseStatus(Long membershipCardId, Long sessionExerciseId) {
         MembershipCard card = membershipCardRepository.findById(membershipCardId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy Membership Card"));

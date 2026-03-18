@@ -39,7 +39,7 @@ public class SecurityConfig {
             throws Exception {
 
         http
-                .csrf().disable()
+                .csrf(csrf -> csrf.disable())
 
                 // ✅ CORS FIX FULL
                 .cors(cors -> cors.configurationSource(request -> {
