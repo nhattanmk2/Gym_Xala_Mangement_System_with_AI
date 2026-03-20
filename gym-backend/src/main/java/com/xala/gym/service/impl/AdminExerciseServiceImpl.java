@@ -10,6 +10,7 @@ import com.xala.gym.repository.StandardExerciseRepository;
 import com.xala.gym.service.AdminExerciseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -33,7 +34,12 @@ public class AdminExerciseServiceImpl implements AdminExerciseService {
     }
 
     @Override
+    @Transactional
     public void deleteCategory(Long categoryId) {
+        List<StandardExercise> exercises = exerciseRepository.findByCategoryId(categoryId);
+        for (StandardExercise ex : exercises) {
+            deleteExercise(ex.getId());
+        }
         categoryRepository.deleteById(categoryId);
     }
 
@@ -55,7 +61,10 @@ public class AdminExerciseServiceImpl implements AdminExerciseService {
     }
 
     @Override
+    @Transactional
     public void deleteExercise(Long exerciseId) {
+        List<ExerciseLevel> levels = levelRepository.findByStandardExerciseId(exerciseId);
+        levelRepository.deleteAll(levels);
         exerciseRepository.deleteById(exerciseId);
     }
 

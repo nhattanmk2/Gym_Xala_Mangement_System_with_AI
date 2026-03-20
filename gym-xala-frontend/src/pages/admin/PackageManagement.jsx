@@ -224,7 +224,7 @@ const PackageManagement = () => {
         fetchPackages();
       } catch (error) {
         console.error("Error deleting package:", error);
-        alert("Lỗi khi xóa gói tập.");
+        alert(error.response?.data || "Lỗi khi xóa gói tập.");
       }
     }
   };

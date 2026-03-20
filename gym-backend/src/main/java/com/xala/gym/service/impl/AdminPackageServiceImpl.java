@@ -115,6 +115,9 @@ public class AdminPackageServiceImpl implements AdminPackageService {
     @Override
     @Transactional
     public void deletePackage(Long id) {
+        List<WorkoutRoadmap> oldRoadmaps = roadmapRepository.findByGymPackageId(id);
+        roadmapRepository.deleteAll(oldRoadmaps);
+        
         Package pkg = getPackageById(id);
         packageRepository.delete(pkg);
     }

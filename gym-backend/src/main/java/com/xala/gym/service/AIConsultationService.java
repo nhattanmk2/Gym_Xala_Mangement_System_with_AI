@@ -158,10 +158,21 @@ public class AIConsultationService {
         }
 
         // Fallback response nếu Gemini lỗi hoặc Parse lỗi
+        double heightInMeters = request.getHeight() / 100.0;
+        double calculatedBmi = request.getWeight() / (heightInMeters * heightInMeters);
+        calculatedBmi = Math.round(calculatedBmi * 10.0) / 10.0;
+        
+        String calculatedCategory = "Bình thường";
+        if (calculatedBmi < 18.5) {
+            calculatedCategory = "Thiếu cân";
+        } else if (calculatedBmi >= 25.0) {
+            calculatedCategory = "Thừa cân";
+        }
+
         return AIConsultationResponse.builder()
-                .bmi(0.0)
-                .bmiCategory("Chưa xác định")
-                .advice("Xin lỗi, Chuyên gia AI đang bận. Vui lòng thử lại sau.")
+                .bmi(calculatedBmi)
+                .bmiCategory(calculatedCategory)
+                .advice("Hệ thống AI đang quá tải. Xin vui lòng thử lại sau, nhưng dựa trên chiều cao cân nặng của bạn, hệ thống đã tính được BMI cơ bản.")
                 .recommendedPackages(new ArrayList<>())
                 .build();
     }

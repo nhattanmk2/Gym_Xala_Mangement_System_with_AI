@@ -65,9 +65,13 @@ const ExerciseCatalog = () => {
 
     const handleDeleteCat = async (id) => {
         if (window.confirm('Xóa danh mục này?')) {
-            await deleteCategory(id);
-            fetchCategories();
-            setSelectedCategory(null);
+            try {
+                await deleteCategory(id);
+                fetchCategories();
+                setSelectedCategory(null);
+            } catch (error) {
+                alert(error.response?.data || 'Có lỗi xảy ra khi xóa danh mục!');
+            }
         }
     };
 
@@ -163,7 +167,7 @@ const ExerciseCatalog = () => {
                                             <span><strong>{lvl.sets}</strong> Hiệp</span>
                                             <span><strong>{lvl.reps}</strong> Lần</span>
                                         </div>
-                                        <button className="del-btn" onClick={() => deleteLevel(lvl.id).then(() => handleSelectExercise(selectedExercise))}>×</button>
+                                        <button className="del-btn" onClick={() => deleteLevel(lvl.id).then(() => handleSelectExercise(selectedExercise)).catch(err => alert(err.response?.data || 'Lỗi khi xóa mức độ!'))}>×</button>
                                     </div>
                                 ))
                             }
