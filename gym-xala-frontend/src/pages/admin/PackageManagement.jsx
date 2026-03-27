@@ -59,9 +59,34 @@ const PackageManagement = () => {
   const [activeSessionIndex, setActiveSessionIndex] = useState(-1);
 
   useEffect(() => {
-    fetchPackages();
-    fetchAuxData();
+    const initData = async () => {
+      await fetchPackages();
+      await fetchAuxData();
+      seedMarketPackages();
+    };
+    initData();
   }, []);
+
+  const seedMarketPackages = async () => {
+    try {
+      const data = await import("../../api/adminPackageApi").then(m => m.getAllPackages());
+      if (!data.find(p => p.name === "Premium Muscle Builder PRO")) {
+        const pkgs = [
+          { name: 'Basic Starter', description: 'Gói tập cơ bản dành cho người mới bắt đầu làm quen với Gym, duy trì sức khỏe.', price: '3000000', maxSessions: '12', durationInDays: '30', category: 'GENERAL', promotion: 'Tặng 1 buổi đo inbody', active: true },
+          { name: 'Premium Muscle Builder PRO', description: 'Gói tăng cơ cấp tốc cao cấp dưới sự hướng dẫn 1-1 sát sao. Chuyên sâu về hypertrophy và chế độ dinh dưỡng.', price: '25000000', maxSessions: '36', durationInDays: '90', category: 'MUSCLE', promotion: 'Tặng Whey Protein, giáo án dinh dưỡng độc quyền', active: true },
+          { name: 'Fat Loss VIP Transformation', description: 'Giảm mỡ chuyên sâu, cam kết giảm 3-5kg. Tập luyện kết hợp HIIT và Cardio cường độ cao.', price: '18000000', maxSessions: '30', durationInDays: '90', category: 'CARDIO', promotion: 'Tặng Combo Detox, Đánh giá sinh học cơ thể hàng tuần', active: true },
+          { name: 'Endurance & Core Master', description: 'Tăng cường độ bền bỉ, sức dẻo dai và core. Thích hợp cho người làm văn phòng cần cải thiện tư thế.', price: '10000000', maxSessions: '24', durationInDays: '60', category: 'YOGA', promotion: 'Tặng Yoga Thảm', active: true }
+        ];
+        
+        for (let p of pkgs) {
+            const fd = new FormData();
+            fd.append("data", new Blob([JSON.stringify(p)], { type: 'application/json' }));
+            await import("../../api/adminPackageApi").then(m => m.createPackage(fd));
+        }
+        fetchPackages(); // refresh
+      }
+    } catch (e) { console.error("Auto seed error", e); }
+  };
 
   const fetchAuxData = async () => {
     try {

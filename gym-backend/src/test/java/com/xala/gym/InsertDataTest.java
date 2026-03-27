@@ -1,22 +1,25 @@
-package com.xala.gym.config;
+package com.xala.gym;
 
 import com.xala.gym.entity.Package;
 import com.xala.gym.repository.PackageRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.stereotype.Component;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
 
-@Component
-@RequiredArgsConstructor
-public class MarketDataInitializer implements CommandLineRunner {
+@SpringBootTest
+public class InsertDataTest {
 
-    private final PackageRepository packageRepository;
+    @Autowired
+    private PackageRepository packageRepository;
 
-    @Override
-    public void run(String... args) throws Exception {
-        if (packageRepository.count() == 0) {
+    @Test
+    public void testInsertPackages() {
+        boolean hasPremium = packageRepository.findAll().stream()
+                .anyMatch(p -> p.getName() != null && p.getName().trim().equalsIgnoreCase("Premium Muscle Builder PRO"));
+                
+        if (!hasPremium) {
             Package p1 = new Package();
             p1.setName("Basic Starter");
             p1.setDescription("Gói tập cơ bản dành cho người mới bắt đầu làm quen với Gym, duy trì sức khỏe.");
@@ -58,7 +61,9 @@ public class MarketDataInitializer implements CommandLineRunner {
             p4.setActive(true);
 
             packageRepository.saveAll(List.of(p1, p2, p3, p4));
-            System.out.println("✅ Khởi tạo Seed Data Gói tập thị trường thành công!");
+            System.out.println("✅ INSERTED PACKAGES VIA TEST!");
+        } else {
+            System.out.println("✅ PACKAGES ALREADY EXIST!");
         }
     }
 }
