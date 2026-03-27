@@ -12,6 +12,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import com.xala.gym.service.MembershipCardService;
+import com.xala.gym.repository.MembershipCardRepository;
+import com.xala.gym.dto.response.MembershipCardResponse;
+import com.xala.gym.service.AIConsultationService;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -20,6 +24,10 @@ import java.util.List;
 public class AdminMemberController {
 
     private final AdminMemberService memberService;
+    private final MembershipCardService membershipCardService;
+    private final MembershipCardRepository cardRepository;
+    private final AIConsultationService aiConsultationService;
+    private final com.xala.gym.repository.MemberRepository memberRepository;
 
     // ✅ API: Admin lấy danh sách học viên + filter name/cccd
     @GetMapping("/members")
@@ -73,5 +81,29 @@ public class AdminMemberController {
     public ResponseEntity<String> upgradeToPt(@PathVariable("id") Long id) {
         memberService.upgradeToPt(id);
         return ResponseEntity.ok("Nâng cấp hội viên lên PT thành công");
+    }
+
+    // ✅ API: Lấy AI History của một Hội viên cụ thể (Giới hạn 1 session mới nhất để tham khảo giá)
+    @GetMapping("/members/{id}/ai-history")
+    public ResponseEntity<java.util.List<com.xala.gym.entity.AIConsultationHistory>> getMemberAiHistory(@PathVariable("id") Long memberId) {
+        com.xala.gym.entity.Member member = memberRepository.findById(memberId).orElse(null);
+        if (member == null) return ResponseEntity.ok(java.util.List.of());
+        return ResponseEntity.ok(aiConsultationService.getHistory(member.getUser().getUsername()));
+    }
+
+    // ✅ API: Lấy danh sách Thẻ tập của một Hội viên
+    @GetMapping("/members/{id}/memberships")
+    public ResponseEntity<List<MembershipCardResponse>> getMemberMemberships(@PathVariable("id") Long memberId) {
+        return ResponseEntity.ok(membershipCardService.getMemberCards(memberId));
+    }
+
+    // ✅ API: Duyệt Gói Tập (MembershipCard) với Custom Price
+    @PutMapping("/memberships/{id}/approve")
+    public ResponseEntity<String> approveMembership(
+            @PathVariable("id") Long id,
+            @RequestParam(required = false) Double customPrice
+    ) {
+        membershipCardService.approveCard(id, customPrice);
+        return ResponseEntity.ok("Duyệt gói tập thành công");
     }
 }

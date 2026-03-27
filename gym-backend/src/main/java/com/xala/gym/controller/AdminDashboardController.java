@@ -136,4 +136,55 @@ public class AdminDashboardController {
 
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/pt-performance")
+    public ResponseEntity<List<com.xala.gym.dto.response.PtPerformanceResponse>> getPtPerformance(@RequestParam(defaultValue = "month") String filter) {
+        LocalDateTime startDate = getStartDateFromFilter(filter);
+        
+        List<Map<String, Object>> rankingResults = bookingRepository.getPtRankingByCompletedSessions(startDate);
+        List<Map<String, Object>> salesResults = membershipCardRepository.getPtSalesStatsByDate(startDate);
+        
+        Map<Long, com.xala.gym.dto.response.PtPerformanceResponse> ptMap = new HashMap<>();
+        
+        for (Map<String, Object> row : rankingResults) {
+            Long ptId = ((Number) row.get("ptId")).longValue();
+            String ptName = (String) row.get("ptName");
+            int completedSessions = ((Number) row.get("completedSessions")).intValue();
+            
+            ptMap.put(ptId, com.xala.gym.dto.response.PtPerformanceResponse.builder()
+                .ptId(ptId)
+                .ptName(ptName)
+                .completedSessions(completedSessions)
+                .soldPackages(0)
+                .revenue(0.0)
+                .build());
+        }
+        
+        for(Map<String, Object> row : salesResults) {
+            Long ptId = ((Number) row.get("ptId")).longValue();
+            String ptName = (String) row.get("ptName");
+            int soldPackages = ((Number) row.get("soldPackages")).intValue();
+            double revenue = row.get("revenue") != null ? ((Number) row.get("revenue")).doubleValue() : 0.0;
+            
+            com.xala.gym.dto.response.PtPerformanceResponse stat = ptMap.get(ptId);
+            if(stat == null) {
+                stat = com.xala.gym.dto.response.PtPerformanceResponse.builder()
+                    .ptId(ptId)
+                    .ptName(ptName)
+                    .completedSessions(0)
+                    .soldPackages(soldPackages)
+                    .revenue(revenue)
+                    .build();
+                ptMap.put(ptId, stat);
+            } else {
+                stat.setSoldPackages(soldPackages);
+                stat.setRevenue(revenue);
+            }
+        }
+        
+        List<com.xala.gym.dto.response.PtPerformanceResponse> response = new ArrayList<>(ptMap.values());
+        response.sort((a, b) -> Double.compare(b.getRevenue(), a.getRevenue())); // Sort descending by revenue
+        
+        return ResponseEntity.ok(response);
+    }
 }

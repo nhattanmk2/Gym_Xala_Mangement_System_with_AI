@@ -28,4 +28,7 @@ public class PtScheduleResponse {
     private String exercises;
     private String achievedGoals;
     private String ptEvaluation;
+    
+    private Integer rating;
+    private String feedback;
 }

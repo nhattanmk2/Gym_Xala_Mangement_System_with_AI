@@ -49,4 +49,18 @@ public class MemberPackageController {
         membershipCardService.assignPt(username, cardId, ptId);
         return ResponseEntity.ok().build();
     }
+
+    @PutMapping("/{cardId}/pause")
+    public ResponseEntity<Void> pauseCard(@PathVariable Long cardId, @RequestParam(required = false) String reason) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        membershipCardService.pauseCard(username, cardId, reason);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{cardId}/resume")
+    public ResponseEntity<Void> resumeCard(@PathVariable Long cardId) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        membershipCardService.resumeCard(username, cardId);
+        return ResponseEntity.ok().build();
+    }
 }

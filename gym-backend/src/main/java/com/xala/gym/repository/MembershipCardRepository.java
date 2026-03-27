@@ -14,6 +14,7 @@ public interface MembershipCardRepository extends JpaRepository<MembershipCard, 
     List<MembershipCard> findByMemberId(Long memberId);
     List<MembershipCard> findByMember_User_Id(Long userId);
     Optional<MembershipCard> findFirstByMemberIdAndStatusOrderByEndDateDesc(Long memberId, String status);
+    Optional<MembershipCard> findFirstByMemberIdAndStatusInOrderByEndDateDesc(Long memberId, List<String> statuses);
     @Query("SELECT mc FROM MembershipCard mc WHERE mc.assignedPt.user.id = :userId")
     List<MembershipCard> findByAssignedPt_User_Id(@Param("userId") Long userId);
 
@@ -56,4 +57,12 @@ public interface MembershipCardRepository extends JpaRepository<MembershipCard, 
 
     @Query("SELECT COUNT(DISTINCT mc.member.id) FROM MembershipCard mc WHERE mc.createdAt < :startDate")
     long countDistinctMembersBeforeDate(@Param("startDate") java.time.LocalDateTime startDate);
+
+    @Query("SELECT new map(mc.assignedPt.user.id as ptId, mc.assignedPt.user.fullName as ptName, COUNT(mc.id) as soldPackages, SUM(p.price) as revenue) " +
+           "FROM MembershipCard mc JOIN mc.gymPackage p " +
+           "WHERE mc.assignedPt IS NOT NULL " +
+           "AND mc.status = 'ACTIVE' " +
+           "AND mc.createdAt >= :startDate " +
+           "GROUP BY mc.assignedPt.user.id, mc.assignedPt.user.fullName")
+    List<java.util.Map<String, Object>> getPtSalesStatsByDate(@Param("startDate") java.time.LocalDateTime startDate);
 }

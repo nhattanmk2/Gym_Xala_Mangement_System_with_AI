@@ -53,6 +53,14 @@ public class MemberController {
         return ResponseEntity.ok("Upload avatar thành công");
     }
 
+    // ✅ API Submit Feedback
+    @PostMapping("/schedule/{id}/feedback")
+    public ResponseEntity<com.xala.gym.dto.response.PtScheduleResponse> submitFeedback(
+            @PathVariable Long id, 
+            @org.springframework.web.bind.annotation.RequestBody @jakarta.validation.Valid com.xala.gym.dto.request.FeedbackRequest request) {
+        return ResponseEntity.ok(ptScheduleService.submitFeedback(id, request));
+    }
+
     // ✅ API Lấy thống kê tuần của Member
     @GetMapping("/stats/weekly")
     public ResponseEntity<com.xala.gym.dto.response.WeeklyStatsResponse> getMemberWeeklyStats() {

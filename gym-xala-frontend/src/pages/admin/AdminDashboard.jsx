@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import AdminLayout from "./layout/AdminLayout";
-import { getDashboardStats, getMemberGrowth, getPtRanking } from "../../api/adminDashboardApi";
+import { getDashboardStats, getMemberGrowth, getPtPerformance } from "../../api/adminDashboardApi";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -37,21 +37,21 @@ const AdminDashboard = () => {
   const [filter, setFilter] = useState("month");
 
   const [growthData, setGrowthData] = useState({ labels: [], data: [] });
-  const [ptRanking, setPtRanking] = useState([]);
+  const [ptPerformance, setPtPerformance] = useState([]);
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
         setLoading(true);
-        const [statsData, growthResponse, rankingResponse] = await Promise.all([
+        const [statsData, growthResponse, performanceResponse] = await Promise.all([
           getDashboardStats(),
           getMemberGrowth(filter),
-          getPtRanking(filter)
+          getPtPerformance(filter)
         ]);
 
         setStats(statsData);
         setGrowthData(growthResponse);
-        setPtRanking(rankingResponse);
+        setPtPerformance(performanceResponse);
       } catch (error) {
         console.error("Failed to load dashboard data", error);
       } finally {
@@ -165,23 +165,28 @@ const AdminDashboard = () => {
               </div>
 
               <div className="ad-leaderboard-wrapper">
-                <h3>🏆 Bảng Xếp Hạng PT </h3>
+                <h3>🏆 Bảng Xếp Hạng Năng Suất PT </h3>
                 <div className="pt-ranking-list">
-                  {ptRanking.length > 0 ? (
-                    ptRanking.map((pt, index) => (
-                      <div key={pt.ptId} className="pt-ranking-item">
-                        <div className="pt-rank-number">#{index + 1}</div>
-                        <div className="pt-rank-info">
-                          <h4>{pt.ptName}</h4>
-                          <div className="pt-rank-stats">
-                            <span>⭐ {pt.rating.toFixed(1)}</span>
-                            <span style={{ color: '#d0fd3e', marginLeft: '10px' }}>✔️ {pt.completedSessions} buổi hoàn thành</span>
+                  {ptPerformance.length > 0 ? (
+                    ptPerformance.map((pt, index) => (
+                      <div key={pt.ptId} className="pt-ranking-item" style={{ flexDirection: 'column', alignItems: 'flex-start', padding: '15px' }}>
+                        <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <div className="pt-rank-number" style={{ position: 'static', marginRight: 0 }}>#{index + 1}</div>
+                            <h4 style={{ margin: 0, fontSize: '1.1rem' }}>{pt.ptName}</h4>
                           </div>
+                          <div style={{ color: '#00e5ff', fontWeight: 'bold' }}>
+                            {formatCurrency(pt.revenue)}
+                          </div>
+                        </div>
+                        <div className="pt-rank-stats" style={{ width: '100%', display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: '#ccc' }}>
+                          <span>📦 Bán ra: <strong style={{color: '#fff'}}>{pt.soldPackages}</strong> gói</span>
+                          <span>✔️ Hoàn thành: <strong style={{color: '#fff'}}>{pt.completedSessions}</strong> buổi</span>
                         </div>
                       </div>
                     ))
                   ) : (
-                    <p className="no-pt-data">Chưa có PT nào hoàn thành buổi dạy trong gian đoạn này.</p>
+                    <p className="no-pt-data">Chưa có dữ liệu hoạt động của PT trong giai đoạn này.</p>
                   )}
                 </div>
               </div>

@@ -63,3 +63,31 @@ export const upgradeToPt = async (id) => {
   });
   return res.data;
 };
+
+export const getMemberMemberships = async (memberId) => {
+  const token = getToken();
+  const res = await axios.get(`${BASE_URL}/${memberId}/memberships`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return res.data;
+};
+
+export const getMemberAiHistory = async (memberId) => {
+  const token = getToken();
+  const res = await axios.get(`${BASE_URL}/${memberId}/ai-history`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return res.data;
+};
+
+export const approveMembership = async (membershipId, customPrice) => {
+  const token = getToken();
+  let url = `http://localhost:8080/api/admin/memberships/${membershipId}/approve`;
+  if (customPrice != null) {
+      url += `?customPrice=${customPrice}`;
+  }
+  const res = await axios.put(url, {}, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return res.data;
+};

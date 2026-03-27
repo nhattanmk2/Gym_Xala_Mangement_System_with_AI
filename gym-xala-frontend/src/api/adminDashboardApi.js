@@ -43,3 +43,18 @@ export const getPtRanking = async (filter = 'month') => {
         throw error;
     }
 };
+
+export const getPtPerformance = async (filter = 'month') => {
+    try {
+        const response = await axios.get(`${BASE_URL}/pt-performance?filter=${filter}`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching PT performance:", error);
+        throw error;
+    }
+};
+

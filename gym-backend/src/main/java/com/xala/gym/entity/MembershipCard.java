@@ -40,6 +40,9 @@ public class MembershipCard {
     @Column(nullable = false)
     private String status; // ACTIVE, EXPIRED, CANCELED
 
+    @Column(name = "custom_price")
+    private Double customPrice;
+
     // Số buổi tập còn lại
     private Integer remainingSessions;
 

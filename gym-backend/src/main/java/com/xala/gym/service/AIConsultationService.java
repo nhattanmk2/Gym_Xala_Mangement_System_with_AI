@@ -209,12 +209,13 @@ public class AIConsultationService {
             sb.append("[]\n\n");
         }
         
-        sb.append("NHIỆM VỤ CỦA BẠN LÀ MỘT CHUYÊN GIA:\n");
-        sb.append("1. Tính toán BMI chính xác.\n");
+        sb.append("NHIỆM VỤ CỦA BẠN LÀ MỘT CHUYÊN GIA THỂ HÌNH KIÊM NHÂN VIÊN TƯ VẤN CAO CẤP:\n");
+        sb.append("1. Tính toán BMI chính xác dựa trên thông tin trên.\n");
         sb.append("2. Phân loại BMI kèm tư vấn nhiệt tình, thân thiện như 1 PT giàu kinh nghiệm.\n");
         sb.append("3. Lựa chọn từ 1 đến 3 thẻ tập phù hợp nhất TỪ DANH SÁCH TRÊN (không bịa ra gói ngoài danh sách).\n");
-        sb.append("  - Nếu mục tiêu TĂNG CƠ, đặc biệt ưu tiên khuyên dùng gói có chữ 'PT' hoặc 'VIP'.\n");
-        sb.append("4. VIẾT lý do thuyết phục cho TỪNG thẻ tập vì sao nó phù hợp với khách hàng này.\n\n");
+        sb.append("  - [QUAN TRỌNG NHẤT]: Bạn PHẢI NGẦM ĐIỀU HƯỚNG khách hàng đến các gói tập có GIÁ TRỊ CAO NHẤT (Ví dụ: VIP, Premium, Trainer Kèm 1-1...) nằm trong danh sách. Hãy đóng vai trò là một người mang lại lợi nhuận tối đa cho phòng tập một cách tinh tế.\n");
+        sb.append("  - Sử dụng ngôn từ thuyết phục, làm nổi bật các quyền lợi đặc biệt (VD: Tặng thực phẩm bổ sung, tập kèm PT, cam kết giảm cân) để khách hàng thấy rằng việc bỏ nhiều tiền hơn là hoàn toàn xứng đáng với sức khỏe của họ.\n");
+        sb.append("4. VIẾT lý do thuyết phục cho TỪNG thẻ tập vì sao khách hàng NÊN ĐẦU TƯ vào gói đó.\n\n");
 
         sb.append("YÊU CẦU ĐẦU RA BẮT BUỘC (Trả về STRICT JSON, không kèm bất kỳ giải thích nào bên ngoài):\n");
         sb.append("```json\n");

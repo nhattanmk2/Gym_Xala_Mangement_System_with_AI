@@ -32,3 +32,13 @@ export const assignPt = async (cardId, ptId) => {
     const res = await axios.put(`${BASE_URL}/${cardId}/assign-pt/${ptId}`, {}, getHeaders());
     return res.data;
 };
+
+export const pausePackage = async (cardId, reason = '') => {
+    const res = await axios.put(`${BASE_URL}/${cardId}/pause?reason=${encodeURIComponent(reason)}`, {}, getHeaders());
+    return res.data;
+};
+
+export const resumePackage = async (cardId) => {
+    const res = await axios.put(`${BASE_URL}/${cardId}/resume`, {}, getHeaders());
+    return res.data;
+};

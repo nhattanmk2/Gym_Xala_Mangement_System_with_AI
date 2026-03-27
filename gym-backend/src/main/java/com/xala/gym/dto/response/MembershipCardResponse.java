@@ -21,6 +21,8 @@ public class MembershipCardResponse {
     private String status;
     private Integer maxSessions;
     private Integer remainingSessions;
+    private Double originalPrice;
+    private Double customPrice;
     private Long assignedPtId;
     private String assignedPtName;
     private String assignedPtLocationName;

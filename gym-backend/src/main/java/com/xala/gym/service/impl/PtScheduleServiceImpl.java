@@ -125,7 +125,28 @@ public class PtScheduleServiceImpl implements PtScheduleService {
         }
 
         if (slot.getMember() != null && !"CANCELLED".equals(slot.getStatus())) {
-            throw new RuntimeException("Không thể xóa khung giờ đã có người đặt.");
+            // PT ốm đột xuất hoặc có việc bận -> Hủy lịch đã có người đặt
+            // 1. Hoàn lại buổi tập cho member
+            com.xala.gym.entity.Member currentMember = memberRepository.findByUser_Id(slot.getMember().getId()).orElse(null);
+            if (currentMember != null) {
+                java.util.Optional<com.xala.gym.entity.MembershipCard> activeCardOpt = 
+                    membershipCardRepository.findFirstByMemberIdAndStatusInOrderByEndDateDesc(currentMember.getId(), java.util.List.of("ACTIVE", "PAUSED"));
+                if (activeCardOpt.isPresent()) {
+                    com.xala.gym.entity.MembershipCard activeCard = activeCardOpt.get();
+                    if (activeCard.getRemainingSessions() != null) {
+                        activeCard.setRemainingSessions(activeCard.getRemainingSessions() + 1);
+                        membershipCardRepository.save(activeCard);
+                    }
+                }
+            }
+            
+            // 2. Thông báo cho member
+            String timeStr = slot.getStartTime().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm dd/MM"));
+            notificationService.sendNotification(
+                slot.getMember().getId(),
+                "Huấn luyện viên " + pt.getFullName() + " đã hủy lịch tập lúc " + timeStr + " do sự cố đột xuất. Buổi tập đã được hoàn lại cho gói của bạn.",
+                "PT_CANCELLED_BOOKING"
+            );
         }
 
         bookingRepository.delete(slot);
@@ -432,23 +453,27 @@ public class PtScheduleServiceImpl implements PtScheduleService {
             throw new RuntimeException("Chỉ có thể hủy lịch khi đang chờ duyệt hoặc đã xác nhận.");
         }
 
+        boolean shouldRefund = true;
         // Kiểm tra quy tắc 24h
         java.time.Duration timeUntilStart = java.time.Duration.between(LocalDateTime.now(), slot.getStartTime());
         if (timeUntilStart.toHours() < 24) {
-            throw new RuntimeException("Không thể hủy! Chỉ được phép hủy lịch trước thời gian bắt đầu ít nhất 24 giờ. Vui lòng liên hệ Admin.");
+            // Hủy lịch phút chót (dưới 24h)
+            shouldRefund = false;
         }
 
-        // Hoàn lại buổi tập cho user - Cần lấy ID Member
-        com.xala.gym.entity.Member currentMember = memberRepository.findByUser_Id(member.getId()).orElse(null);
-        
-        if (currentMember != null) {
-            java.util.Optional<com.xala.gym.entity.MembershipCard> activeCardOpt = 
-                membershipCardRepository.findFirstByMemberIdAndStatusOrderByEndDateDesc(currentMember.getId(), "ACTIVE");
-            if (activeCardOpt.isPresent()) {
-                com.xala.gym.entity.MembershipCard activeCard = activeCardOpt.get();
-                if (activeCard.getRemainingSessions() != null) {
-                    activeCard.setRemainingSessions(activeCard.getRemainingSessions() + 1);
-                    membershipCardRepository.save(activeCard);
+        if (shouldRefund) {
+            // Hoàn lại buổi tập cho user
+            com.xala.gym.entity.Member currentMember = memberRepository.findByUser_Id(member.getId()).orElse(null);
+            
+            if (currentMember != null) {
+                java.util.Optional<com.xala.gym.entity.MembershipCard> activeCardOpt = 
+                    membershipCardRepository.findFirstByMemberIdAndStatusInOrderByEndDateDesc(currentMember.getId(), java.util.List.of("ACTIVE", "PAUSED"));
+                if (activeCardOpt.isPresent()) {
+                    com.xala.gym.entity.MembershipCard activeCard = activeCardOpt.get();
+                    if (activeCard.getRemainingSessions() != null) {
+                        activeCard.setRemainingSessions(activeCard.getRemainingSessions() + 1);
+                        membershipCardRepository.save(activeCard);
+                    }
                 }
             }
         }
@@ -458,9 +483,10 @@ public class PtScheduleServiceImpl implements PtScheduleService {
 
         // Thông báo cho PT
         String timeStr = slot.getStartTime().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm dd/MM"));
+        String penaltyMsg = shouldRefund ? "" : " (Hủy muộn, học viên vẫn bị trừ buổi)";
         notificationService.sendNotification(
             slot.getPersonalTrainer().getId(),
-            "Học viên " + member.getFullName() + " đã HỦY lịch tập lúc " + timeStr + ".",
+            "Học viên " + member.getFullName() + " đã HỦY lịch tập lúc " + timeStr + penaltyMsg + ".",
             "BOOKING_CANCELLED"
         );
     }
@@ -802,6 +828,37 @@ public class PtScheduleServiceImpl implements PtScheduleService {
                 .build();
     }
 
+    @Override
+    @Transactional
+    public PtScheduleResponse submitFeedback(Long slotId, com.xala.gym.dto.request.FeedbackRequest request) {
+        Booking slot = bookingRepository.findById(slotId)
+                .orElseThrow(() -> new RuntimeException("Buổi tập không tồn tại"));
+
+        User member = getCurrentUser();
+        if (slot.getMember() == null || !slot.getMember().getId().equals(member.getId())) {
+            throw new RuntimeException("Bạn không có quyền đánh giá buổi tập này.");
+        }
+
+        if (!"COMPLETED".equals(slot.getStatus())) {
+            throw new RuntimeException("Chỉ có thể đánh giá buổi tập đã hoàn thành.");
+        }
+
+        slot.setRating(request.getRating());
+        slot.setFeedback(request.getFeedback());
+
+        Booking saved = bookingRepository.save(slot);
+
+        // Gửi thông báo cho PT
+        String timeStr = slot.getStartTime().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm dd/MM"));
+        notificationService.sendNotification(
+            slot.getPersonalTrainer().getId(),
+            "Học viên " + member.getFullName() + " đã gửi phản hồi (" + request.getRating() + " sao) cho buổi tập lúc " + timeStr + ".",
+            "FEEDBACK_RECEIVED"
+        );
+
+        return mapToResponse(saved);
+    }
+
     private User getCurrentUser() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByUsername(username)
@@ -828,6 +885,8 @@ public class PtScheduleServiceImpl implements PtScheduleService {
                 .exercises(b.getExercises())
                 .achievedGoals(b.getAchievedGoals())
                 .ptEvaluation(b.getPtEvaluation())
+                .rating(b.getRating())
+                .feedback(b.getFeedback())
                 .build();
     }
 }

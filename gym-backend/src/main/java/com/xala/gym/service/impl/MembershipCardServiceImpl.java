@@ -12,6 +12,9 @@ import com.xala.gym.repository.MembershipCardRepository;
 import com.xala.gym.repository.PackageRepository;
 import com.xala.gym.repository.UserRepository;
 import com.xala.gym.repository.EmployeeRepository;
+import com.xala.gym.entity.MembershipPauseHistory;
+import com.xala.gym.repository.MembershipPauseHistoryRepository;
+import java.time.temporal.ChronoUnit;
 import com.xala.gym.service.MembershipCardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -32,6 +35,7 @@ public class MembershipCardServiceImpl implements MembershipCardService {
     private final PackageRepository packageRepository;
     private final UserRepository userRepository;
     private final EmployeeRepository employeeRepository;
+    private final MembershipPauseHistoryRepository pauseHistoryRepository;
 
     @Override
     @Transactional
@@ -78,11 +82,19 @@ public class MembershipCardServiceImpl implements MembershipCardService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<MembershipCardResponse> getMemberCards(Long memberId) {
+        return cardRepository.findByMemberId(memberId).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public MembershipCardResponse getCurrentCard(String username) {
         Member member = memberRepository.findByUserUsername(username)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy member cho: " + username));
         
-        return cardRepository.findFirstByMemberIdAndStatusOrderByEndDateDesc(member.getId(), "ACTIVE")
+        return cardRepository.findFirstByMemberIdAndStatusInOrderByEndDateDesc(member.getId(), java.util.List.of("ACTIVE", "PAUSED"))
                 .map(this::mapToResponse)
                 .orElse(null);
     }
@@ -105,6 +117,24 @@ public class MembershipCardServiceImpl implements MembershipCardService {
         }
 
         card.setStatus("CANCELLED"); // Sử dụng CANCELLED đồng nhất với hệ thống
+        cardRepository.save(card);
+    }
+
+    @Override
+    @Transactional
+    public void approveCard(Long cardId, Double customPrice) {
+        MembershipCard card = cardRepository.findById(cardId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy thông tin gói tập với ID: " + cardId));
+                
+        if (!"PENDING".equals(card.getStatus())) {
+            throw new IllegalStateException("Gói tập không ở trạng thái chờ duyệt.");
+        }
+        
+        if (customPrice != null) {
+            card.setCustomPrice(customPrice);
+        }
+        
+        card.setStatus("ACTIVE");
         cardRepository.save(card);
     }
 
@@ -140,6 +170,68 @@ public class MembershipCardServiceImpl implements MembershipCardService {
         cardRepository.save(card);
     }
 
+    @Override
+    @Transactional
+    public void pauseCard(String username, Long cardId, String reason) {
+        Member member = memberRepository.findByUserUsername(username)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy member cho: " + username));
+
+        MembershipCard card = cardRepository.findById(cardId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy thông tin gói tập với ID: " + cardId));
+
+        if (!card.getMember().getId().equals(member.getId())) {
+            throw new IllegalStateException("Bạn không có quyền bảo lưu gói tập này");
+        }
+
+        if (!"ACTIVE".equals(card.getStatus())) {
+            throw new IllegalStateException("Gói tập hiện không ở trạng thái hoạt động để có thể bảo lưu.");
+        }
+
+        card.setStatus("PAUSED");
+        cardRepository.save(card);
+
+        MembershipPauseHistory history = MembershipPauseHistory.builder()
+                .membershipCard(card)
+                .pauseDate(LocalDate.now())
+                .reason(reason != null ? reason : "Bảo lưu theo yêu cầu cá nhân")
+                .build();
+        pauseHistoryRepository.save(history);
+    }
+
+    @Override
+    @Transactional
+    public void resumeCard(String username, Long cardId) {
+        Member member = memberRepository.findByUserUsername(username)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy member cho: " + username));
+
+        MembershipCard card = cardRepository.findById(cardId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy thông tin gói tập với ID: " + cardId));
+
+        if (!card.getMember().getId().equals(member.getId())) {
+            throw new IllegalStateException("Bạn không có quyền tiếp tục gói tập này");
+        }
+
+        if (!"PAUSED".equals(card.getStatus())) {
+            throw new IllegalStateException("Gói tập không ở trạng thái bảo lưu.");
+        }
+
+        MembershipPauseHistory history = pauseHistoryRepository
+                .findFirstByMembershipCardIdAndResumeDateIsNullOrderByCreatedAtDesc(cardId)
+                .orElseThrow(() -> new IllegalStateException("Không tìm thấy lịch sử bảo lưu hợp lệ."));
+
+        history.setResumeDate(LocalDate.now());
+        pauseHistoryRepository.save(history);
+
+        // Tính toán lại ngày kết thúc gói tập
+        long daysPaused = ChronoUnit.DAYS.between(history.getPauseDate(), history.getResumeDate());
+        if (card.getEndDate() != null) {
+            card.setEndDate(card.getEndDate().plusDays(daysPaused));
+        }
+        
+        card.setStatus("ACTIVE");
+        cardRepository.save(card);
+    }
+
     private MembershipCardResponse mapToResponse(MembershipCard card) {
         MembershipCardResponse.MembershipCardResponseBuilder builder = MembershipCardResponse.builder()
                 .id(card.getId())
@@ -150,7 +242,9 @@ public class MembershipCardServiceImpl implements MembershipCardService {
                 .endDate(card.getEndDate())
                 .status(card.getStatus())
                 .maxSessions(card.getGymPackage() != null ? card.getGymPackage().getMaxSessions() : 0)
-                .remainingSessions(card.getRemainingSessions());
+                .remainingSessions(card.getRemainingSessions())
+                .originalPrice(card.getGymPackage() != null ? card.getGymPackage().getPrice() : null)
+                .customPrice(card.getCustomPrice());
 
         if (card.getAssignedPt() != null && card.getAssignedPt().getUser() != null) {
             builder.assignedPtId(card.getAssignedPt().getUser().getId());

@@ -19,6 +19,13 @@ const AdminMemberList = () => {
     username: "", password: "", name: "", cccd: "", sex: "", email: "", phone: ""
   });
 
+  // Membership Modal States
+  const [showMembershipModal, setShowMembershipModal] = useState(false);
+  const [currentSelectedMemberId, setCurrentSelectedMemberId] = useState(null);
+  const [selectedMemberships, setSelectedMemberships] = useState([]);
+  const [memberAiHistory, setMemberAiHistory] = useState([]);
+  const [customPriceInput, setCustomPriceInput] = useState({});
+
   const fetchMembers = useCallback(async () => {
     try {
       setLoading(true);
@@ -90,6 +97,49 @@ const AdminMemberList = () => {
         console.error("Lỗi nâng cấp PT:", error);
         alert("Nâng cấp thất bại.");
       }
+    }
+  };
+
+  const handleManageMemberships = async (member) => {
+    try {
+      setLoading(true);
+      const { getMemberMemberships, getMemberAiHistory } = await import("../../../api/adminMemberApi");
+      const [memberships, aiHist] = await Promise.all([
+        getMemberMemberships(member.id),
+        getMemberAiHistory(member.id)
+      ]);
+      setSelectedMemberships(memberships);
+      setMemberAiHistory(aiHist);
+      setCurrentSelectedMemberId(member.id);
+      setShowMembershipModal(true);
+      
+      const priceInit = {};
+      memberships.forEach(m => priceInit[m.id] = m.originalPrice || 0);
+      setCustomPriceInput(priceInit);
+      
+    } catch (error) {
+       console.error("Lỗi tải thông tin thẻ tập:", error);
+       alert("Lỗi tải thông tin thẻ tập");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleApproveMembership = async (cardId) => {
+    try {
+      const { approveMembership, getMemberMemberships } = await import("../../../api/adminMemberApi");
+      const priceToApprove = customPriceInput[cardId] !== "" ? Number(customPriceInput[cardId]) : null;
+      await approveMembership(cardId, priceToApprove);
+      alert("Duyệt thẻ thành công!");
+      
+      // Refresh modal data
+      if (currentSelectedMemberId) {
+        const memberships = await getMemberMemberships(currentSelectedMemberId);
+        setSelectedMemberships(memberships);
+      }
+    } catch (error) {
+      console.error("Lỗi duyệt thẻ:", error);
+      alert(error.response?.data?.message || error.response?.data || "Duyệt thẻ thất bại.");
     }
   };
 
@@ -188,6 +238,7 @@ const AdminMemberList = () => {
                       {m.status !== false ? "Khóa" : "Mở Khóa"}
                     </button>
                     <button className="action-btn" style={{ background: "#673AB7", color: "white" }} onClick={() => handleUpgradeToPt(m.id)}>Nâng cấp PT</button>
+                    <button className="action-btn" style={{ background: "#4caf50", color: "white" }} onClick={() => handleManageMemberships(m)}>Thẻ Tập</button>
                     <button className="action-btn delete" onClick={() => handleDelete(m.id)}>Xóa</button>
                   </td>
                 </tr>
@@ -337,6 +388,92 @@ const AdminMemberList = () => {
               <button className="action-btn" onClick={() => setShowAddModal(false)}>Hủy</button>
               <button className="action-btn" style={{ background: "#4CAF50", color: "white" }} onClick={handleSaveAdd}>Thêm Mới</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Membership Management Modal */}
+      {showMembershipModal && (
+        <div className="modal-overlay">
+          <div className="modal-content" style={{ maxWidth: '800px', width: '90%', maxHeight: '90vh', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3>Quản lý Thẻ Tập Hội Viên</h3>
+              <button 
+                onClick={() => setShowMembershipModal(false)}
+                style={{ background: 'transparent', border: 'none', fontSize: '20px', cursor: 'pointer' }}
+              >✕</button>
+            </div>
+
+            {/* AI Hint Section */}
+            {memberAiHistory && memberAiHistory.length > 0 && (
+              <div style={{ background: '#f0f9ff', padding: '15px', borderRadius: '8px', borderLeft: '4px solid #0284c7', marginBottom: '20px' }}>
+                <h4 style={{ margin: '0 0 10px 0', color: '#0369a1' }}>🤖 Phân tích Thể trạng từ AI Consultant</h4>
+                {memberAiHistory.slice(0, 1).map(ai => (
+                  <div key={ai.id} style={{ fontSize: '14px', color: '#334155' }}>
+                    <p><strong>BMI:</strong> {ai.bmi} - <strong>Phân loại:</strong> {ai.bmiCategory}</p>
+                    <p><strong>Mục tiêu:</strong> {ai.goal}</p>
+                    <p style={{ fontStyle: 'italic', marginBottom: 0 }}>"{ai.advice}"</p>
+                    <p style={{ marginTop: '5px', fontSize: '12px', color: '#64748b' }}>
+                      * Thông tin này giúp bạn (Admin) tùy biến giá (Custom Price) theo độ tuổi, bệnh lý, và khối lượng tập luyện.
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Memberships List */}
+            {selectedMemberships.length === 0 ? (
+              <p>Hội viên này chưa đăng ký gói tập nào.</p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                {selectedMemberships.map(card => (
+                  <div key={card.id} style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '15px', background: '#fff' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                      <h4 style={{ margin: 0 }}>{card.packageName} <span style={{ fontSize: '12px', background: '#e2e8f0', padding: '2px 6px', borderRadius: '4px' }}>{card.category}</span></h4>
+                      <span style={{ 
+                        fontWeight: 'bold', 
+                        color: card.status === 'ACTIVE' ? 'green' : card.status === 'PENDING' ? 'orange' : 'red',
+                        background: card.status === 'ACTIVE' ? '#dcfce7' : card.status === 'PENDING' ? '#fef3c7' : '#fee2e2',
+                        padding: '4px 8px', borderRadius: '4px', fontSize: '12px'
+                      }}>
+                        {card.status}
+                      </span>
+                    </div>
+                    
+                    <div style={{ fontSize: '14px', color: '#475569', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                      <span><strong>Ngày bắt đầu:</strong> {card.startDate}</span>
+                      <span><strong>Ngày kết thúc:</strong> {card.endDate}</span>
+                      <span><strong>Số buổi:</strong> {card.maxSessions} (Còn {card.remainingSessions})</span>
+                      <span>
+                        <strong>Giá gốc:</strong> {(card.originalPrice || 0).toLocaleString()} VNĐ
+                        {card.customPrice && <span style={{ color: 'red', marginLeft: '10px' }}>(Đã duyệt mức giá: {card.customPrice.toLocaleString()} VNĐ)</span>}
+                      </span>
+                    </div>
+
+                    {card.status === 'PENDING' && (
+                      <div style={{ marginTop: '15px', paddingTop: '15px', borderTop: '1px dashed #cbd5e1', display: 'flex', alignItems: 'center', gap: '15px' }}>
+                        <div style={{ flex: 1 }}>
+                          <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', marginBottom: '5px' }}>Thiết lập Mức giá Tùy chỉnh (VNĐ) <span style={{fontWeight: 'normal', color: '#64748b'}}>* Dành riêng cho học viên này</span></label>
+                          <input 
+                            type="number" 
+                            style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #cbd5e1' }}
+                            value={customPriceInput[card.id] || ""}
+                            onChange={(e) => setCustomPriceInput({...customPriceInput, [card.id]: e.target.value})}
+                          />
+                        </div>
+                        <button 
+                          className="action-btn" 
+                          style={{ background: "#f59e0b", color: "white", alignSelf: 'flex-end', padding: '9px 20px' }} 
+                          onClick={() => handleApproveMembership(card.id)}
+                        >
+                          Duyệt Gói Này
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}

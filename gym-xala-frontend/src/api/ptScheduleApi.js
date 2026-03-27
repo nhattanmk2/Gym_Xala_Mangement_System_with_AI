@@ -111,6 +111,13 @@ export const markSessionCompleted = async (id) => {
     return res.data;
 };
 
+export const submitFeedback = async (id, rating, feedback) => {
+    const res = await axios.post(`http://localhost:8080/api/member/schedule/${id}/feedback`, { rating, feedback }, {
+        headers: getAuthHeader()
+    });
+    return res.data;
+};
+
 // API Lấy Thống kê tuần của Member
 export const getMemberWeeklyStats = async () => {
     const res = await axios.get(`http://localhost:8080/api/member/stats/weekly`, {

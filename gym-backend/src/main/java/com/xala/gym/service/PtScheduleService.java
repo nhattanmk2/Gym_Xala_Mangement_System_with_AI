@@ -39,5 +39,8 @@ public interface PtScheduleService {
     // PT confirmed completion
     void markSessionAsCompleted(Long slotId);
     
+    // Member feedback
+    PtScheduleResponse submitFeedback(Long slotId, com.xala.gym.dto.request.FeedbackRequest request);
+    
     void updateMemberExerciseProgress(com.xala.gym.entity.User memberUser, com.xala.gym.entity.Package gymPackage);
 }

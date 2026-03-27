@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getCurrentCard, getMyCardList, cancelPackage, assignPt } from "../../../api/membershipApi";
+import { getCurrentCard, getMyCardList, cancelPackage, assignPt, pausePackage, resumePackage } from "../../../api/membershipApi";
 import { getAvailableSlots } from "../../../api/ptScheduleApi";
 import "./my-package.css";
 
@@ -60,6 +60,33 @@ export default function MyPackage() {
                     msg = typeof error.response.data === "string" ? error.response.data : (error.response.data.message || msg);
                 }
                 alert("❌ Lỗi: " + msg);
+            }
+        }
+    };
+
+    const handlePause = async (cardId) => {
+        const reason = window.prompt("Vui lòng nhập lý do bảo lưu gói tập (Ví dụ: Đi công tác, Lý do sức khỏe...):");
+        if (reason !== null) {
+            try {
+                await pausePackage(cardId, reason);
+                alert("✅ Đã bảo lưu gói tập thành công.");
+                fetchData();
+            } catch (error) {
+                console.error("Lỗi khi bảo lưu:", error);
+                alert("❌ Lỗi: " + (error.response?.data?.message || error.response?.data || "Không thể bảo lưu gói tập."));
+            }
+        }
+    };
+
+    const handleResume = async (cardId) => {
+        if (window.confirm("Bạn có chắc chắn muốn kích hoạt lại gói tập này không?")) {
+            try {
+                await resumePackage(cardId);
+                alert("✅ Đã kích hoạt lại gói tập thành công.");
+                fetchData();
+            } catch (error) {
+                console.error("Lỗi khi kích hoạt lại:", error);
+                alert("❌ Lỗi: " + (error.response?.data?.message || error.response?.data || "Không thể kích hoạt lại gói tập."));
             }
         }
     };
@@ -128,7 +155,7 @@ export default function MyPackage() {
                         <div className="pkg-glow"></div>
                         <div className="pkg-content">
                             <div className="pkg-info">
-                                <span className="pkg-badge">ĐANG HOẠT ĐỘNG</span>
+                                <span className={`pkg-badge ${currentCard.status === 'PAUSED' ? 'paused-badge' : ''}`} style={currentCard.status === 'PAUSED' ? {backgroundColor: '#ffc107', color: '#000'} : {}}>{currentCard.status === 'PAUSED' ? 'BẢO LƯU' : 'ĐANG HOẠT ĐỘNG'}</span>
                                 <h3 className="pkg-name">{currentCard.packageName}</h3>
                                 <p className="pkg-cat">{currentCard.category}</p>
 
@@ -170,14 +197,32 @@ export default function MyPackage() {
                             <div className="pkg-visual">
                                 <div className="days-left">
                                     <span>Hết hạn trong</span>
-                                    <div className="days-count">
-                                        {Math.ceil((new Date(currentCard.endDate) - new Date()) / (1000 * 60 * 60 * 24))}
-                                    </div>
-                                    <span>ngày</span>
+                                    {currentCard.status === 'PAUSED' ? (
+                                        <div className="days-count" style={{color: '#ffc107', fontSize: '1.5rem', whiteSpace: 'nowrap'}}>
+                                            BẢO LƯU
+                                        </div>
+                                    ) : (
+                                        <div className="days-count">
+                                            {Math.ceil((new Date(currentCard.endDate) - new Date()) / (1000 * 60 * 60 * 24))}
+                                        </div>
+                                    )}
+                                    {currentCard.status !== 'PAUSED' && <span>ngày</span>}
                                 </div>
-                                <button className="btn-cancel-top" onClick={() => handleCancel(currentCard.id)}>
-                                    Hủy gói tập
-                                </button>
+                                <div style={{display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '10px'}}>
+                                    {currentCard.status === 'ACTIVE' && (
+                                        <button className="btn-cancel-top" style={{backgroundColor: '#ff9800', border: '1px solid #ff9800'}} onClick={() => handlePause(currentCard.id)}>
+                                            Bảo lưu gói tập
+                                        </button>
+                                    )}
+                                    {currentCard.status === 'PAUSED' && (
+                                        <button className="btn-cancel-top" style={{backgroundColor: '#4caf50', border: '1px solid #4caf50'}} onClick={() => handleResume(currentCard.id)}>
+                                            Tiếp tục tập
+                                        </button>
+                                    )}
+                                    <button className="btn-cancel-top" onClick={() => handleCancel(currentCard.id)}>
+                                        Hủy gói tập
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -217,6 +262,7 @@ export default function MyPackage() {
                                             <div className="status-action-group">
                                                 <span className={`status-pill ${card.status.toLowerCase()}`}>
                                                     {card.status === "ACTIVE" ? "Đang hoạt động" :
+                                                        card.status === "PAUSED" ? "Đã bảo lưu" :
                                                         card.status === "PENDING" ? "Đang chờ duyệt" :
                                                             card.status === "CANCELLED" || card.status === "CANCELED" ? "Đã hủy" :
                                                                 card.status}

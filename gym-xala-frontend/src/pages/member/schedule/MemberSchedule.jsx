@@ -23,6 +23,11 @@ const MemberSchedule = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loadingDetail, setLoadingDetail] = useState(false);
 
+  // Feedback State
+  const [feedbackMode, setFeedbackMode] = useState(false);
+  const [ratingInput, setRatingInput] = useState(5);
+  const [feedbackInput, setFeedbackInput] = useState("");
+
   useEffect(() => {
     fetchSchedules();
   }, []);
@@ -53,12 +58,28 @@ const MemberSchedule = () => {
       // We fetch the latest specific details to ensure data freshness
       const detailData = await import("../../../api/ptScheduleApi").then(m => m.getMemberScheduleById(id));
       setSelectedSchedule(detailData);
+      setFeedbackMode(false);
+      setRatingInput(detailData.rating || 5);
+      setFeedbackInput(detailData.feedback || "");
     } catch (error) {
       console.error("Error fetching schedule details:", error);
       alert("Lỗi khi tải chi tiết buổi tập.");
       setIsModalOpen(false);
     } finally {
       setLoadingDetail(false);
+    }
+  };
+
+  const handleSubmitFeedback = async () => {
+    try {
+      const res = await import("../../../api/ptScheduleApi").then(m => m.submitFeedback(selectedSchedule.id, ratingInput, feedbackInput));
+      alert("Cảm ơn bạn đã gửi đánh giá!");
+      setSelectedSchedule(res);
+      setFeedbackMode(false);
+      fetchSchedules();
+    } catch (error) {
+      console.error("Error submitting feedback:", error);
+      alert("Lỗi khi gửi đánh giá: " + (error.response?.data?.message || error.response?.data || "Vui lòng thử lại"));
     }
   };
 
@@ -447,6 +468,47 @@ const MemberSchedule = () => {
                         ⚠️ Hủy lịch tập
                       </button>
                       <p className="cancel-note">* Chỉ có thể hủy trước 24h diễn ra buổi tập</p>
+                    </div>
+                  )}
+
+                  {selectedSchedule.status === 'COMPLETED' && (
+                    <div className="modal-info-group feedback-group" style={{ marginTop: '20px', padding: '15px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                      <label style={{ fontSize: '1.1rem', color: '#1e293b', marginBottom: '10px', display: 'block' }}>Đánh giá của bạn</label>
+                      {selectedSchedule.rating ? (
+                        <div className="submitted-feedback">
+                          <div className="stars" style={{ color: '#fbbf24', fontSize: '1.2rem', marginBottom: '5px' }}>
+                            {"★".repeat(selectedSchedule.rating)}{"☆".repeat(5 - selectedSchedule.rating)}
+                          </div>
+                          {selectedSchedule.feedback && <p style={{ color: '#475569', fontStyle: 'italic', margin: '0' }}>"{selectedSchedule.feedback}"</p>}
+                        </div>
+                      ) : feedbackMode ? (
+                        <div className="feedback-form" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                          <div className="rating-select" style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
+                            <span style={{color: '#475569'}}>Điểm đánh giá:</span>
+                            <select value={ratingInput} onChange={e => setRatingInput(Number(e.target.value))} style={{ padding: '6px', borderRadius: '4px', border: '1px solid #cbd5e1', outline: 'none' }}>
+                              <option value="5">5 Sao - Rất hài lòng</option>
+                              <option value="4">4 Sao - Hài lòng</option>
+                              <option value="3">3 Sao - Bình thường</option>
+                              <option value="2">2 Sao - Không hài lòng</option>
+                              <option value="1">1 Sao - Rất tệ</option>
+                            </select>
+                          </div>
+                          <textarea 
+                            value={feedbackInput} 
+                            onChange={e => setFeedbackInput(e.target.value)} 
+                            placeholder="Chia sẻ cảm nhận của bạn về chất lượng buổi tập (không bắt buộc)..."
+                            style={{ padding: '10px', borderRadius: '4px', border: '1px solid #cbd5e1', minHeight: '80px', fontFamily: 'inherit', resize: 'vertical' }}
+                          />
+                          <div style={{ display: 'flex', gap: '10px', marginTop: '5px' }}>
+                            <button onClick={handleSubmitFeedback} style={{ padding: '8px 16px', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: '500' }}>Gửi đánh giá</button>
+                            <button onClick={() => setFeedbackMode(false)} style={{ padding: '8px 16px', backgroundColor: '#e2e8f0', color: '#475569', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: '500' }}>Hủy</button>
+                          </div>
+                        </div>
+                      ) : (
+                        <button onClick={() => setFeedbackMode(true)} style={{ padding: '10px 15px', backgroundColor: '#10b981', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '1rem', transition: 'background-color 0.2s' }}>
+                          ⭐ Đánh giá buổi tập này
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>
