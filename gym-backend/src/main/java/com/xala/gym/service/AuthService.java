@@ -167,9 +167,11 @@ public class AuthService {
                 .toList();
 
         String token = jwtService.generateToken(userDetails);
+        String refreshToken = jwtService.generateRefreshToken(userDetails);
 
         AuthResponse res = new AuthResponse(
                 token,
+                refreshToken,
                 user.getUsername(),
                 user.getEmail(),
                 roles,
@@ -187,6 +189,63 @@ public class AuthService {
         }
 
         return res;
+    }
+
+    // ======================= REFRESH TOKEN =======================
+    public AuthResponse refreshToken(com.xala.gym.dto.request.RefreshRequest request) {
+        String reqRefreshToken = request.getRefreshToken();
+        if (reqRefreshToken == null) {
+            throw new RuntimeException("Refresh token is missing");
+        }
+
+        String username = jwtService.extractUsername(reqRefreshToken);
+        if (username != null) {
+            User user = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            if (!user.getEnabled()) {
+                throw new RuntimeException("Tài khoản chưa được xác thực");
+            }
+
+            UserDetails userDetails = org.springframework.security.core.userdetails.User.builder()
+                    .username(user.getUsername())
+                    .password(user.getPassword())
+                    .authorities(user.getRoles().stream()
+                            .map(role -> new org.springframework.security.core.authority.SimpleGrantedAuthority(role.getName().name()))
+                            .toList())
+                    .build();
+
+            if (jwtService.isTokenValid(reqRefreshToken, userDetails)) {
+                String accessToken = jwtService.generateToken(userDetails);
+                String newRefreshToken = jwtService.generateRefreshToken(userDetails);
+
+                List<String> roles = user.getRoles()
+                        .stream()
+                        .map(r -> r.getName().name())
+                        .toList();
+
+                AuthResponse res = new AuthResponse(
+                        accessToken,
+                        newRefreshToken,
+                        user.getUsername(),
+                        user.getEmail(),
+                        roles,
+                        null,
+                        null
+                );
+
+                if (roles.contains(UserRole.ROLE_PT.name())) {
+                    employeeRepository.findByUser_Id(user.getId()).ifPresent(e -> {
+                        if (e.getGymLocation() != null) {
+                            res.setGymLocationId(e.getGymLocation().getId());
+                            res.setGymLocationName(e.getGymLocation().getName());
+                        }
+                    });
+                }
+                return res;
+            }
+        }
+        throw new RuntimeException("Refresh token is invalid or expired");
     }
 }
 

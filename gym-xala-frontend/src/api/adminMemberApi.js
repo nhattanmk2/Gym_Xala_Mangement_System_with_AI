@@ -1,93 +1,53 @@
-import axios from "axios";
-import { getToken } from "../utils/auth";
+import axiosClient from "./axiosClient";
 
-const BASE_URL = "http://localhost:8080/api/admin/members";
+const BASE_URL = "/admin/members";
 
-export const getAllMembers = async (name = "", cccd = "") => {
-  const token = getToken();
-
-  const res = await axios.get(BASE_URL, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+export const getAllMembers = async (name = "", cccd = "") => {
+  const res = await axiosClient.get(BASE_URL, {
     params: {
       name,
       cccd,
-    },
-  });
+    }});
 
   return res.data;
 };
 
-export const updateMember = async (id, data) => {
-  const token = getToken();
-
-  const res = await axios.put(`${BASE_URL}/${id}`, data, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+export const updateMember = async (id, data) => {
+  const res = await axiosClient.put(`${BASE_URL}/${id}`, data);
 
   return res.data;
 };
 
-export const updateMemberStatus = async (id, status) => {
-  const token = getToken();
-  const res = await axios.put(`${BASE_URL}/${id}/status`, null, {
-    headers: { Authorization: `Bearer ${token}` },
+export const updateMemberStatus = async (id, status) => {  const res = await axiosClient.put(`${BASE_URL}/${id}/status`, null, {
     params: { status }
   });
   return res.data;
 };
 
-export const deleteMember = async (id) => {
-  const token = getToken();
-  const res = await axios.delete(`${BASE_URL}/${id}`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
+export const deleteMember = async (id) => {  const res = await axiosClient.delete(`${BASE_URL}/${id}`);
   return res.data;
 };
 
-export const createMember = async (data) => {
-  const token = getToken();
-  const res = await axios.post(`${BASE_URL}/create`, data, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
+export const createMember = async (data) => {  const res = await axiosClient.post(`${BASE_URL}/create`, data);
   return res.data;
 };
 
-export const upgradeToPt = async (id) => {
-  const token = getToken();
-  const res = await axios.put(`${BASE_URL}/${id}/upgrade-pt`, {}, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
+export const upgradeToPt = async (id) => {  const res = await axiosClient.put(`${BASE_URL}/${id}/upgrade-pt`);
   return res.data;
 };
 
-export const getMemberMemberships = async (memberId) => {
-  const token = getToken();
-  const res = await axios.get(`${BASE_URL}/${memberId}/memberships`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
+export const getMemberMemberships = async (memberId) => {  const res = await axiosClient.get(`${BASE_URL}/${memberId}/memberships`);
   return res.data;
 };
 
-export const getMemberAiHistory = async (memberId) => {
-  const token = getToken();
-  const res = await axios.get(`${BASE_URL}/${memberId}/ai-history`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
+export const getMemberAiHistory = async (memberId) => {  const res = await axiosClient.get(`${BASE_URL}/${memberId}/ai-history`);
   return res.data;
 };
 
-export const approveMembership = async (membershipId, customPrice) => {
-  const token = getToken();
-  let url = `http://localhost:8080/api/admin/memberships/${membershipId}/approve`;
+export const approveMembership = async (membershipId, customPrice) => {  let url = `/admin/memberships/${membershipId}/approve`;
   if (customPrice != null) {
       url += `?customPrice=${customPrice}`;
   }
-  const res = await axios.put(url, {}, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
+  const res = await axiosClient.put(url);
   return res.data;
 };

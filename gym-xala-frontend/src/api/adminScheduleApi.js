@@ -1,44 +1,25 @@
-import axios from "axios";
-import { getToken } from "../utils/auth";
+import axiosClient from "./axiosClient";
 
-const BASE_URL = "http://localhost:8080/api/admin/schedules";
+const BASE_URL = "/admin/schedules";
 
-export const getAllSchedules = async (filters = {}) => {
-    const token = getToken();
-    const { branchId, ptName, status } = filters;
+export const getAllSchedules = async (filters = {}) => {    const { branchId, ptName, status } = filters;
 
-    const res = await axios.get(BASE_URL, {
-        headers: {
-            Authorization: `Bearer ${token}`,
-        },
+    const res = await axiosClient.get(BASE_URL, {
         params: {
             branchId: branchId || undefined,
             ptName: ptName || undefined,
             status: status || undefined,
-        },
-    });
+        }});
 
     return res.data;
 };
-export const updateSchedule = async (id, scheduleData) => {
-    const token = getToken();
-    const response = await axios.put(`${BASE_URL}/${id}`, scheduleData, {
-        headers: { Authorization: `Bearer ${token}` }
-    });
+export const updateSchedule = async (id, scheduleData) => {    const response = await axiosClient.put(`${BASE_URL}/${id}`, scheduleData);
     return response.data;
 };
 
-export const deleteSchedule = async (id) => {
-    const token = getToken();
-    await axios.delete(`${BASE_URL}/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-    });
+export const deleteSchedule = async (id) => {    await axiosClient.delete(`${BASE_URL}/${id}`);
 };
 
-export const batchAddSchedule = async (ptId, slots) => {
-    const token = getToken();
-    const response = await axios.post(`${BASE_URL}/batch/${ptId}`, slots, {
-        headers: { Authorization: `Bearer ${token}` }
-    });
+export const batchAddSchedule = async (ptId, slots) => {    const response = await axiosClient.post(`${BASE_URL}/batch/${ptId}`, slots);
     return response.data;
 };

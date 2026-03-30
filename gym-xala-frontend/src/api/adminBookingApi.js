@@ -1,14 +1,8 @@
-import axios from "axios";
-import { getToken } from "../utils/auth";
+import axiosClient from "./axiosClient";
 
-const API_URL = "http://localhost:8080/api/admin/bookings";
-
-const getHeaders = () => {
-    const token = getToken();
-    return { Authorization: `Bearer ${token}` };
-};
+const API_URL = "/admin/bookings";
 
 export const getPendingBookings = async () => {
-    const response = await axios.get(`${API_URL}/pending`, { headers: getHeaders() });
+    const response = await axiosClient.get(`${API_URL}/pending`);
     return response.data;
 };

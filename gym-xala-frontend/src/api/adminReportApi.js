@@ -1,39 +1,28 @@
-import axios from 'axios';
-import { getToken } from '../utils/auth';
+import axiosClient from './axiosClient';
 
-const BASE_URL = 'http://localhost:8080/api/admin/reports';
+const BASE_URL = "/admin/reports";
 
-export const getRevenueReport = (startDate, endDate) => {
-    const token = getToken();
-    let url = `${BASE_URL}/revenue`;
+export const getRevenueReport = (startDate, endDate) => {    let url = `${BASE_URL}/revenue`;
     const params = {};
     if (startDate && endDate) {
         params.startDate = startDate;
         params.endDate = endDate;
     }
-    return axios.get(url, {
-        headers: { Authorization: `Bearer ${token}` },
+    return axiosClient.get(url, {
         params
     });
 };
 
-export const getPtPerformanceReport = (startDate, endDate) => {
-    const token = getToken();
-    let url = `${BASE_URL}/pt-performance`;
+export const getPtPerformanceReport = (startDate, endDate) => {    let url = `${BASE_URL}/pt-performance`;
     const params = {};
     if (startDate && endDate) {
         params.startDate = startDate;
         params.endDate = endDate;
     }
-    return axios.get(url, {
-        headers: { Authorization: `Bearer ${token}` },
+    return axiosClient.get(url, {
         params
     });
 };
 
-export const getMemberSummaryReport = () => {
-    const token = getToken();
-    return axios.get(`${BASE_URL}/member-summary`, {
-        headers: { Authorization: `Bearer ${token}` }
-    });
+export const getMemberSummaryReport = () => {    return axiosClient.get(`${BASE_URL}/member-summary`);
 };

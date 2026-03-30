@@ -1,17 +1,10 @@
-import axios from "axios";
-import { getToken } from "../utils/auth";
+import axiosClient from "./axiosClient";
 
-const BASE_URL = "http://localhost:8080/api/member";
+const BASE_URL = "/member";
 
 // GET PROFILE
-export const getProfile = async () => {
-  const token = getToken();
-
-  const res = await axios.get(`${BASE_URL}/profile`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+export const getProfile = async () => {
+  const res = await axiosClient.get(`${BASE_URL}/profile`);
 
   return res.data;
 };

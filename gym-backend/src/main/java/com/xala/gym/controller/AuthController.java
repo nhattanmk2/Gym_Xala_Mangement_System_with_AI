@@ -44,4 +44,11 @@ public class AuthController {
     ) {
         return ResponseEntity.ok(authService.login(request));
     }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthResponse> refresh(
+            @RequestBody com.xala.gym.dto.request.RefreshRequest request
+    ) {
+        return ResponseEntity.ok(authService.refreshToken(request));
+    }
 }

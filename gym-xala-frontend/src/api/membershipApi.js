@@ -1,6 +1,6 @@
-import axios from "axios";
+import axiosClient from "./axiosClient";
 
-const BASE_URL = "http://localhost:8080/api/member/packages";
+const BASE_URL = "/member/packages";
 
 const getToken = () => localStorage.getItem("token");
 
@@ -9,36 +9,36 @@ const getHeaders = () => ({
 });
 
 export const registerPackage = async (packageId, startDate) => {
-    const res = await axios.post(`${BASE_URL}/register`, { packageId, startDate }, getHeaders());
+    const res = await axiosClient.post(`${BASE_URL}/register`, { packageId, startDate }, getHeaders());
     return res.data;
 };
 
 export const getMyCardList = async () => {
-    const res = await axios.get(`${BASE_URL}/my-cards`, getHeaders());
+    const res = await axiosClient.get(`${BASE_URL}/my-cards`, getHeaders());
     return res.data;
 };
 
 export const getCurrentCard = async () => {
-    const res = await axios.get(`${BASE_URL}/current`, getHeaders());
+    const res = await axiosClient.get(`${BASE_URL}/current`, getHeaders());
     return res.data;
 };
 
 export const cancelPackage = async (cardId) => {
-    const res = await axios.put(`${BASE_URL}/cancel/${cardId}`, {}, getHeaders());
+    const res = await axiosClient.put(`${BASE_URL}/cancel/${cardId}`, {}, getHeaders());
     return res.data;
 };
 
 export const assignPt = async (cardId, ptId) => {
-    const res = await axios.put(`${BASE_URL}/${cardId}/assign-pt/${ptId}`, {}, getHeaders());
+    const res = await axiosClient.put(`${BASE_URL}/${cardId}/assign-pt/${ptId}`, {}, getHeaders());
     return res.data;
 };
 
 export const pausePackage = async (cardId, reason = '') => {
-    const res = await axios.put(`${BASE_URL}/${cardId}/pause?reason=${encodeURIComponent(reason)}`, {}, getHeaders());
+    const res = await axiosClient.put(`${BASE_URL}/${cardId}/pause?reason=${encodeURIComponent(reason)}`, {}, getHeaders());
     return res.data;
 };
 
 export const resumePackage = async (cardId) => {
-    const res = await axios.put(`${BASE_URL}/${cardId}/resume`, {}, getHeaders());
+    const res = await axiosClient.put(`${BASE_URL}/${cardId}/resume`, {}, getHeaders());
     return res.data;
 };

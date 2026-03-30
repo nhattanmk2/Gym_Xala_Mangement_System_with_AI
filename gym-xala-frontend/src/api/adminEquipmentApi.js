@@ -1,12 +1,7 @@
-import axios from 'axios';
-import { getToken } from '../utils/auth';
+import axiosClient from './axiosClient';
 
-const API_REF = 'http://localhost:8080/api/admin/equipment';
+const API_REF = '/admin/equipment';
 
-const getHeader = () => ({
-    headers: { Authorization: `Bearer ${getToken()}` }
-});
-
-export const getAllEquipment = () => axios.get(API_REF, getHeader());
-export const createEquipment = (data) => axios.post(API_REF, data, getHeader());
-export const deleteEquipment = (id) => axios.delete(`${API_REF}/${id}`, getHeader());
+export const getAllEquipment = () => axiosClient.get(API_REF);
+export const createEquipment = (data) => axiosClient.post(API_REF, data);
+export const deleteEquipment = (id) => axiosClient.delete(`${API_REF}/${id}`);

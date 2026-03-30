@@ -1,6 +1,6 @@
-import axios from "axios";
+import axiosClient from "./axiosClient";
 
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080/api";
+const API_URL = process.env.REACT_APP_API_URL || "";
 
 const getHeader = () => ({
     headers: {
@@ -9,11 +9,11 @@ const getHeader = () => ({
 });
 
 export const getMemberProgress = async (membershipCardId) => {
-    const res = await axios.get(`${API_URL}/member/progress/${membershipCardId}`, getHeader());
+    const res = await axiosClient.get(`${API_URL}/member/progress/${membershipCardId}`, getHeader());
     return res.data;
 }
 
 export const toggleExerciseStatus = async (membershipCardId, sessionExerciseId) => {
-    const res = await axios.post(`${API_URL}/member/progress/${membershipCardId}/toggle/${sessionExerciseId}`, {}, getHeader());
+    const res = await axiosClient.post(`${API_URL}/member/progress/${membershipCardId}/toggle/${sessionExerciseId}`, {}, getHeader());
     return res.data;
 };

@@ -1,6 +1,6 @@
-import axios from "axios";
+import axiosClient from "./axiosClient";
 
-const BASE_URL = "http://localhost:8080/api/member/workout-roadmap";
+const BASE_URL = "/member/workout-roadmap";
 
 const getToken = () => localStorage.getItem("token");
 
@@ -9,11 +9,11 @@ const getHeaders = () => ({
 });
 
 export const getMyRoadmap = async () => {
-    const res = await axios.get(BASE_URL, getHeaders());
+    const res = await axiosClient.get(BASE_URL, getHeaders());
     return res.data;
 };
 
 export const toggleExercise = async (exerciseId) => {
-    const res = await axios.post(`${BASE_URL}/exercises/${exerciseId}/toggle`, {}, getHeaders());
+    const res = await axiosClient.post(`${BASE_URL}/exercises/${exerciseId}/toggle`, {}, getHeaders());
     return res.data;
 };

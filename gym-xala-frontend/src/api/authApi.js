@@ -1,18 +1,21 @@
-import axios from "axios";
-
-const BASE_URL = "http://localhost:8080/api/auth";
+import axiosClient from "./axiosClient";
+import { setTokens } from "../utils/auth";
 
 // LOGIN
 export const login = async (username, password) => {
-  const res = await axios.post(`${BASE_URL}/login`, {
+  const res = await axiosClient.post(`/auth/login`, {
     username,
-    password,
-  });
+    password});
+  
+  if (res.data && res.data.token) {
+      setTokens(res.data.token, res.data.refreshToken);
+  }
+  
   return res.data;
 };
 
 // REGISTER MEMBER
 export const registerMember = async (data) => {
-  const res = await axios.post(`${BASE_URL}/register/member`, data);
+  const res = await axiosClient.post(`/auth/register/member`, data);
   return res.data;
 };

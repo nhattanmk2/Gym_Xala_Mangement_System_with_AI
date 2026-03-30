@@ -1,8 +1,8 @@
-import axios from "axios";
+import axiosClient from "./axiosClient";
 
-const BASE_URL = "http://localhost:8080/api/packages";
+const BASE_URL = "/packages";
 
 export const getActivePackages = async () => {
-    const res = await axios.get(BASE_URL);
+    const res = await axiosClient.get(BASE_URL);
     return res.data;
 };

@@ -1,6 +1,6 @@
-import axios from "axios";
+import axiosClient from "./axiosClient";
 
-const BASE_URL = "http://localhost:8080/api/admin/packages";
+const BASE_URL = "/admin/packages";
 
 const getToken = () => localStorage.getItem("token");
 
@@ -9,17 +9,17 @@ const getHeaders = () => ({
 });
 
 export const getAllPackages = async () => {
-    const res = await axios.get(BASE_URL, getHeaders());
+    const res = await axiosClient.get(BASE_URL, getHeaders());
     return res.data;
 };
 
 export const getPackageById = async (id) => {
-    const res = await axios.get(`${BASE_URL}/${id}`, getHeaders());
+    const res = await axiosClient.get(`${BASE_URL}/${id}`, getHeaders());
     return res.data;
 };
 
 export const createPackage = async (formData) => {
-    const res = await axios.post(BASE_URL, formData, {
+    const res = await axiosClient.post(BASE_URL, formData, {
         headers: {
             Authorization: `Bearer ${getToken()}`
         }
@@ -28,7 +28,7 @@ export const createPackage = async (formData) => {
 };
 
 export const updatePackage = async (id, formData) => {
-    const res = await axios.put(`${BASE_URL}/${id}`, formData, {
+    const res = await axiosClient.put(`${BASE_URL}/${id}`, formData, {
         headers: {
             Authorization: `Bearer ${getToken()}`,
             "Content-Type": "multipart/form-data"
@@ -38,26 +38,26 @@ export const updatePackage = async (id, formData) => {
 };
 
 export const deletePackage = async (id) => {
-    const res = await axios.delete(`${BASE_URL}/${id}`, getHeaders());
+    const res = await axiosClient.delete(`${BASE_URL}/${id}`, getHeaders());
     return res.data;
 };
 
 export const togglePackageActive = async (id) => {
-    const res = await axios.put(`${BASE_URL}/${id}/toggle`, {}, getHeaders());
+    const res = await axiosClient.put(`${BASE_URL}/${id}/toggle`, {}, getHeaders());
     return res.data;
 };
 
 export const updatePackagePromotion = async (id, promotion) => {
-    const res = await axios.patch(`${BASE_URL}/${id}/promotion`, { promotion }, getHeaders());
+    const res = await axiosClient.patch(`${BASE_URL}/${id}/promotion`, { promotion }, getHeaders());
     return res.data;
 };
 
 export const getWorkoutPlan = async (packageId) => {
-    const res = await axios.get(`http://localhost:8080/api/admin/packages/${packageId}/workout-plan`, getHeaders());
+    const res = await axiosClient.get(`/admin/packages/${packageId}/workout-plan`, getHeaders());
     return res.data;
 };
 
 export const saveWorkoutPlan = async (packageId, data) => {
-    const res = await axios.post(`http://localhost:8080/api/admin/packages/${packageId}/workout-plan`, data, getHeaders());
+    const res = await axiosClient.post(`/admin/packages/${packageId}/workout-plan`, data, getHeaders());
     return res.data;
 };

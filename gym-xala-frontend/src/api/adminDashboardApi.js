@@ -1,14 +1,13 @@
-import axios from "axios";
+import axiosClient from "./axiosClient";
 
-const BASE_URL = "http://localhost:8080/api/admin/dashboard";
+const BASE_URL = "/admin/dashboard";
 
 export const getDashboardStats = async () => {
     try {
-        const response = await axios.get(`${BASE_URL}/stats`, {
+        const response = await axiosClient.get(`${BASE_URL}/stats`, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-        });
+            }});
         return response.data;
     } catch (error) {
         console.error("Error fetching dashboard stats:", error);
@@ -18,11 +17,10 @@ export const getDashboardStats = async () => {
 
 export const getMemberGrowth = async (filter = 'month') => {
     try {
-        const response = await axios.get(`${BASE_URL}/member-growth?filter=${filter}`, {
+        const response = await axiosClient.get(`${BASE_URL}/member-growth?filter=${filter}`, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-        });
+            }});
         return response.data;
     } catch (error) {
         console.error("Error fetching member growth:", error);
@@ -32,11 +30,10 @@ export const getMemberGrowth = async (filter = 'month') => {
 
 export const getPtRanking = async (filter = 'month') => {
     try {
-        const response = await axios.get(`${BASE_URL}/pt-ranking?filter=${filter}`, {
+        const response = await axiosClient.get(`${BASE_URL}/pt-ranking?filter=${filter}`, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-        });
+            }});
         return response.data;
     } catch (error) {
         console.error("Error fetching PT ranking:", error);
@@ -46,11 +43,10 @@ export const getPtRanking = async (filter = 'month') => {
 
 export const getPtPerformance = async (filter = 'month') => {
     try {
-        const response = await axios.get(`${BASE_URL}/pt-performance?filter=${filter}`, {
+        const response = await axiosClient.get(`${BASE_URL}/pt-performance?filter=${filter}`, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-        });
+            }});
         return response.data;
     } catch (error) {
         console.error("Error fetching PT performance:", error);

@@ -18,7 +18,13 @@ const LoginPage = () => {
 
       console.log("LOGIN RESPONSE:", data);
 
-      // LẤY ROLE
+      // ✅ LƯU INFO
+      localStorage.setItem("roles", JSON.stringify(data.roles));
+      localStorage.setItem("username", data.username);
+      localStorage.setItem("email", data.email);
+
+      // (Token và Refresh Token đã được lưu ở authApi.js - setTokens)
+
       const role = data.roles?.[0];
 
       if (role === "ROLE_ADMIN") {
@@ -30,17 +36,6 @@ const LoginPage = () => {
       } else {
         setError("Vai trò không hợp lệ");
       }
-
-      // ✅ LƯU TOKEN + INFO
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("roles", JSON.stringify(data.roles));
-      localStorage.setItem("username", data.username);
-      localStorage.setItem("email", data.email);
-
-      alert("Đăng nhập thành công!");
-
-      // TODO: redirect dashboard
-      // window.location.href = "/dashboard";
 
     } catch (err) {
       console.error("LOGIN ERROR:", err);
