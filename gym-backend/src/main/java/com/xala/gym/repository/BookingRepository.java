@@ -79,12 +79,12 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     @Query("SELECT DISTINCT m FROM Member m WHERE m.user IN (SELECT b.member FROM Booking b WHERE b.personalTrainer.id = :ptId AND b.status != 'CANCELLED')")
     List<Member> findDistinctMembersByPtId(@Param("ptId") Long ptId);
 
-    // Xếp hạng PT theo số Session đã hoàn thành
+    // Xếp hạng PT theo số Session đã hoàn thành (có dải ngày)
     @Query("SELECT new map(b.personalTrainer.id as ptId, b.personalTrainer.fullName as ptName, b.personalTrainer.averageRating as rating, COUNT(b) as completedSessions) " +
            "FROM Booking b " +
            "WHERE b.status = 'COMPLETED' " +
-           "AND b.startTime >= :startDate " +
+           "AND b.startTime >= :startDate AND b.startTime <= :endDate " +
            "GROUP BY b.personalTrainer.id, b.personalTrainer.fullName, b.personalTrainer.averageRating " +
            "ORDER BY COUNT(b) DESC")
-    List<java.util.Map<String, Object>> getPtRankingByCompletedSessions(@Param("startDate") java.time.LocalDateTime startDate);
+    List<java.util.Map<String, Object>> getPtRankingByCompletedSessions(@Param("startDate") java.time.LocalDateTime startDate, @Param("endDate") java.time.LocalDateTime endDate);
 }

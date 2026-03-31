@@ -1,0 +1,431 @@
+[INFO] Scanning for projects...
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/maven-metadata.xml
+Downloading from central: https://repo.maven.apache.org/maven2/org/cyclonedx/maven-metadata.xml
+Downloading from central: https://repo.maven.apache.org/maven2/org/flywaydb/maven-metadata.xml
+Downloading from central: https://repo.maven.apache.org/maven2/io/github/git-commit-id/maven-metadata.xml
+Progress (1): 249 BProgress (2): 249 B | 234 BProgress (3): 249 B | 234 B | 243 BProgress (4): 249 B | 234 B | 243 B | 255 B                                           Downloaded from central: https://repo.maven.apache.org/maven2/io/github/git-commit-id/maven-metadata.xml (255 B at 575 B/s)
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/maven-metadata.xml (249 B at 562 B/s)
+Downloaded from central: https://repo.maven.apache.org/maven2/org/cyclonedx/maven-metadata.xml (243 B at 548 B/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/jooq/maven-metadata.xml
+Downloading from central: https://repo.maven.apache.org/maven2/org/liquibase/maven-metadata.xml
+Downloading from central: https://repo.maven.apache.org/maven2/org/jetbrains/kotlin/maven-metadata.xml
+Downloaded from central: https://repo.maven.apache.org/maven2/org/flywaydb/maven-metadata.xml (234 B at 524 B/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/graalvm/buildtools/maven-metadata.xml
+Progress (1): 375 B                   Downloaded from central: https://repo.maven.apache.org/maven2/org/jetbrains/kotlin/maven-metadata.xml (375 B at 9.1 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-metadata.xml
+Progress (1): 394 B                   Downloaded from central: https://repo.maven.apache.org/maven2/org/liquibase/maven-metadata.xml (394 B at 8.2 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/mojo/maven-metadata.xml
+Progress (1): 398 BProgress (2): 398 B | 242 B                           Downloaded from central: https://repo.maven.apache.org/maven2/org/jooq/maven-metadata.xml (398 B at 7.0 kB/s)
+Downloaded from central: https://repo.maven.apache.org/maven2/org/graalvm/buildtools/maven-metadata.xml (242 B at 5.0 kB/s)
+Progress (1): 4.6 kBProgress (1): 9.7 kBProgress (1): 14 kB                    Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-metadata.xml (14 kB at 340 kB/s)
+Progress (1): 3.1 kBProgress (1): 7.7 kBProgress (1): 12 kB Progress (1): 17 kBProgress (1): 20 kBProgress (1): 21 kB                   Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/mojo/maven-metadata.xml (21 kB at 227 kB/s)
+[INFO] 
+[INFO] ------------------------< com.xala:gym-backend >------------------------
+[INFO] Building GymXalaSystem 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:3.5.9:run (default-cli) > test-compile @ gym-backend >>>
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ gym-backend ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 0 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ gym-backend ---
+[INFO] Changes detected - recompiling the module! :source
+[INFO] Compiling 155 source files with javac [debug release 17] to target\classes
+[INFO] /E:/gym-xala/gym-backend/src/main/java/com/xala/gym/security/SecurityConfig.java: E:\gym-xala\gym-backend\src\main\java\com\xala\gym\security\SecurityConfig.java uses or overrides a deprecated API.
+[INFO] /E:/gym-xala/gym-backend/src/main/java/com/xala/gym/security/SecurityConfig.java: Recompile with -Xlint:deprecation for details.
+[INFO] /E:/gym-xala/gym-backend/src/main/java/com/xala/gym/service/AIConsultationService.java: E:\gym-xala\gym-backend\src\main\java\com\xala\gym\service\AIConsultationService.java uses unchecked or unsafe operations.
+[INFO] /E:/gym-xala/gym-backend/src/main/java/com/xala/gym/service/AIConsultationService.java: Recompile with -Xlint:unchecked for details.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ gym-backend ---
+[INFO] skip non existing resourceDirectory E:\gym-xala\gym-backend\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.11.0:testCompile (default-testCompile) @ gym-backend ---
+[INFO] Changes detected - recompiling the module! :dependency
+[INFO] Compiling 2 source files with javac [debug release 17] to target\test-classes
+[INFO] 
+[INFO] <<< spring-boot:3.5.9:run (default-cli) < test-compile @ gym-backend <<<
+[INFO] 
+[INFO] 
+[INFO] --- spring-boot:3.5.9:run (default-cli) @ gym-backend ---
+[INFO] Attaching agents: []
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.5.9)
+
+2026-03-31T11:54:57.946+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] com.xala.gym.GymXalaSystemApplication    : Starting GymXalaSystemApplication using Java 17.0.12 with PID 12572 (E:\gym-xala\gym-backend\target\classes started by 84335 in E:\gym-xala\gym-backend)
+2026-03-31T11:54:57.948+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] com.xala.gym.GymXalaSystemApplication    : No active profile set, falling back to 1 default profile: "default"
+2026-03-31T11:54:57.978+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-03-31T11:54:57.978+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-03-31T11:54:58.599+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-03-31T11:54:58.692+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 84 ms. Found 20 JPA repository interfaces.
+2026-03-31T11:54:58.837+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.s.cloud.context.scope.GenericScope     : BeanFactory id=2de0e2d5-6880-350d-b194-78b1c56cf49e
+2026-03-31T11:54:59.269+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-03-31T11:54:59.283+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-03-31T11:54:59.284+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.50]
+2026-03-31T11:54:59.325+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-03-31T11:54:59.326+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1348 ms
+2026-03-31T11:54:59.419+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-03-31T11:54:59.451+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.39.Final
+2026-03-31T11:54:59.471+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-03-31T11:54:59.633+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-03-31T11:54:59.655+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-03-31T11:54:59.759+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@2279c6b9
+2026-03-31T11:54:59.761+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-03-31T11:54:59.790+07:00  WARN 12572 --- [GymXalaSystem] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: MySQL8Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-03-31T11:54:59.791+07:00  WARN 12572 --- [GymXalaSystem] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000026: MySQL8Dialect has been deprecated; use org.hibernate.dialect.MySQLDialect instead
+2026-03-31T11:54:59.807+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 8.0
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-03-31T11:55:00.692+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+Hibernate: 
+    alter table role 
+       modify column name enum ('ROLE_ADMIN','ROLE_MEMBER','ROLE_PT')
+2026-03-31T11:55:00.862+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-03-31T11:55:01.016+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-03-31T11:55:02.385+07:00  WARN 12572 --- [GymXalaSystem] [  restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-03-31T11:55:02.558+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] eAuthenticationProviderManagerConfigurer : Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2026-03-31T11:55:02.561+07:00  WARN 12572 --- [GymXalaSystem] [  restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used by Spring Security for automatically configuring username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider. If the current configuration is intentional, to turn off this warning, increase the logging level of 'org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer' to ERROR
+2026-03-31T11:55:02.874+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2026-03-31T11:55:03.021+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2026-03-31T11:55:03.107+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] com.xala.gym.GymXalaSystemApplication    : Started GymXalaSystemApplication in 5.567 seconds (process running for 5.981)
+2026-03-31T11:57:37.984+07:00  INFO 12572 --- [GymXalaSystem] [   File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 207 class path changes (0 additions, 206 deletions, 1 modification)
+2026-03-31T11:57:38.000+07:00  INFO 12572 --- [GymXalaSystem] [       Thread-6] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2026-03-31T11:57:38.154+07:00  INFO 12572 --- [GymXalaSystem] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2026-03-31T11:57:38.164+07:00  INFO 12572 --- [GymXalaSystem] [       Thread-6] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-03-31T11:57:38.168+07:00  INFO 12572 --- [GymXalaSystem] [       Thread-6] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2026-03-31T11:57:38.177+07:00  INFO 12572 --- [GymXalaSystem] [       Thread-6] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.5.9)
+
+2026-03-31T11:57:38.445+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] com.xala.gym.GymXalaSystemApplication    : Starting GymXalaSystemApplication using Java 17.0.12 with PID 12572 (E:\gym-xala\gym-backend\target\classes started by 84335 in E:\gym-xala\gym-backend)
+2026-03-31T11:57:38.445+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] com.xala.gym.GymXalaSystemApplication    : No active profile set, falling back to 1 default profile: "default"
+2026-03-31T11:57:38.602+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-03-31T11:57:38.604+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 0 ms. Found 0 JPA repository interfaces.
+2026-03-31T11:57:38.631+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.s.cloud.context.scope.GenericScope     : BeanFactory id=a72c5aae-a33d-3d08-bcf4-5f94283b57e1
+2026-03-31T11:57:38.677+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-03-31T11:57:38.678+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-03-31T11:57:38.678+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.50]
+2026-03-31T11:57:38.702+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-03-31T11:57:38.703+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 256 ms
+2026-03-31T11:57:38.752+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-03-31T11:57:38.755+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-03-31T11:57:38.763+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-03-31T11:57:38.764+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Starting...
+2026-03-31T11:57:38.768+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-2 - Added connection com.mysql.cj.jdbc.ConnectionImpl@1f810e8a
+2026-03-31T11:57:38.769+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Start completed.
+2026-03-31T11:57:38.769+07:00  WARN 12572 --- [GymXalaSystem] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: MySQL8Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-03-31T11:57:38.769+07:00  WARN 12572 --- [GymXalaSystem] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000026: MySQL8Dialect has been deprecated; use org.hibernate.dialect.MySQLDialect instead
+2026-03-31T11:57:38.771+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-2)']
+	Database driver: undefined/unknown
+	Database version: 8.0
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-03-31T11:57:38.786+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-03-31T11:57:38.788+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-03-31T11:57:38.806+07:00  WARN 12572 --- [GymXalaSystem] [  restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-03-31T11:57:39.008+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2026-03-31T11:57:39.197+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2026-03-31T11:57:39.377+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] com.xala.gym.GymXalaSystemApplication    : Started GymXalaSystemApplication in 1.116 seconds (process running for 162.252)
+2026-03-31T11:57:39.385+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation delta:
+
+
+==========================
+CONDITION EVALUATION DELTA
+==========================
+
+
+Positive matches:
+-----------------
+
+    None
+
+
+Negative matches:
+-----------------
+
+   SecurityFilterAutoConfiguration#securityFilterChainRegistration:
+      Did not match:
+         - @ConditionalOnBean (names: springSecurityFilterChain; SearchStrategy: all) did not find any beans named springSecurityFilterChain (OnBeanCondition)
+
+
+Exclusions:
+-----------
+
+    None
+
+
+Unconditional classes:
+----------------------
+
+    None
+
+
+
+2026-03-31T11:58:57.453+07:00  INFO 12572 --- [GymXalaSystem] [   File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2026-03-31T11:58:57.456+07:00  INFO 12572 --- [GymXalaSystem] [       Thread-9] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2026-03-31T11:58:57.551+07:00  INFO 12572 --- [GymXalaSystem] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2026-03-31T11:58:57.554+07:00  INFO 12572 --- [GymXalaSystem] [       Thread-9] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-03-31T11:58:57.554+07:00  INFO 12572 --- [GymXalaSystem] [       Thread-9] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Shutdown initiated...
+2026-03-31T11:58:57.557+07:00  INFO 12572 --- [GymXalaSystem] [       Thread-9] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Shutdown completed.
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.5.9)
+
+2026-03-31T11:58:57.762+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] com.xala.gym.GymXalaSystemApplication    : Starting GymXalaSystemApplication using Java 17.0.12 with PID 12572 (E:\gym-xala\gym-backend\target\classes started by 84335 in E:\gym-xala\gym-backend)
+2026-03-31T11:58:57.762+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] com.xala.gym.GymXalaSystemApplication    : No active profile set, falling back to 1 default profile: "default"
+2026-03-31T11:58:57.894+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-03-31T11:58:57.897+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 0 ms. Found 0 JPA repository interfaces.
+2026-03-31T11:58:57.928+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.s.cloud.context.scope.GenericScope     : BeanFactory id=a72c5aae-a33d-3d08-bcf4-5f94283b57e1
+2026-03-31T11:58:57.987+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-03-31T11:58:57.989+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-03-31T11:58:57.989+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.50]
+2026-03-31T11:58:58.018+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-03-31T11:58:58.019+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 255 ms
+2026-03-31T11:58:58.068+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-03-31T11:58:58.071+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-03-31T11:58:58.077+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-03-31T11:58:58.080+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-3 - Starting...
+2026-03-31T11:58:58.086+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-3 - Added connection com.mysql.cj.jdbc.ConnectionImpl@78ba7b3
+2026-03-31T11:58:58.088+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-3 - Start completed.
+2026-03-31T11:58:58.089+07:00  WARN 12572 --- [GymXalaSystem] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: MySQL8Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-03-31T11:58:58.090+07:00  WARN 12572 --- [GymXalaSystem] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000026: MySQL8Dialect has been deprecated; use org.hibernate.dialect.MySQLDialect instead
+2026-03-31T11:58:58.090+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-3)']
+	Database driver: undefined/unknown
+	Database version: 8.0
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-03-31T11:58:58.107+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-03-31T11:58:58.107+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-03-31T11:58:58.130+07:00  WARN 12572 --- [GymXalaSystem] [  restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-03-31T11:58:58.277+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2026-03-31T11:58:58.418+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2026-03-31T11:58:58.545+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] com.xala.gym.GymXalaSystemApplication    : Started GymXalaSystemApplication in 0.928 seconds (process running for 241.42)
+2026-03-31T11:58:58.546+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
+2026-03-31T11:59:01.586+07:00  INFO 12572 --- [GymXalaSystem] [   File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 206 class path changes (206 additions, 0 deletions, 0 modifications)
+2026-03-31T11:59:01.588+07:00  INFO 12572 --- [GymXalaSystem] [      Thread-15] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2026-03-31T11:59:01.679+07:00  INFO 12572 --- [GymXalaSystem] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2026-03-31T11:59:01.681+07:00  INFO 12572 --- [GymXalaSystem] [      Thread-15] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-03-31T11:59:01.681+07:00  INFO 12572 --- [GymXalaSystem] [      Thread-15] com.zaxxer.hikari.HikariDataSource       : HikariPool-3 - Shutdown initiated...
+2026-03-31T11:59:01.682+07:00  INFO 12572 --- [GymXalaSystem] [      Thread-15] com.zaxxer.hikari.HikariDataSource       : HikariPool-3 - Shutdown completed.
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.5.9)
+
+2026-03-31T11:59:01.865+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] com.xala.gym.GymXalaSystemApplication    : Starting GymXalaSystemApplication using Java 17.0.12 with PID 12572 (E:\gym-xala\gym-backend\target\classes started by 84335 in E:\gym-xala\gym-backend)
+2026-03-31T11:59:01.866+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] com.xala.gym.GymXalaSystemApplication    : No active profile set, falling back to 1 default profile: "default"
+2026-03-31T11:59:02.195+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-03-31T11:59:02.261+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 64 ms. Found 20 JPA repository interfaces.
+2026-03-31T11:59:02.329+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.s.cloud.context.scope.GenericScope     : BeanFactory id=2de0e2d5-6880-350d-b194-78b1c56cf49e
+2026-03-31T11:59:02.439+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-03-31T11:59:02.439+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-03-31T11:59:02.440+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.50]
+2026-03-31T11:59:02.460+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-03-31T11:59:02.460+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 593 ms
+2026-03-31T11:59:02.509+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-03-31T11:59:02.511+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-03-31T11:59:02.520+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-03-31T11:59:02.520+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-4 - Starting...
+2026-03-31T11:59:02.524+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-4 - Added connection com.mysql.cj.jdbc.ConnectionImpl@2e5c8ff8
+2026-03-31T11:59:02.524+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-4 - Start completed.
+2026-03-31T11:59:02.525+07:00  WARN 12572 --- [GymXalaSystem] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: MySQL8Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-03-31T11:59:02.525+07:00  WARN 12572 --- [GymXalaSystem] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000026: MySQL8Dialect has been deprecated; use org.hibernate.dialect.MySQLDialect instead
+2026-03-31T11:59:02.525+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-4)']
+	Database driver: undefined/unknown
+	Database version: 8.0
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-03-31T11:59:02.714+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+Hibernate: 
+    alter table role 
+       modify column name enum ('ROLE_ADMIN','ROLE_MEMBER','ROLE_PT')
+2026-03-31T11:59:02.869+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-03-31T11:59:03.542+07:00  WARN 12572 --- [GymXalaSystem] [  restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-03-31T11:59:03.640+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] eAuthenticationProviderManagerConfigurer : Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2026-03-31T11:59:03.640+07:00  WARN 12572 --- [GymXalaSystem] [  restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used by Spring Security for automatically configuring username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider. If the current configuration is intentional, to turn off this warning, increase the logging level of 'org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer' to ERROR
+2026-03-31T11:59:03.788+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2026-03-31T11:59:03.896+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2026-03-31T11:59:03.985+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] com.xala.gym.GymXalaSystemApplication    : Started GymXalaSystemApplication in 2.266 seconds (process running for 246.86)
+2026-03-31T11:59:03.987+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation delta:
+
+
+==========================
+CONDITION EVALUATION DELTA
+==========================
+
+
+Positive matches:
+-----------------
+
+   SecurityFilterAutoConfiguration#securityFilterChainRegistration matched:
+      - @ConditionalOnBean (names: springSecurityFilterChain; SearchStrategy: all) found bean 'springSecurityFilterChain' (OnBeanCondition)
+
+
+Negative matches:
+-----------------
+
+    None
+
+
+Exclusions:
+-----------
+
+    None
+
+
+Unconditional classes:
+----------------------
+
+    None
+
+
+
+2026-03-31T12:02:41.393+07:00  INFO 12572 --- [GymXalaSystem] [   File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 2 class path changes (0 additions, 2 deletions, 0 modifications)
+2026-03-31T12:02:41.396+07:00  INFO 12572 --- [GymXalaSystem] [      Thread-21] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2026-03-31T12:02:41.497+07:00  INFO 12572 --- [GymXalaSystem] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2026-03-31T12:02:41.500+07:00  INFO 12572 --- [GymXalaSystem] [      Thread-21] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-03-31T12:02:41.501+07:00  INFO 12572 --- [GymXalaSystem] [      Thread-21] com.zaxxer.hikari.HikariDataSource       : HikariPool-4 - Shutdown initiated...
+2026-03-31T12:02:41.502+07:00  INFO 12572 --- [GymXalaSystem] [      Thread-21] com.zaxxer.hikari.HikariDataSource       : HikariPool-4 - Shutdown completed.
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.5.9)
+
+2026-03-31T12:02:41.690+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] com.xala.gym.GymXalaSystemApplication    : Starting GymXalaSystemApplication using Java 17.0.12 with PID 12572 (E:\gym-xala\gym-backend\target\classes started by 84335 in E:\gym-xala\gym-backend)
+2026-03-31T12:02:41.690+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] com.xala.gym.GymXalaSystemApplication    : No active profile set, falling back to 1 default profile: "default"
+2026-03-31T12:02:41.949+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-03-31T12:02:42.023+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 72 ms. Found 20 JPA repository interfaces.
+2026-03-31T12:02:42.103+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.s.cloud.context.scope.GenericScope     : BeanFactory id=2de0e2d5-6880-350d-b194-78b1c56cf49e
+2026-03-31T12:02:42.225+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-03-31T12:02:42.228+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-03-31T12:02:42.229+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.50]
+2026-03-31T12:02:42.247+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-03-31T12:02:42.248+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 555 ms
+2026-03-31T12:02:42.324+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-03-31T12:02:42.328+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-03-31T12:02:42.340+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-03-31T12:02:42.342+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-5 - Starting...
+2026-03-31T12:02:42.347+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-5 - Added connection com.mysql.cj.jdbc.ConnectionImpl@4c05ed0
+2026-03-31T12:02:42.347+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-5 - Start completed.
+2026-03-31T12:02:42.348+07:00  WARN 12572 --- [GymXalaSystem] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: MySQL8Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-03-31T12:02:42.348+07:00  WARN 12572 --- [GymXalaSystem] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000026: MySQL8Dialect has been deprecated; use org.hibernate.dialect.MySQLDialect instead
+2026-03-31T12:02:42.348+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-5)']
+	Database driver: undefined/unknown
+	Database version: 8.0
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-03-31T12:02:42.612+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+Hibernate: 
+    alter table role 
+       modify column name enum ('ROLE_ADMIN','ROLE_MEMBER','ROLE_PT')
+2026-03-31T12:02:42.747+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-03-31T12:02:43.442+07:00  WARN 12572 --- [GymXalaSystem] [  restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-03-31T12:02:43.534+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] eAuthenticationProviderManagerConfigurer : Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2026-03-31T12:02:43.535+07:00  WARN 12572 --- [GymXalaSystem] [  restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used by Spring Security for automatically configuring username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider. If the current configuration is intentional, to turn off this warning, increase the logging level of 'org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer' to ERROR
+2026-03-31T12:02:43.701+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2026-03-31T12:02:43.814+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2026-03-31T12:02:43.913+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] com.xala.gym.GymXalaSystemApplication    : Started GymXalaSystemApplication in 2.365 seconds (process running for 466.788)
+2026-03-31T12:02:43.914+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
+2026-03-31T12:02:45.146+07:00  INFO 12572 --- [GymXalaSystem] [   File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 2 class path changes (2 additions, 0 deletions, 0 modifications)
+2026-03-31T12:02:45.148+07:00  INFO 12572 --- [GymXalaSystem] [      Thread-27] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2026-03-31T12:02:45.249+07:00  INFO 12572 --- [GymXalaSystem] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2026-03-31T12:02:45.252+07:00  INFO 12572 --- [GymXalaSystem] [      Thread-27] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-03-31T12:02:45.253+07:00  INFO 12572 --- [GymXalaSystem] [      Thread-27] com.zaxxer.hikari.HikariDataSource       : HikariPool-5 - Shutdown initiated...
+2026-03-31T12:02:45.254+07:00  INFO 12572 --- [GymXalaSystem] [      Thread-27] com.zaxxer.hikari.HikariDataSource       : HikariPool-5 - Shutdown completed.
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.5.9)
+
+2026-03-31T12:02:45.484+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] com.xala.gym.GymXalaSystemApplication    : Starting GymXalaSystemApplication using Java 17.0.12 with PID 12572 (E:\gym-xala\gym-backend\target\classes started by 84335 in E:\gym-xala\gym-backend)
+2026-03-31T12:02:45.484+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] com.xala.gym.GymXalaSystemApplication    : No active profile set, falling back to 1 default profile: "default"
+2026-03-31T12:02:45.711+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-03-31T12:02:45.760+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 46 ms. Found 20 JPA repository interfaces.
+2026-03-31T12:02:45.808+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.s.cloud.context.scope.GenericScope     : BeanFactory id=2de0e2d5-6880-350d-b194-78b1c56cf49e
+2026-03-31T12:02:45.895+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-03-31T12:02:45.896+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-03-31T12:02:45.896+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.50]
+2026-03-31T12:02:45.911+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-03-31T12:02:45.911+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 425 ms
+2026-03-31T12:02:45.951+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-03-31T12:02:45.953+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-03-31T12:02:45.958+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-03-31T12:02:45.958+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-6 - Starting...
+2026-03-31T12:02:45.961+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-6 - Added connection com.mysql.cj.jdbc.ConnectionImpl@27ead43e
+2026-03-31T12:02:45.961+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-6 - Start completed.
+2026-03-31T12:02:45.962+07:00  WARN 12572 --- [GymXalaSystem] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: MySQL8Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-03-31T12:02:45.962+07:00  WARN 12572 --- [GymXalaSystem] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000026: MySQL8Dialect has been deprecated; use org.hibernate.dialect.MySQLDialect instead
+2026-03-31T12:02:45.962+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-6)']
+	Database driver: undefined/unknown
+	Database version: 8.0
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-03-31T12:02:46.234+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+Hibernate: 
+    alter table role 
+       modify column name enum ('ROLE_ADMIN','ROLE_MEMBER','ROLE_PT')
+2026-03-31T12:02:46.420+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-03-31T12:02:46.991+07:00  WARN 12572 --- [GymXalaSystem] [  restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-03-31T12:02:47.112+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] eAuthenticationProviderManagerConfigurer : Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2026-03-31T12:02:47.114+07:00  WARN 12572 --- [GymXalaSystem] [  restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used by Spring Security for automatically configuring username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider. If the current configuration is intentional, to turn off this warning, increase the logging level of 'org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer' to ERROR
+2026-03-31T12:02:47.280+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2026-03-31T12:02:47.403+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2026-03-31T12:02:47.501+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] com.xala.gym.GymXalaSystemApplication    : Started GymXalaSystemApplication in 2.192 seconds (process running for 470.375)
+2026-03-31T12:02:47.502+07:00  INFO 12572 --- [GymXalaSystem] [  restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged

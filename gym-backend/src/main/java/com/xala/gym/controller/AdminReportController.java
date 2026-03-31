@@ -63,8 +63,9 @@ public class AdminReportController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
     ) {
         LocalDateTime start = startDate != null ? startDate.atStartOfDay() : LocalDateTime.now().minusMonths(1);
+        LocalDateTime end = endDate != null ? endDate.atTime(23, 59, 59) : LocalDateTime.now();
         
-        List<Map<String, Object>> rankingRaw = bookingRepository.getPtRankingByCompletedSessions(start);
+        List<Map<String, Object>> rankingRaw = bookingRepository.getPtRankingByCompletedSessions(start, end);
         
         // Batch load employees to avoid N+1
         List<Long> ptUserIds = rankingRaw.stream()

@@ -19,7 +19,7 @@ public class AdminInvoiceController {
 
     @GetMapping
     public ResponseEntity<List<InvoiceResponse>> getInvoices(
-            @RequestParam(required = false, defaultValue = "PENDING") String status,
+            @RequestParam(required = false, defaultValue = "ALL") String status,
             @RequestParam(required = false) String memberCode,
             @RequestParam(required = false) String registrationDate
     ) {

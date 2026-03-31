@@ -12,6 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ChartDataResponse {
-    private List<String> labels; // e.g: ["Mon", "Tue", "Wed"] or ["Jan", "Feb"]
-    private List<Long> data; // e.g: [12, 19, 3] new members
+    private List<String> labels; // e.g: ["Mon", "Tue", "Wed"]
+    private List<Long> data; // e.g: [12, 19, 3] new members (primary data)
+    private List<Long> secondData; // e.g: [100, 102, 105] active members (secondary data)
 }

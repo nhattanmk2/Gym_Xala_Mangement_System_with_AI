@@ -9,7 +9,7 @@ export default function AdminInvoices() {
     // Filter states
     const [memberCode, setMemberCode] = useState("");
     const [registrationDate, setRegistrationDate] = useState("");
-    const [status, setStatus] = useState("PENDING"); // Default load pending
+    const [status, setStatus] = useState("ALL"); // Default load all
 
     const fetchInvoices = useCallback(async () => {
         setLoading(true);
@@ -78,6 +78,12 @@ export default function AdminInvoices() {
             </div>
 
             <div className="invoices-tabs">
+                <button
+                    className={`tab-btn ${status === 'ALL' ? 'active' : ''}`}
+                    onClick={() => setStatus('ALL')}
+                >
+                    📑 Tất cả (All)
+                </button>
                 <button
                     className={`tab-btn ${status === 'PENDING' ? 'active' : ''}`}
                     onClick={() => setStatus('PENDING')}
@@ -149,7 +155,7 @@ export default function AdminInvoices() {
                                     <th>SỐ TIỀN</th>
                                     <th>THỜI GIAN LẬP</th>
                                     <th>TRẠNG THÁI</th>
-                                    {status === 'PENDING' && <th className="text-center">HÀNH ĐỘNG</th>}
+                                    <th className="text-center">HÀNH ĐỘNG</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -165,24 +171,28 @@ export default function AdminInvoices() {
                                                 {inv.status}
                                             </span>
                                         </td>
-                                        {status === 'PENDING' && (
-                                            <td className="action-cells">
-                                                <button
-                                                    className="btn-approve-text"
-                                                    onClick={() => handleApprove(inv.id)}
-                                                    disabled={loading}
-                                                >
-                                                    {loading ? "Đang xử lý..." : "Xác nhận thanh toán"}
-                                                </button>
-                                                <button
-                                                    className="btn-reject-text"
-                                                    onClick={() => handleReject(inv.id)}
-                                                    disabled={loading}
-                                                >
-                                                    Hủy
-                                                </button>
-                                            </td>
-                                        )}
+                                        <td className="action-cells">
+                                            {inv.status === 'PENDING' ? (
+                                                <>
+                                                    <button
+                                                        className="btn-approve-text"
+                                                        onClick={() => handleApprove(inv.id)}
+                                                        disabled={loading}
+                                                    >
+                                                        {loading ? "Đang xử lý..." : "Xác nhận thanh toán"}
+                                                    </button>
+                                                    <button
+                                                        className="btn-reject-text"
+                                                        onClick={() => handleReject(inv.id)}
+                                                        disabled={loading}
+                                                    >
+                                                        Hủy
+                                                    </button>
+                                                </>
+                                            ) : (
+                                                <span className="no-action">-</span>
+                                            )}
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>

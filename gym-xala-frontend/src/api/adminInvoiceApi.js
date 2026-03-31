@@ -3,7 +3,7 @@ import axiosClient from "./axiosClient";
 const BASE_URL = "/admin/invoices";
 
 // Lấy danh sách hóa đơn với filter (status mặc định là PENDING nếu không truyền)
-export const getInvoices = async (status = "PENDING", memberCode = "", registrationDate = "") => {
+export const getInvoices = async (status = "", memberCode = "", registrationDate = "") => {
     try {
         const params = {};
         if (status) params.status = status;
