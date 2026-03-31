@@ -85,7 +85,7 @@ public class PtScheduleController {
     }
 
     @GetMapping("/progress/{memberId}")
-    public ResponseEntity<List<com.xala.gym.dto.response.MemberExerciseProgressResponse>> getMemberExerciseProgress(@PathVariable Long memberId) {
+    public ResponseEntity<com.xala.gym.dto.response.MemberProgressResponse> getMemberExerciseProgress(@PathVariable Long memberId) {
         return ResponseEntity.ok(ptScheduleService.getMemberExerciseProgress(memberId));
     }
 

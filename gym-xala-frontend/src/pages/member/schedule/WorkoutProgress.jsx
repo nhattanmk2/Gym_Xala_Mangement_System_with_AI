@@ -25,6 +25,10 @@ const WorkoutProgress = () => {
                 setError("Bạn hiện không có gói tập nào đang hoạt động.");
                 return;
             }
+            if (currentCard.status === 'PENDING') {
+                setError("Lộ trình tập luyện sẽ khả dụng sau khi gói tập của bạn được Admin duyệt thành công (sau khi thanh toán).");
+                return;
+            }
             setCard(currentCard);
             const progressData = await getMemberProgress(currentCard.id);
             setProgress(progressData);

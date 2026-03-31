@@ -20,4 +20,5 @@ public class PackageResponse {
     private byte[] image;
     private String promotion;
     private java.util.List<AdminPtResponse> personalTrainers;
+    private java.util.List<WorkoutRoadmapResponse> roadmaps;
 }

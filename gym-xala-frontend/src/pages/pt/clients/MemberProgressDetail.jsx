@@ -8,10 +8,12 @@ const MemberProgressDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [history, setHistory] = useState([]);
-    const [progress, setProgress] = useState([]);
+    const [progress, setProgress] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [activeTab, setActiveTab] = useState('HISTORY'); // 'HISTORY' | 'PROGRESS'
+    const [expandedRoadmap, setExpandedRoadmap] = useState(null);
+    const [expandedSession, setExpandedSession] = useState(null);
 
     useEffect(() => {
         if (id) {
@@ -28,6 +30,11 @@ const MemberProgressDetail = () => {
             ]);
             setHistory(historyData);
             setProgress(progressData);
+            
+            // Tự động mở rộng roadmap đầu tiên nếu có
+            if (progressData && progressData.roadmaps && progressData.roadmaps.length > 0) {
+                setExpandedRoadmap(progressData.roadmaps[0].roadmapId);
+            }
         } catch (err) {
             setError(err.response?.data?.message || 'Có lỗi xảy ra khi tải thông tin học viên!');
         } finally {
@@ -58,9 +65,7 @@ const MemberProgressDetail = () => {
         );
     }
 
-    const completedExercises = progress.filter(p => p.isCompleted).length;
-    const totalExercises = progress.length;
-    const progressPercentage = totalExercises > 0 ? Math.round((completedExercises / totalExercises) * 100) : 0;
+    const { totalCompletedExercises = 0, totalExercises = 0, overallPercentage = 0, roadmaps = [] } = progress || {};
 
     return (
         <div className="pt-clients-container animated-fade-in">
@@ -154,47 +159,77 @@ const MemberProgressDetail = () => {
                     <div style={{ marginBottom: '20px', background: '#fff', padding: '15px', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                             <span style={{ fontWeight: '600', color: '#334155' }}>Tiến độ tổng quan</span>
-                            <span style={{ fontWeight: '600', color: 'var(--primary-color)' }}>{progressPercentage}%</span>
+                            <span style={{ fontWeight: '600', color: 'var(--primary-color)' }}>{overallPercentage}%</span>
                         </div>
                         <div style={{ width: '100%', height: '8px', background: '#e2e8f0', borderRadius: '4px', overflow: 'hidden' }}>
-                            <div style={{ width: `${progressPercentage}%`, height: '100%', background: 'var(--primary-color)', transition: 'width 0.3s ease' }}></div>
+                            <div style={{ width: `${overallPercentage}%`, height: '100%', background: 'var(--primary-color)', transition: 'width 0.3s ease' }}></div>
                         </div>
                         <p style={{ marginTop: '8px', fontSize: '14px', color: '#64748b' }}>
-                            Đã hoàn thành {completedExercises} / {totalExercises} bài tập
+                            Đã hoàn thành {totalCompletedExercises} / {totalExercises} bài tập
                         </p>
                     </div>
 
-                    {progress.length === 0 ? (
+                    {roadmaps.length === 0 ? (
                         <div className="clients-empty">
                             <CheckCircle size={48} color="#cbd5e1" />
-                            <h3>Chưa có bài tập</h3>
-                            <p>Học viên này chưa được giao bài tập hoặc chưa mua gói có lộ trình.</p>
+                            <h3>Chưa có lộ trình</h3>
+                            <p>Học viên này chưa được giao lộ trình hoặc gói tập không có bài tập đi kèm.</p>
                         </div>
                     ) : (
-                        <div style={{ display: 'grid', gap: '15px' }}>
-                            {progress.map((item, idx) => (
-                                <div key={idx} style={{ background: '#fff', padding: '15px', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <div>
-                                        <h4 style={{ margin: '0 0 5px 0', color: '#1e293b' }}>{item.exerciseName}</h4>
-                                        <p style={{ margin: '0', fontSize: '14px', color: '#64748b' }}>
-                                            {item.sets} Set x {item.reps} Rep
-                                        </p>
-                                        {item.completedAt && (
-                                            <p style={{ margin: '5px 0 0 0', fontSize: '12px', color: '#94a3b8' }}>
-                                                Hoàn thành: {new Date(item.completedAt).toLocaleString('vi-VN')}
-                                            </p>
-                                        )}
+                        <div className="roadmap-accordion-container">
+                            {roadmaps.map((roadmap) => (
+                                <div key={roadmap.roadmapId} className="roadmap-group" style={{ marginBottom: '15px', background: '#fff', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0' }}>
+                                    <div 
+                                        className="roadmap-header" 
+                                        onClick={() => setExpandedRoadmap(expandedRoadmap === roadmap.roadmapId ? null : roadmap.roadmapId)}
+                                        style={{ padding: '15px 20px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f8fafc' }}
+                                    >
+                                        <div>
+                                            <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#1e293b' }}>{roadmap.name}</h3>
+                                            <span style={{ fontSize: '0.85rem', color: '#64748b' }}>{roadmap.completedExercises}/{roadmap.totalExercises} bài tập ({roadmap.percentage}%)</span>
+                                        </div>
+                                        <div style={{ transform: expandedRoadmap === roadmap.roadmapId ? 'rotate(180deg)' : 'rotate(0)' }}>▼</div>
                                     </div>
-                                    <div>
-                                        {item.isCompleted ? (
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#10b981', fontWeight: '500' }}>
-                                                <CheckCircle size={20} />
-                                                Đã xong
-                                            </div>
-                                        ) : (
-                                            <span style={{ color: '#94a3b8', fontSize: '14px' }}>Chưa tập</span>
-                                        )}
-                                    </div>
+
+                                    {expandedRoadmap === roadmap.roadmapId && (
+                                        <div className="roadmap-sessions" style={{ padding: '10px 20px 20px 20px' }}>
+                                            {roadmap.sessionProgresses.map((sess) => (
+                                                <div key={sess.sessionId} className="session-item" style={{ marginTop: '10px', border: '1px solid #f1f5f9', borderRadius: '8px' }}>
+                                                    <div 
+                                                        className="session-header"
+                                                        onClick={() => setExpandedSession(expandedSession === sess.sessionId ? null : sess.sessionId)}
+                                                        style={{ padding: '12px 15px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: expandedSession === sess.sessionId ? '#f1f5f9' : 'transparent' }}
+                                                    >
+                                                        <span style={{ fontWeight: '500', color: '#334155' }}>{sess.name}</span>
+                                                        <span style={{ fontSize: '0.85rem', color: sess.percentage === 100 ? '#10b981' : '#64748b' }}>
+                                                            {sess.completedExercises}/{sess.totalExercises}
+                                                        </span>
+                                                    </div>
+
+                                                    {expandedSession === sess.sessionId && (
+                                                        <div className="session-exercises" style={{ padding: '10px', borderTop: '1px solid #f1f5f9' }}>
+                                                            {sess.exercises.map((ex) => (
+                                                                <div key={ex.sessionExerciseId} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px', backgroundColor: ex.isCompleted ? 'rgba(16, 185, 129, 0.03)' : 'transparent', borderRadius: '6px', marginBottom: '5px' }}>
+                                                                    <div>
+                                                                        <div style={{ fontWeight: '500', color: ex.isCompleted ? '#059669' : '#1e293b', fontSize: '0.95rem' }}>{ex.exerciseName}</div>
+                                                                        <div style={{ fontSize: '0.8rem', color: '#64748b' }}>{ex.sets} Set x {ex.reps} Rep • {ex.levelName}</div>
+                                                                        {ex.completedAt && <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Xong: {ex.completedAt}</div>}
+                                                                    </div>
+                                                                    <div>
+                                                                        {ex.isCompleted ? (
+                                                                            <CheckCircle size={18} color="#10b981" />
+                                                                        ) : (
+                                                                            <span style={{ fontSize: '0.8rem', color: '#cbd5e1' }}>Chưa tập</span>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             ))}
                         </div>

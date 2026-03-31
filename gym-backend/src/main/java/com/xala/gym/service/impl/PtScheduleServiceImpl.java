@@ -6,6 +6,7 @@ import com.xala.gym.entity.*;
 import com.xala.gym.repository.*;
 import com.xala.gym.service.PtScheduleService;
 import com.xala.gym.service.NotificationService;
+import com.xala.gym.service.MemberProgressService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class PtScheduleServiceImpl implements PtScheduleService {
 
     private final BookingRepository bookingRepository;
@@ -31,6 +33,7 @@ public class PtScheduleServiceImpl implements PtScheduleService {
     private final WorkoutRoadmapRepository roadmapRepository;
     private final WorkoutSessionRepository sessionRepository;
     private final SessionExerciseRepository sessionExerciseRepository;
+    private final MemberProgressService memberProgressService;
 
     @Override
     @Transactional
@@ -109,6 +112,7 @@ public class PtScheduleServiceImpl implements PtScheduleService {
     public List<PtScheduleResponse> getAdminSchedules(Integer branchId, String ptName, String memberName, String status) {
         return bookingRepository.searchSchedules(branchId, ptName, memberName, status)
                 .stream()
+                .filter(b -> b.getPersonalTrainer() != null) // Safety filter
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
@@ -802,27 +806,27 @@ public class PtScheduleServiceImpl implements PtScheduleService {
     }
 
     @Override
-    public List<MemberExerciseProgressResponse> getMemberExerciseProgress(Long memberId) {
+    public com.xala.gym.dto.response.MemberProgressResponse getMemberExerciseProgress(Long memberId) {
         User pt = getCurrentUser();
-        // Return exercise progress for the member.
-        return memberExerciseStatusRepository.findByMembershipCard_Member_IdOrderByCompletedAtDesc(memberId)
-                .stream()
-                .map(status -> {
-                    SessionExercise se = status.getSessionExercise();
-                    ExerciseLevel el = se.getExerciseLevel();
-                    StandardExercise std = el.getStandardExercise();
-                    
-                    return MemberExerciseProgressResponse.builder()
-                        .id(status.getId())
-                        .exerciseName(std.getName())
-                        .description(std.getDescription())
-                        .sets(el.getSets())
-                        .reps(el.getReps())
-                        .isCompleted(status.getIsCompleted())
-                        .completedAt(status.getCompletedAt())
-                        .build();
-                })
-                .collect(Collectors.toList());
+        
+        com.xala.gym.entity.Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy thông tin học viên ID: " + memberId));
+
+        // Tìm thẻ tập ACTIVE cuối cùng của học viên
+        java.util.Optional<com.xala.gym.entity.MembershipCard> activeCardOpt = 
+                membershipCardRepository.findFirstByMemberIdAndStatusOrderByEndDateDesc(member.getId(), "ACTIVE");
+
+        if (activeCardOpt.isEmpty()) {
+            return com.xala.gym.dto.response.MemberProgressResponse.builder()
+                .roadmaps(java.util.Collections.emptyList())
+                .categories(java.util.Collections.emptyList())
+                .overallPercentage(0.0)
+                .totalCompletedExercises(0)
+                .totalExercises(0)
+                .build();
+        }
+
+        return memberProgressService.getMemberProgress(activeCardOpt.get().getId());
     }
 
     @Override
@@ -933,15 +937,18 @@ public class PtScheduleServiceImpl implements PtScheduleService {
 
     private PtScheduleResponse mapToResponse(Booking b) {
         User pt = b.getPersonalTrainer();
+        if (pt == null) return null; // Should be filtered but added for robustness
+
         Employee emp = employeeRepository.findByUser_Id(pt.getId()).orElse(null);
+        User member = b.getMember();
         
         return PtScheduleResponse.builder()
                 .id(b.getId())
                 .ptId(pt.getId())
                 .ptName(pt.getFullName())
                 .branchName(emp != null && emp.getGymLocation() != null ? emp.getGymLocation().getName() : "N/A")
-                .memberId(b.getMember() != null ? b.getMember().getId() : null)
-                .memberName(b.getMember() != null ? b.getMember().getFullName() : null)
+                .memberId(member != null ? member.getId() : null)
+                .memberName(member != null ? member.getFullName() : null)
                 .startTime(b.getStartTime())
                 .endTime(b.getEndTime())
                 .status(b.getStatus())

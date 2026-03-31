@@ -49,6 +49,32 @@ public class AdminRoadmapServiceImpl implements AdminRoadmapService {
 
     @Override
     @Transactional
+    public WorkoutRoadmap updateRoadmap(Long roadmapId, WorkoutRoadmap roadmap) {
+        WorkoutRoadmap existing = roadmapRepository.findById(roadmapId)
+                .orElseThrow(() -> new RuntimeException("Roadmap not found"));
+        existing.setName(roadmap.getName());
+        existing.setDescription(roadmap.getDescription());
+        if (roadmap.getOrderIndex() != null && roadmap.getOrderIndex() != 0) {
+            existing.setOrderIndex(roadmap.getOrderIndex());
+        }
+        return roadmapRepository.save(existing);
+    }
+
+    @Override
+    @Transactional
+    public void reorderRoadmaps(List<Long> roadmapIds) {
+        for (int i = 0; i < roadmapIds.size(); i++) {
+            Long id = roadmapIds.get(i);
+            int newOrder = i + 1;
+            roadmapRepository.findById(id).ifPresent(rm -> {
+                rm.setOrderIndex(newOrder);
+                roadmapRepository.save(rm);
+            });
+        }
+    }
+
+    @Override
+    @Transactional
     public void deleteRoadmap(Long roadmapId) {
         WorkoutRoadmap roadmap = roadmapRepository.findById(roadmapId).orElseThrow();
         Long packageId = roadmap.getGymPackage().getId();
@@ -64,6 +90,31 @@ public class AdminRoadmapServiceImpl implements AdminRoadmapService {
         WorkoutSession saved = sessionRepository.save(session);
         updatePackageMaxSessions(roadmap.getGymPackage().getId());
         return saved;
+    }
+
+    @Override
+    @Transactional
+    public WorkoutSession updateSession(Long sessionId, WorkoutSession session) {
+        WorkoutSession existing = sessionRepository.findById(sessionId)
+                .orElseThrow(() -> new RuntimeException("Session not found"));
+        existing.setName(session.getName());
+        if (session.getOrderIndex() != null && session.getOrderIndex() != 0) {
+            existing.setOrderIndex(session.getOrderIndex());
+        }
+        return sessionRepository.save(existing);
+    }
+
+    @Override
+    @Transactional
+    public void reorderSessions(List<Long> sessionIds) {
+        for (int i = 0; i < sessionIds.size(); i++) {
+            Long id = sessionIds.get(i);
+            int newOrder = i + 1;
+            sessionRepository.findById(id).ifPresent(sess -> {
+                sess.setOrderIndex(newOrder);
+                sessionRepository.save(sess);
+            });
+        }
     }
 
     @Override

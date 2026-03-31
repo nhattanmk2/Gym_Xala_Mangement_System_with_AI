@@ -134,12 +134,12 @@ export default function MemberLayout() {
             <span className="nav-icon">👤</span>
             <span className="nav-text">Cá nhân</span>
           </NavLink>
-        </nav>
 
-        <button className="logout-btn" onClick={logout}>
-          <span className="nav-icon">🚪</span>
-          <span className="nav-text">Đăng xuất</span>
-        </button>
+          <button className="logout-btn" onClick={logout}>
+            <span className="nav-icon">🚪</span>
+            <span className="nav-text">Đăng xuất</span>
+          </button>
+        </nav>
       </aside>
 
       {/* CONTENT */}

@@ -28,7 +28,7 @@ public interface PtScheduleService {
     PtScheduleResponse saveSessionContent(Long slotId, com.xala.gym.dto.request.WorkoutSessionContentRequest request);
     
     List<PtScheduleResponse> getMemberTrainingHistory(Long memberId);
-    List<com.xala.gym.dto.response.MemberExerciseProgressResponse> getMemberExerciseProgress(Long memberId);
+    com.xala.gym.dto.response.MemberProgressResponse getMemberExerciseProgress(Long memberId);
     long getMonthlyCompletedSessionsCount();
     
     long getManagedClientsCount();

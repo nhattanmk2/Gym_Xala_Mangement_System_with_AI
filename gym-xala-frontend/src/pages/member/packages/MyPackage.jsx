@@ -151,81 +151,146 @@ export default function MyPackage() {
             <section className="mypkg-section">
                 <h2 className="section-title">Gói tập hiện tại</h2>
                 {currentCard ? (
-                    <div className="current-pkg-card">
-                        <div className="pkg-glow"></div>
-                        <div className="pkg-content">
-                            <div className="pkg-info">
-                                <span className={`pkg-badge ${currentCard.status === 'PAUSED' ? 'paused-badge' : ''}`} style={currentCard.status === 'PAUSED' ? {backgroundColor: '#ffc107', color: '#000'} : {}}>{currentCard.status === 'PAUSED' ? 'BẢO LƯU' : 'ĐANG HOẠT ĐỘNG'}</span>
-                                <h3 className="pkg-name">{currentCard.packageName}</h3>
-                                <p className="pkg-cat">{currentCard.category}</p>
-
-                                <div className="assigned-pt-section">
-                                    {currentCard.assignedPtName ? (
-                                        <div className="pt-display">
-                                            <span>Huấn luyện viên phụ trách</span>
-                                            <div className="pt-name-badge">
-                                                <i className="pt-icon">👤</i>
-                                                <strong>{currentCard.assignedPtName}</strong>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <div className="pt-unassigned">
-                                            <p className="pt-hint">Gói này có huấn luyện viên đi kèm. Hãy chọn người đồng hành cùng bạn!</p>
-                                            <button 
-                                                className="btn-select-pt"
-                                                onClick={() => setShowPtModal(true)}
-                                            >
-                                                ✨ Chọn Huấn luyện viên
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
-
-                                <div className="pkg-dates">
-                                    <div className="date-item">
-                                        <span>Ngày bắt đầu</span>
-                                        <strong>{new Date(currentCard.startDate).toLocaleDateString("vi-VN")}</strong>
+                    currentCard.status === 'PENDING' ? (
+                        <div className="current-pkg-card pending-card">
+                            <div className="pkg-glow" style={{background: 'linear-gradient(135deg, rgba(255, 152, 0, 0.4) 0%, rgba(255, 87, 34, 0.2) 100%)'}}></div>
+                            <div className="pkg-content">
+                                <div className="pkg-info" style={{flex: '1'}}>
+                                    <span className="pkg-badge" style={{backgroundColor: '#ff9800', color: '#fff'}}>⏳ ĐANG CHỜ DUYỆT THANH TOÁN</span>
+                                    <h3 className="pkg-name">{currentCard.packageName}</h3>
+                                    <p className="pkg-cat" style={{marginBottom: '15px'}}>{currentCard.category}</p>
+                                    
+                                    <div className="pending-notice" style={{
+                                        maxWidth: '450px', 
+                                        padding: '12px 16px', 
+                                        backgroundColor: 'rgba(255, 152, 0, 0.05)', 
+                                        borderRadius: '12px', 
+                                        borderLeft: '4px solid #ff9800',
+                                        fontSize: '0.9rem'
+                                    }}>
+                                        <p style={{margin: 0, color: '#f59e0b', fontWeight: '500', lineHeight: '1.4'}}>
+                                            Gói tập của bạn hiện đang đợi Admin xác nhận thanh toán. 
+                                            Sau khi được duyệt, bạn sẽ có thể chọn Huấn luyện viên và bắt đầu tập luyện.
+                                        </p>
                                     </div>
-                                    <div className="date-divider"></div>
-                                    <div className="date-item">
-                                        <span>Ngày hết hạn</span>
-                                        <strong className="expiry-date">{new Date(currentCard.endDate).toLocaleDateString("vi-VN")}</strong>
+                                    
+                                    <div className="pkg-dates" style={{opacity: 0.6, marginTop: '20px'}}>
+                                        <div className="date-item">
+                                            <span>Ngày yêu cầu</span>
+                                            <strong>{new Date(currentCard.startDate).toLocaleDateString("vi-VN")}</strong>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-
-                            <div className="pkg-visual">
-                                <div className="days-left">
-                                    <span>Hết hạn trong</span>
-                                    {currentCard.status === 'PAUSED' ? (
-                                        <div className="days-count" style={{color: '#ffc107', fontSize: '1.5rem', whiteSpace: 'nowrap'}}>
-                                            BẢO LƯU
-                                        </div>
-                                    ) : (
-                                        <div className="days-count">
-                                            {Math.ceil((new Date(currentCard.endDate) - new Date()) / (1000 * 60 * 60 * 24))}
-                                        </div>
-                                    )}
-                                    {currentCard.status !== 'PAUSED' && <span>ngày</span>}
-                                </div>
-                                <div style={{display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '10px'}}>
-                                    {currentCard.status === 'ACTIVE' && (
-                                        <button className="btn-cancel-top" style={{backgroundColor: '#ff9800', border: '1px solid #ff9800'}} onClick={() => handlePause(currentCard.id)}>
-                                            Bảo lưu gói tập
-                                        </button>
-                                    )}
-                                    {currentCard.status === 'PAUSED' && (
-                                        <button className="btn-cancel-top" style={{backgroundColor: '#4caf50', border: '1px solid #4caf50'}} onClick={() => handleResume(currentCard.id)}>
-                                            Tiếp tục tập
-                                        </button>
-                                    )}
-                                    <button className="btn-cancel-top" onClick={() => handleCancel(currentCard.id)}>
-                                        Hủy gói tập
+                                <div className="pkg-visual" style={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px', paddingLeft: '20px'}}>
+                                    <div className="pending-icon" style={{fontSize: '2.5rem', opacity: 0.8}}>💳</div>
+                                    <button 
+                                        className="btn-cancel-top" 
+                                        style={{
+                                            marginTop: 0, 
+                                            padding: '12px 20px', 
+                                            backgroundColor: 'rgba(244, 63, 94, 0.1)', 
+                                            border: '2px solid rgba(244, 63, 94, 0.4)', 
+                                            color: '#fb7185',
+                                            borderRadius: '12px',
+                                            fontWeight: '800',
+                                            fontSize: '0.85rem',
+                                            transition: 'all 0.3s ease',
+                                            boxShadow: '0 4px 12px rgba(244, 63, 94, 0.1)'
+                                        }}
+                                        onMouseOver={(e) => {
+                                            e.currentTarget.style.backgroundColor = 'rgba(244, 63, 94, 0.2)';
+                                            e.currentTarget.style.borderColor = '#f43f5e';
+                                            e.currentTarget.style.transform = 'scale(1.05)';
+                                        }}
+                                        onMouseOut={(e) => {
+                                            e.currentTarget.style.backgroundColor = 'rgba(244, 63, 94, 0.1)';
+                                            e.currentTarget.style.borderColor = 'rgba(244, 63, 94, 0.4)';
+                                            e.currentTarget.style.transform = 'scale(1)';
+                                        }}
+                                        onClick={() => handleCancel(currentCard.id)}
+                                    >
+                                        ❌ Hủy yêu cầu đăng ký
                                     </button>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    ) : (
+                        <div className="current-pkg-card">
+                            <div className="pkg-glow"></div>
+                            <div className="pkg-content">
+                                <div className="pkg-info">
+                                    <span className={`pkg-badge ${currentCard.status === 'PAUSED' ? 'paused-badge' : ''}`} style={currentCard.status === 'PAUSED' ? {backgroundColor: '#ffc107', color: '#000'} : {}}>{currentCard.status === 'PAUSED' ? 'BẢO LƯU' : 'ĐANG HOẠT ĐỘNG'}</span>
+                                    <h3 className="pkg-name">{currentCard.packageName}</h3>
+                                    <p className="pkg-cat">{currentCard.category}</p>
+
+                                    <div className="assigned-pt-section">
+                                        {currentCard.assignedPtName ? (
+                                            <div className="pt-display">
+                                                <span>Huấn luyện viên phụ trách</span>
+                                                <div className="pt-name-badge">
+                                                    <i className="pt-icon">👤</i>
+                                                    <strong>{currentCard.assignedPtName}</strong>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="pt-unassigned">
+                                                <p className="pt-hint">Gói này có huấn luyện viên đi kèm. Hãy chọn người đồng hành cùng bạn!</p>
+                                                <button 
+                                                    className="btn-select-pt"
+                                                    onClick={() => setShowPtModal(true)}
+                                                >
+                                                    ✨ Chọn Huấn luyện viên
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="pkg-dates">
+                                        <div className="date-item">
+                                            <span>Ngày bắt đầu</span>
+                                            <strong>{new Date(currentCard.startDate).toLocaleDateString("vi-VN")}</strong>
+                                        </div>
+                                        <div className="date-divider"></div>
+                                        <div className="date-item">
+                                            <span>Ngày hết hạn</span>
+                                            <strong className="expiry-date">{new Date(currentCard.endDate).toLocaleDateString("vi-VN")}</strong>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="pkg-visual">
+                                    <div className="days-left">
+                                        <span>Hết hạn trong</span>
+                                        {currentCard.status === 'PAUSED' ? (
+                                            <div className="days-count" style={{color: '#ffc107', fontSize: '1.5rem', whiteSpace: 'nowrap'}}>
+                                                BẢO LƯU
+                                            </div>
+                                        ) : (
+                                            <div className="days-count">
+                                                {Math.ceil((new Date(currentCard.endDate) - new Date()) / (1000 * 60 * 60 * 24))}
+                                            </div>
+                                        )}
+                                        {currentCard.status !== 'PAUSED' && <span>ngày</span>}
+                                    </div>
+                                    <div style={{display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '10px'}}>
+                                        {currentCard.status === 'ACTIVE' && (
+                                            <button className="btn-cancel-top" style={{backgroundColor: '#ff9800', border: '1px solid #ff9800'}} onClick={() => handlePause(currentCard.id)}>
+                                                Bảo lưu gói tập
+                                            </button>
+                                        )}
+                                        {currentCard.status === 'PAUSED' && (
+                                            <button className="btn-cancel-top" style={{backgroundColor: '#4caf50', border: '1px solid #4caf50'}} onClick={() => handleResume(currentCard.id)}>
+                                                Tiếp tục tập
+                                            </button>
+                                        )}
+                                        <button className="btn-cancel-top" onClick={() => handleCancel(currentCard.id)}>
+                                            Hủy gói tập
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )
                 ) : (
                     <div className="no-pkg-alert">
                         <p>Bạn hiện không có gói tập nào đang hoạt động.</p>

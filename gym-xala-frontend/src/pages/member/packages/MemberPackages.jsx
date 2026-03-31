@@ -103,9 +103,45 @@ export default function MemberPackages() {
               </div>
 
               <h3 style={{ fontSize: "1.5rem", fontWeight: "800", color: "#1e293b", marginBottom: "8px" }}>{pkg.name}</h3>
-              <p style={{ color: "#64748b", fontSize: "0.95rem", lineHeight: "1.6", marginBottom: "20px", height: "45px", overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
+              <p style={{ color: "#64748b", fontSize: "0.95rem", lineHeight: "1.6", marginBottom: "15px", height: "45px", overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
                 {pkg.description}
               </p>
+
+              {/* ROADMAPS SUMMARY */}
+              <div style={{ marginBottom: "20px" }}>
+                <div style={{ fontSize: "0.75rem", fontWeight: "700", color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "10px", display: "flex", alignItems: "center", gap: "6px" }}>
+                  <span style={{ display: "inline-block", width: "12px", height: "2px", background: "#2563eb" }}></span>
+                  Lộ trình huấn luyện
+                </div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+                  {pkg.roadmaps && pkg.roadmaps.length > 0 ? (
+                    pkg.roadmaps.slice(0, 2).map((rm, idx) => (
+                      <div key={idx} style={{
+                        background: "#f8fafc",
+                        border: "1px solid #e2e8f0",
+                        padding: "5px 10px",
+                        borderRadius: "10px",
+                        fontSize: "0.8rem",
+                        color: "#475569",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px"
+                      }}>
+                        <span style={{ color: "#2563eb" }}>✓</span> {rm.name}
+                      </div>
+                    ))
+                  ) : (
+                    <div style={{ fontSize: "0.85rem", color: "#94a3b8", fontStyle: "italic" }}>
+                      Đang cập nhật lộ trình cụ thể...
+                    </div>
+                  )}
+                  {pkg.roadmaps && pkg.roadmaps.length > 2 && (
+                    <div style={{ fontSize: "0.8rem", color: "#64748b", alignSelf: "center", fontWeight: "600" }}>
+                      +{pkg.roadmaps.length - 2} khác
+                    </div>
+                  )}
+                </div>
+              </div>
 
               <div style={{ marginTop: "auto" }}>
                 {pkg.promotion && (

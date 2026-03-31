@@ -1,5 +1,6 @@
 package com.xala.gym.controller;
 
+import com.xala.gym.dto.ReorderRequest;
 import com.xala.gym.entity.SessionExercise;
 import com.xala.gym.entity.WorkoutRoadmap;
 import com.xala.gym.entity.WorkoutSession;
@@ -27,6 +28,19 @@ public class AdminRoadmapController {
         return ResponseEntity.ok(adminRoadmapService.createRoadmap(packageId, roadmap));
     }
 
+    @PutMapping("/{roadmapId}")
+    public ResponseEntity<WorkoutRoadmap> updateRoadmap(@PathVariable Long roadmapId, @RequestBody WorkoutRoadmap roadmap) {
+        return ResponseEntity.ok(adminRoadmapService.updateRoadmap(roadmapId, roadmap));
+    }
+
+    @PostMapping("/reorder")
+    public ResponseEntity<Void> reorderRoadmaps(@RequestBody ReorderRequest request) {
+        if (request.getIds() != null) {
+            adminRoadmapService.reorderRoadmaps(request.getIds());
+        }
+        return ResponseEntity.ok().build();
+    }
+
     @DeleteMapping("/{roadmapId}")
     public ResponseEntity<Void> deleteRoadmap(@PathVariable Long roadmapId) {
         adminRoadmapService.deleteRoadmap(roadmapId);
@@ -36,6 +50,19 @@ public class AdminRoadmapController {
     @PostMapping("/{roadmapId}/sessions")
     public ResponseEntity<WorkoutSession> createSession(@PathVariable Long roadmapId, @RequestBody WorkoutSession session) {
         return ResponseEntity.ok(adminRoadmapService.createSession(roadmapId, session));
+    }
+
+    @PutMapping("/sessions/{sessionId}")
+    public ResponseEntity<WorkoutSession> updateSession(@PathVariable Long sessionId, @RequestBody WorkoutSession session) {
+        return ResponseEntity.ok(adminRoadmapService.updateSession(sessionId, session));
+    }
+
+    @PostMapping("/sessions/reorder")
+    public ResponseEntity<Void> reorderSessions(@RequestBody ReorderRequest request) {
+        if (request.getIds() != null) {
+            adminRoadmapService.reorderSessions(request.getIds());
+        }
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/sessions/{sessionId}")

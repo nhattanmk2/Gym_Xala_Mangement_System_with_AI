@@ -4,6 +4,7 @@ import com.xala.gym.dto.request.MembershipRegistrationRequest;
 import com.xala.gym.dto.response.MembershipCardResponse;
 import com.xala.gym.dto.response.AdminPtResponse;
 import com.xala.gym.entity.Member;
+import com.xala.gym.entity.User;
 import com.xala.gym.entity.MembershipCard;
 import com.xala.gym.entity.Package;
 import com.xala.gym.entity.Employee;
@@ -46,14 +47,14 @@ public class MembershipCardServiceImpl implements MembershipCardService {
         Package gymPackage = packageRepository.findById(request.getPackageId())
                 .orElseThrow(() -> new RuntimeException("Gói tập không tồn tại"));
 
-        // Kiểm tra xem đã có gói active hay chưa - sử dụng existsBy để chính xác hơn
-        log.info("Checking active status for member ID: {}", member.getId());
-        boolean hasActive = cardRepository.existsByMemberIdAndStatus(member.getId(), "ACTIVE");
-        log.info("Has active package result: {}", hasActive);
+        // Kiểm tra xem đã có gói active hoặc pending hay chưa
+        log.info("Checking active/pending status for member ID: {}", member.getId());
+        boolean hasExisting = cardRepository.existsByMemberIdAndStatusIn(member.getId(), List.of("ACTIVE", "PENDING"));
+        log.info("Has existing active/pending package result: {}", hasExisting);
         
-        if (hasActive) {
-            log.warn("Registration rejected: Member {} already has an active package", username);
-            throw new IllegalArgumentException("Bạn hiện đang có một gói tập đang hoạt động. Vui lòng hủy hoặc đợi gói cũ hết hạn trước khi đăng ký mới.");
+        if (hasExisting) {
+            log.warn("Registration rejected: Member {} already has an active or pending package", username);
+            throw new IllegalArgumentException("Bạn hiện đang có một gói tập đang hoạt động hoặc đang chờ duyệt. Vui lòng hoàn tất hoặc hủy gói cũ trước khi đăng ký mới.");
         }
 
         // Chặn đăng ký gói đã ngừng kinh doanh
@@ -99,7 +100,7 @@ public class MembershipCardServiceImpl implements MembershipCardService {
         Member member = memberRepository.findByUserUsername(username)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy member cho: " + username));
         
-        return cardRepository.findFirstByMemberIdAndStatusInOrderByEndDateDesc(member.getId(), java.util.List.of("ACTIVE", "PAUSED"))
+        return cardRepository.findFirstByMemberIdAndStatusInOrderByEndDateDesc(member.getId(), java.util.List.of("ACTIVE", "PAUSED", "PENDING"))
                 .map(this::mapToResponse)
                 .orElse(null);
     }
@@ -261,14 +262,17 @@ public class MembershipCardServiceImpl implements MembershipCardService {
 
         if (card.getGymPackage() != null && card.getGymPackage().getPersonalTrainers() != null) {
             builder.availablePts(card.getGymPackage().getPersonalTrainers().stream()
-                    .map(pt -> AdminPtResponse.builder()
-                            .id(pt.getUser() != null ? pt.getUser().getId() : pt.getId()) // Use User ID for scheduling
-                            .userId(pt.getUser() != null ? pt.getUser().getId() : null)
+                    .map(pt -> {
+                        User ptUser = pt.getUser();
+                        return AdminPtResponse.builder()
+                            .id(ptUser != null ? ptUser.getId() : pt.getId()) // Use User ID for scheduling if available
+                            .userId(ptUser != null ? ptUser.getId() : null)
                             .name(pt.getName())
                             .ptSpecialty(pt.getPtSpecialty())
                             .avatar(pt.getAvatar() != null ? java.util.Base64.getEncoder().encodeToString(pt.getAvatar()) : null)
-                            .ptRating(pt.getUser() != null ? pt.getUser().getAverageRating() : null)
-                            .build())
+                            .ptRating(ptUser != null ? ptUser.getAverageRating() : pt.getPtRating())
+                            .build();
+                    })
                     .collect(java.util.stream.Collectors.toList()));
         }
 

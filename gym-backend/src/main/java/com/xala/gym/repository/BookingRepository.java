@@ -30,9 +30,9 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             Long ptId, LocalDateTime start, LocalDateTime end
     );
 
-    @Query("SELECT b FROM Booking b " +
-           "LEFT JOIN b.personalTrainer u " +
-           "LEFT JOIN b.member m " +
+    @Query("SELECT DISTINCT b FROM Booking b " +
+           "LEFT JOIN FETCH b.personalTrainer u " +
+           "LEFT JOIN FETCH b.member m " +
            "WHERE (:branchId IS NULL OR EXISTS (SELECT e FROM Employee e WHERE e.user.id = u.id AND e.gymLocation.id = :branchId)) " +
            "AND (:ptName IS NULL OR :ptName = '' OR u.fullName LIKE %:ptName%) " +
            "AND (:memberName IS NULL OR :memberName = '' OR m.fullName LIKE %:memberName%) " +
