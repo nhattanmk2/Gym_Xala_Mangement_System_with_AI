@@ -9,13 +9,16 @@ import java.util.List;
 public interface AdminExerciseService {
     List<ExerciseCategory> getAllCategories();
     ExerciseCategory createCategory(ExerciseCategory category);
+    ExerciseCategory updateCategory(Long id, ExerciseCategory category);
     void deleteCategory(Long categoryId);
 
     List<StandardExercise> getExercisesByCategory(Long categoryId);
     StandardExercise createExercise(Long categoryId, Long equipmentId, StandardExercise exercise);
+    StandardExercise updateExercise(Long id, StandardExercise exercise);
     void deleteExercise(Long exerciseId);
 
     List<ExerciseLevel> getLevelsByExercise(Long exerciseId);
     ExerciseLevel createLevel(Long exerciseId, ExerciseLevel level);
+    ExerciseLevel updateLevel(Long id, ExerciseLevel level);
     void deleteLevel(Long levelId);
 }

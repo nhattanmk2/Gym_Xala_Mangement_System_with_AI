@@ -3,6 +3,7 @@ package com.xala.gym.controller;
 import com.xala.gym.dto.request.AdminCreatePtRequest;
 import com.xala.gym.dto.request.AdminUpdatePtRequest;
 import com.xala.gym.dto.response.AdminPtResponse;
+import com.xala.gym.dto.response.PtPerformanceDetailResponse;
 import com.xala.gym.entity.GymLocation;
 import com.xala.gym.entity.Position;
 import com.xala.gym.repository.GymLocationRepository;
@@ -45,6 +46,11 @@ public class AdminPtController {
     @GetMapping("/{id}")
     public ResponseEntity<AdminPtResponse> getPtDetail(@PathVariable(name = "id") Long id) {
         return ResponseEntity.ok(adminPtService.getPtDetail(id));
+    }
+
+    @GetMapping("/{id}/performance")
+    public ResponseEntity<PtPerformanceDetailResponse> getPtPerformance(@PathVariable(name = "id") Long id) {
+        return ResponseEntity.ok(adminPtService.getPtPerformanceDetail(id));
     }
 
     @DeleteMapping("/{id}")

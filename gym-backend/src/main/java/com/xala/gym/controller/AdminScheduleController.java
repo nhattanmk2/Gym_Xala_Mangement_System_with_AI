@@ -21,9 +21,10 @@ public class AdminScheduleController {
     public ResponseEntity<List<PtScheduleResponse>> getAllSchedules(
             @RequestParam(required = false) Integer branchId,
             @RequestParam(required = false) String ptName,
+            @RequestParam(required = false) String memberName,
             @RequestParam(required = false) String status
     ) {
-        return ResponseEntity.ok(ptScheduleService.getAdminSchedules(branchId, ptName, status));
+        return ResponseEntity.ok(ptScheduleService.getAdminSchedules(branchId, ptName, memberName, status));
     }
 
     @PostMapping("/batch/{ptId}")

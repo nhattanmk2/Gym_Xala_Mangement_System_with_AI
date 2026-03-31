@@ -64,3 +64,192 @@ Phần này tóm tắt các thiết lập kỹ thuật và môi trường quan t
 
 **6. Giới hạn Upload File:**
 - Các file ảnh (VD: avatar User, ảnh Package) upload từ client lên có giới hạn kích thước tối đa là **10MB** (`spring.servlet.multipart.max-file-size=10MB`).
+
+---
+## CẤU TRÚC DỮ LIỆU & MỐI QUAN HỆ CÁC BẢNG (Database Relationship)
+Dưới đây là giải phẫu cấu trúc bảng (Entities) cốt lõi của hệ thống, giúp bạn nắm rõ cách dòng chảy dữ liệu được thiết kế:
+
+**1. Nhóm Bảng Tài khoản - User / Account**
+- **`User` (Bảng trung tâm):** Quản lý định danh (username, password, email) và phân quyền chung (Admin, Member, PT) thông qua bảng trung gian `user_role` (quan hệ nhiều-nhiều `@ManyToMany`). Đặc biệt, `User` lưu trữ luôn các thông tin phục vụ AI như `goalType` (mục tiêu mong muốn), chiều cao, cân nặng, và mảng JSON `availabilitySlots` (khung giờ rảnh).
+- **`Member` (Profile Mở rộng):** Mở rộng thông tin chi tiết cho tài khoản Hội viên (CCCD, Trạng thái, Avatar...). Map 1-1 (`@OneToOne`) ngược lại với bảng `User`.
+
+**2. Bảng Package (Gói tập)**
+- Chứa dữ liệu cấu hình kinh doanh: giá tiền, tổng số buổi tập (`maxSessions`), thời hạn (`durationInDays`), và loại gói (`category` - phục vụ AI match).
+- **Quan hệ với PT:** Được liên kết nhiều-nhiều (`@ManyToMany`) với bảng rẽ nhánh chức danh (đại diện PT) thông qua bảng trung gian `package_pts`. Việc này giúp Admin cấu hình trước: Lọc danh sách nhóm HLV đủ tiêu chuẩn dạy gói tập cụ thể đó.
+
+**3. Bảng Booking / PtSchedule (Lịch đặt / Giao dịch)**
+- (Tên Model là `Booking`, nhưng lưu xuống DB dưới Table `pt_schedules`). Đóng vai trò là bảng Giao dịch (Transaction) trung tâm ghi nhận từng phiên làm việc.
+- Sở hữu 3 đường liên kết khóa ngoại (`@ManyToOne`): Trỏ tới `User` (người tập), trỏ tới `User` (PT), và trỏ tới `Package` (gói tập đang áp dụng).
+- Lưu trữ thời gian bắt đầu/kết thúc khung giờ, trạng thái duyệt (PENDING, CONFIRMED). Đây cũng là nơi lưu **Feedback** (Đánh giá Rate, Review của Member sau khi tập xong để hệ thống AI đánh trọng số xếp hạng PT).
+
+**4. Bảng WorkoutRoadmap & WorkoutSession (Hệ thống Lộ trình)**
+- **`WorkoutRoadmap` (Giáo án / Lộ trình):** Nằm tronrg 1 `Package` (`@ManyToOne`). Định nghĩa ra các giai đoạn chuẩn tắc của một gói (Ví dụ: Giai đoạn 1: Giảm mỡ, GĐ2: Siết cơ).
+- **`WorkoutSession` (Buổi tập cụ thể):** Nằm gọn trong 1 Roadmap (`@ManyToOne`). Nó chứa cụ thể ngày hôm đó phải tập bao nhiêu bài.
+- **Ý nghĩa vòng lặp:** Sau khi buổi tập (Booking) hoàn tất, PT sẽ tích vào các Session để đánh dấu là thành viên đã tập xong. Cấu trúc bảng này thiết kế tách biệt nhằm tính toán Tiến trình (Progress) dài hạn một cách tự động thay vì PT phải gõ tay báo cáo.
+
+---
+## KIỂM SOÁT LUỒNG VÀO (Tầng Controllers - API Gateway)
+Tầng Controller đóng vai trò là cửa ngõ giao tiếp trực tiếp với Frontend. Dưới đây là 5 Controller cốt lõi và các phương thức (Endpoints) mà Client (Trình duyệt/Mobile) có quyền gọi tới:
+
+**1. `AuthController` (Quản lý Định danh)**
+- `POST /api/auth/register/member`: Khách vãng lai gửi form tạo tài khoản mới.
+- `POST /api/auth/register/verify`: Xác thực email bằng mã code để kích hoạt tài khoản.
+- `POST /api/auth/login`: Gửi username/password, Server trả về chuỗi `token` và `refreshToken`.
+- `POST /api/auth/refresh`: Dùng `refreshToken` đổi lấy cặp Token mới khi cái cũ hết hạn.
+
+**2. `PackageController` (Danh mục Gói tập)**
+- `GET /api/packages`: Frontend gọi để hiển thị lên "Cửa hàng" tất cả các Gói tập đang kinh doanh (`active = true`).
+- `GET /api/packages/{id}`: Bấm vào xem chi tiết mô tả 1 Gói tập cụ thể.
+
+**3. `PtScheduleController` (Trái tim của chức năng Xếp lịch & Lên lớp)**
+> Controller này chứa nhiều Endpoint nhất do gánh toàn bộ nghiệp vụ lõi vòng lặp của phòng tập.
+- **PT khai báo lịch rảnh:** `POST /api/pt/schedule/batch` (PT đẩy mảng các khung giờ mình sẵn sàng nhận dạy).
+- **Member đặt lịch:** `GET /available/{ptId}` (Xem lịch trống của PT) ➔ `POST /book/{id}` (Member ấn nút chốt lịch đăng ký).
+- **PT xử lý lịch:** `PUT /{id}/approve` (Đồng ý dạy) hoặc `reject` (Từ chối).
+- **Vận hành buổi tập:** `PUT /{id}/content` (PT ghi lại các bài tập đã tham gia) ➔ `PUT /{id}/complete` (Xác nhận buổi tập hoàn thành).
+- **Theo dõi:** `GET /progress/{memberId}` (Lấy % hoàn thành giáo án của người học).
+
+**4. `PtController` (Thông tin Huấn luyện viên)**
+- `GET /api/pt/profile` & `PUT /profile`: Hỗ trợ PT tự chỉnh sửa Bio cá nhân, tải ảnh đại diện lên Server (thông qua `multipart/form-data`).
+- `GET /api/pt/all`: Lấy danh sách toàn bộ HLV để hiển thị màn hình chọn PT.
+
+**5. `AIConsultationController` (Não bộ Hệ thống)**
+- `POST /api/member/ai-consultation`: Frontend gom các chỉ số BMI, GoalType đẩy lên. Server làm mượt prompt chuyển sang Google Gemini, cuối cùng trả về chuỗi tư vấn kèm thêm mảng *Các gói tập (Packages)* được Recommend.
+- `GET /.../history`: Tra cứu các lịch sử chat AI tư vấn cũ của người dùng đang đăng nhập.
+
+---
+## LOGIC NGHIỆP VỤ CỐT LÕI (Tầng Services - Business Logic)
+Tầng Service là nơi quy tụ các quy tắc nghiệp vụ rắc rối nhất (Business Rules). Dưới đây là 3 luồng hoạt động chính được hệ thống xử lý ngầm ở Backend:
+
+**1. Luồng Tư Vấn AI (`AIConsultationService` -> `GeminiService`)**
+- **Tối ưu Token:** Thay vì gửi toàn bộ Database cồng kềnh, Service chỉ lấy danh sách các Gói tập đang `ACTIVE`, rút gọn chúng thành mảng JSON thu gọn (gỉ gồm id, name, price, description) để nhét vào Prompt giúp phản hồi nhanh và tiết kiệm băng thông API.
+- **Prompt Engineering (Kỹ thuật điều hướng AI):** Hệ thống gán Persona cho Gemini là "Chuyên gia thể hình Xala". Prompt ngầm ra lệnh cho AI không chỉ tính BMI, mà còn PHẢI điều hướng người dùng *"Ưu tiên mua các gói tập VIP có giá trị cao nhất"* dựa trên danh sách JSON vừa nạp và ép trả về định dạng **Strict JSON**.
+- **Top PT Matching:** Sau khi xử lý bóc tách thành công chuỗi JSON từ Gemini, hệ thống tự động quét thuật toán nội bộ (`ptMatchingService`) để tìm ngay ra top 3 PT (HLV) hoàn hảo nhất gán vào đi kèm gói tập mà AI vừa khen ngợi.
+
+**2. Luồng Xếp Lịch & Thực Thi Lớp Học (`PtScheduleServiceImpl`)**
+- **Validate Block giờ (Cơ chế Nhận Lịch An Toàn):**
+  - Khi PT mở khung giờ mình rảnh, Service triệu hồi hàm `findOverlappingSlots`. 
+  - Nếu phát hiện khung giờ mới tạo đè lên lịch cũ, nó sẽ kiểm tra xem lịch hiện tại có mang cờ `BUSY` (Khoảng thời gian PT nghỉ phép/Bận việc riêng) hay không. Nhãn này là bất khả xâm phạm.
+  - Ở cấp độ Chi nhánh (Branch Capacity): Trọng lượng tải của phòng Gym được đo đếm gắt gao. Service gọi `countBookingsInBranchAtInterval` đếm xem nếu duyệt thêm học viên này, số người trong cơ sở có chạm trần `maxCapacity` (VD: 50 người) không, nếu quá tải sẽ quăng Lỗi báo đỏ.
+- **Auto-Progress (Cập nhật tiến trình thông minh):** 
+  - Tại hàm `markSessionAsCompleted`, khi PT ấn nút xác nhận "Buổi tập kết thúc", Service sẽ tự động dò tìm vào Lộ trình cấu trúc (Roadmap) của người học. Trích xuất nhóm bài tập (Session) mà họ đang học dở, chạy vòng lặp đánh dấu biến `IsCompleted = true` cho toàn bộ các bài đó, triệt tiêu hoàn toàn sự mệt mỏi do nhập liệu bằng tay của PT.
+
+**3. Luồng Mua Gói & Phân Bổ HLV (`MembershipCardServiceImpl`)**
+- **Sàn Lọc Đăng Ký Chờ (PENDING):** Mọi hành vi ấn nút Đăng ký mua Gói tập trên giao diện qua API `registerPackage` đều khởi tạo 1 đối tượng `MembershipCard` bị kìm hãm ở trạng thái `PENDING`. Hệ thống quét chống SPAM bằng cách cưỡng ép mỗi khách hàng dĩ nhiên chỉ được tồn tại duy nhất 1 thẻ kích hoạt đồng thời.
+- **Approve Checkout:** Lễ Tân / Quản trị viên (Admin) nhận chuyển khoản xong sẽ thao tác hàm `approveCard`. Tại đây Admin có thể truyền tham số `customPrice` (giảm giá thủ công nếu áp mã khuyến mãi). Thẻ lập tức chuyển `ACTIVE`.
+- **Binding PT Khắt Khe (`assignPt`):** Sinh viên không được tự do chọn thầy vô tội vạ. Service bắt buộc chạy check kiểm chứng `isPtInPackage`: quét dò xem PT khách hàng chọn có thực sự vinh dự nằm trong mảng "Danh sách Huấn luyện viên phụ trách gói" mà tay Admin đã phân bổ thiết lập từ đầu hệ thống hay không!
+
+---
+## TẦNG BẢO MẬT VÀ PHÂN QUYỀN (Security & Filters)
+Bảo vệ toàn bộ các luồng dữ liệu trên là Spring Security được nhúng thành một lá chắn (Gatekeeper) chặn đứng mọi kết nối không hợp lệ.
+
+**1. Cấu hình Toàn cục (`SecurityConfig`)**
+- **Mở cửa CORS:** Ghi nhận và cho phép nguồn gốc `http://localhost:3000` (ReactJS / Frontend) được truyền dữ liệu xuyên biên giới (Đầy đủ các hàm GET, POST, PUT, DELETE).
+- **Thiết kế Vô trạng thái (Stateless):** Do sử dụng JWT token nên hệ thống tắt hẳn cơ chế lưu Session truyền thống của Server, giảm thiểu tối đa tình trạng ngốn RAM bộ nhớ.
+- **Phân luồng Giao thông (Routes Validation):**
+  - Các API như `/api/auth/**`, `/api/packages/**` là luồng Public (Cho khách vãng lai).
+  - Các API mang tính hủy diệt cao như `/api/admin/**` bắt buộc tài khoản mang cờ `hasRole("ADMIN")`.
+  - Các API thao tác chuyên môn `/api/pt/**` và `/api/member/**` được phân ranh giới rõ ràng (Trừ một vài rule cho phép cả 3 Role cùng được xem).
+
+**2. Cái Lưới Siêu Lọc (`JwtAuthenticationFilter`)**
+- Kế thừa `OncePerRequestFilter`, nó chặn đứng toàn bộ Request (Giao dịch) trước khi chạm tới Controller ngoại trừ nhánh `/api/auth`.
+- Nó vạch trần biến `Authorization` ở Header Request để bóc mẽ chuỗi ký tự `Bearer `.
+- Sử dụng `JwtService` để giải mã chữ ký, lôi ra tên tài khoản (Username) và thẩm định xem Token này có bị tẩy xóa, làm giả không.
+- **Cơ Chế Báo Hết Hạn Nhẹ Nhàng:** Trong hàm có bẫy `try-catch ExpiredJwtException`. Kỹ thuật này giúp khi Token Access hết hạn, Server không nổ lỗi 500 nát bét mà trả về duyên dáng một mã lỗi `401 Unauthorized` để đánh tiếng cho Frontend: *"Token của anh hết tuổi rồi, gọi ngầm hàm /api/auth/refresh lấy bộ mới đi chứ đừng đẩy người ta văng bắt đăng nhập lại."*
+- Một khi Token đã được xác nhận an toàn, Filter sẽ cấp phát một giấy phép tạm vào chiếc hộp `SecurityContextHolder`, báo hiệu với toàn hệ thống rằng nhân vật này hoàn toàn hợp pháp.
+
+---
+## TỔNG QUAN ARCHITECTURE FRONTEND (Kiến Trúc Giao Diện React)
+Kiến trúc phần mềm bên phía trình duyệt người dùng (Client-Side) được thiết kế cực kỳ tinh gọn theo hướng thuần React, hạn chế sự phụ thuộc vướng víu vào các thư viện quá cồng kềnh nhằm tối ưu tốc độ load chậm chạp. 
+
+**1. Khám nghiệm File xương sống `package.json` (Tech Stack)**
+- **KHÔNG sử dụng State Management nặng nề:** Dự án hoàn toàn KHÔNG sử dụng Redux hay Zustand. Mọi trạng thái (như thông tin User, Token) được đưa qua lưu trữ `localStorage` tĩnh trên máy ảo kết hợp với các hook tiêu chuẩn `useState` nội mạng của Component. Việc này đồng bộ khớp tuyệt vời với mô hình Stateless phi trạng thái của Backend phía sau.
+- **KHÔNG dùng CSS Framework cồng xếnh:** Hệ thống tịnh không cài cắm một dòng Tailwind CSS hay Bootstrap nào! Thay vào đó, nó dựa trên sức mạnh của CSS nguyên bản (Vanilla CSS thông qua `index.css`, `App.css`) kết hợp chặt với khai báo Inline Styles JavaScript (`style={styles.container}`) để tái sử dụng mãnh vỡ giao diện.
+- **Thực thể Giao tiếp Mạng:** Gọi dữ liệu qua thư viện quốc dân **`axios`**.
+- **Biểu đồ & Icon Học:** Điểm nhấn dùng **`chart.js`** để vẽ các biểu đồ phân tích doanh thu (AI Analytics Dashboard) cho Admin, kết hợp thư viện **`lucide-react`** để phủ hàng loạt icon hiện đại nhẹ dung lượng.
+
+**2. Sơ đồ Mạng Nhện Điều Hướng (`App.jsx` + `react-router-dom`)**
+Kiến trúc File Router được quy hoạch thành 4 cụm phân khu cực kỳ nghiêm ngặt:
+- **Khu PUBLIC (Công Viên Tự Do):** Gồm quy hoạch `/register`, `/login`, `/verify`. Ai vãng lai truy cập cũng được mà không bị chặn hỏi vé.
+- **Bọc Thép Bảo Vệ `ProtectedRoute` (Cửa Nhận Diện An Ninh):** Một Component bao bọc tự tạo, đóng vai trò như chốt bảo vệ bọc lấy các giao diện mật. 
+  - Nó gọi hàm `getToken()` ở utils. Nếu không rà thấy vé Token ➔ Tống cổ ngay ra cổng `/login` bằng lệnh rẽ `<Navigate replace />`.
+  - Nếu có vé nhưng đi lọt nhầm khu vực đặc quyền (Ví dụ: Member cầm thẻ quẹt thử gõ url vào trang `/admin/...`), nó kiểm tra lưới cấp lọc qua tham số mảng `allowRoles=["ROLE_ADMIN"]`. Lập tức khóa chặt màn hình trắng đen hiển thị *Dòng cấm 403 - Permission denied* ngay tại giao diện mà không thèm gọi vòi sang nhờ Backend xử lý.
+- **Layout Rẽ Nhánh (Nested routing):** Ở cấp độ cao, mỗi thế lực (ADMIN, PT, MEMBER) có một Layout dàn giáo mẫu riêng. Ví dụ `MemberLayout` chứa Thanh Menu (Sidebar) riêng mình Member. Các mảnh trang nhỏ lẻ (Booking, My Package, AI Chat) bên trong khu vực này sẽ được nạp động không cần tải lại toàn mặt web.
+
+---
+## KIẾN TRÚC GỌI API (Services & API Call Frontend)
+Thư mục `src/api` đóng vai trò là cây cầu giao tiếp, nơi ReactJS ở Frontend "nhờ vả" Spring Boot Backend xử lý dữ liệu. Để giữ code Frontend sạch, hệ thống áp dụng pattern tách biệt hoàn toàn Logic gọi mạng khỏi các Component Giao diện (UI).
+
+**1. Bộ điều hướng trung tâm `axiosClient.js` (Lính Gác Interceptors)**
+File này thiết lập một cấu hình `axiosClient` duy nhất kiểm soát tất cả luồng mạng:
+- **Request Interceptor (Gắn thẻ thông hành tự động):** Trước khi mọi Request bay ra khỏi trình duyệt, "lính gác" này sẽ chặn lại, moi `getToken()` dưới LocalStorage và gài sẵn vào Header dưới dạng `Authorization: Bearer <token>`. Lập trình viên không bao giờ phải gõ lại đoạn code nạp token ở bất kỳ Component nào!
+- **Response Interceptor (Cơ chế Cứu hộ Silent Refresh 401 Tự Động):** 
+  - Khi Server dội ngược về mã lỗi `401 Unauthorized` (Token hết tuổi), Interceptor không vội ném lỗi ngay lên màn hình. Nó tức tốc bật nhãn `isRefreshing` để đình chỉ mọi Request khác đang chuẩn bị gọi (đẩy vào danh sách chờ `failedQueue`).
+  - Nó ngầm vứt `refreshToken` xuống gọi Endpoint `/api/auth/refresh`.
+  - Nếu sinh ngầm thành công: Nó ghi đè Token mới tươi rói vào Storage, nhả khóa (Release Queue) và tiếp tục bấm nút gửi lại toàn bộ những Request nãy giờ đang bị đóng băng. Client Web không hề khựng lại một nhịp độ nào!
+  - Nếu thất bại triệt để (Cả Refresh Token cũng quá hạn): Lập tức gọi `logout()`, xóa sổ bộ nhớ trình duyệt và hất văng người dùng về trang Login.
+
+**2. API Call Map (Quy Hoạch Bản Đồ API)**
+Sự sạch sẽ thể hiện ở việc không có dòng `axios.get` nào dính dấp lộn xộn vào giao diện. Toàn bộ thư mục `src/api/` quy tụ lại xấp xỉ **26 file** chia tách:
+- **Phân mảnh theo Thực thể (Domain-Driven API Map):** 
+  - Khối tĩnh: `adminPackageApi.js`, `adminExerciseApi.js`
+  - Khối trí tuệ nhân tạo: `aiConsultationApi.js` (`POST /member/ai-consultation`)
+  - Khối lõi nghiệp vụ: `ptScheduleApi.js`, `membershipApi.js`
+- **Thước đo Động cơ (Live Progress Bar):** Thanh chỉ số % hoàn thành lộ trình của học viên hoàn toàn KHÔNG NẰM lưu chữ cứng cáp nào ở trong Database Backend! Thực tế, Component thông minh tự đếm xem mảng lộ trình có bao nhiêu bài học thoả mãn cờ hiệu `isCompleted == true` đem chia tay ngang với tổng số Record mảng để tính ra % `progressPercentage = Math.round((completed / total) * 100)` bắn trực tiếp số liệu đồ hoạ lên Thanh UI!
+
+---
+## ⏱️ TRACE THỰC TẾ - NỐI GHÉP LUỒNG (End-to-End Trace)
+Để hiểu thực sự cách hệ thống vận hành, hãy cùng "đi bộ" qua một luồng nghiệp vụ quan trọng nhất: **Member đặt lịch tập với PT**.
+
+**1. Khởi đầu tại Giao diện (Frontend UI)**
+- **File:** `MemberBooking.jsx`
+- **Hành động:** Người dùng nhìn thấy danh sách các khung giờ rảnh của PT và nhấn nút **"Đặt lịch ngay"**.
+- **Sự kiện:** Hàm `handleBook(slot.id)` được kích hoạt. Nó thiết lập trạng thái loading (`setBookingId`) để người dùng không bấm loạn xạ.
+
+**2. Gọi lệnh qua đường dây API (Frontend API Call)**
+- **File:** `ptScheduleApi.js`
+- **Hàm:** `bookSlot(slotId)`
+- **Kỹ thuật:** Sử dụng `axiosClient` để gửi một yêu cầu `POST` tới địa chỉ `/pt/schedule/book/{id}`. 
+- **Bảo mật:** Tại đây, `axiosClient` sẽ tự động nhúng Token JWT của Member vào Header để Backend biết ai đang đặt lịch.
+
+**3. Tiếp nhận tại Cửa ngõ Backend (Controller)**
+- **File:** `PtScheduleController.java`
+- **Endpoint:** `@PostMapping("/book/{id}")`
+- **Nhiệm vụ:** Nhận diện mã số khung giờ (`id`) từ URL, sau đó chuyển yêu cầu xuống tầng xử lý nghiệp vụ: `ptScheduleService.bookSlot(id)`.
+
+**4. Xử lý "Não bộ" Nghiệp vụ (Service Layer)**
+- **File:** `PtScheduleServiceImpl.java`
+- **Hàm:** `bookSlot(Long slotId)`
+- **Quy trình xử lý ngầm:**
+  - **Nhận diện:** Lấy thông tin Member đang đăng nhập từ `SecurityContext`.
+  - **Kiểm tra (Validation):** Check xem Member có thẻ tập (`MembershipCard`) còn hiệu lực không? PT có bị trùng lịch không? Buổi tập còn đủ số lượng không?
+  - **Thực thi:** Nếu mọi thứ ổn, Service sẽ cập nhật bản ghi trong bảng `pt_schedules`: Gán `member_id` vào, đổi trạng thái từ `OPEN` (Lịch rảnh) sang `PENDING` (Chờ PT duyệt).
+  - **Lưu trữ:** Gọi `repository.save(...)` để chốt dữ liệu xuống Database (MySQL).
+
+**5. Phản hồi và Cập nhật Giao diện (Closing the Loop)**
+- **Backend:** Trả về mã **200 OK** kèm thông tin buổi tập đã cập nhật.
+- **Frontend:** Nhận phản hồi thành công, hàm `handleBook` hiển thị thông báo "✨ Gửi yêu cầu đặt lịch thành công!".
+- **Refresh:** Component gọi lại hàm `fetchSlots()` để cập nhật lại danh sách, lúc này khung giờ vừa đặt sẽ biến mất (do trạng thái không còn là OPEN) hoặc hiển thị trạng thái mới.
+
+> [!IMPORTANT]
+> **Tư duy Trace Code:** 
+> Khi muốn tìm hiểu một tính năng, hãy bắt đầu từ **UI (Component)** ➔ **API (Frontend)** ➔ **Controller (Backend)** ➔ **Service (Logic)** ➔ **Repository (Database)**. Đây là con đường độc đạo của mọi dòng chảy dữ liệu trong hệ thống này.
+---
+## GIAO DIỆN CHÍNH (Pages & Components)
+Bóc tách 3 luồng giao diện quan trọng nhất cấu thành nên linh hồn của dự án Web React Client:
+
+**1. Màn hình Mua Gói & Chatbot AI (`MemberPackages.jsx` & `AIConsultation.jsx`)**
+- **Cử chỉ Fetch Dữ liệu:** Khi trang `MemberPackages` vừa được nhúng lên màn hình, Hook `useEffect(..., [])` lập tức nổ phát súng gọi `getActivePackages()` để cào danh sách các Gói tập từ DB. Xuyên suốt quá trình cào, UI hiển thị vòng Loading xoay vòng, và chỉ bung Giao diện ra khi Data ùa về đổ đầy biến `setPackages(data)`.
+- **Kịch bản AI Chatbot:** 
+  - Khách hàng điền Form khai báo rành rọt (Cân nặng, Chiều cao, Tuổi, Ngày muốn tập). 
+  - Hàm `handleSubmit` sẽ gom tất cả thành biến cục bộ `payload` và bắn thẳng lệnh gọi API `getAIConsultation(payload)`.
+  - Kết quả trả lại cực kỳ vi diệu: Không chỉ phân tích dăm ba cái lời khuyên BMI, Component còn bóc tách thẳng tay mảng `result.recommendedPackages` (Giăng bẫy hiển thị các thẻ Card cho Gói tập AI khuyên dùng) và `pkg.recommendedPts` (Liệt kê thẳng mặt Top 3 vị HLV sáng giá nhất gán kèm để rủ rê Member nạp card bấm nút Đặt lịch).
+
+**2. Bảng Xếp Lịch Phức Tạp (`MemberSchedule.jsx`)**
+- **Super Component Khổng Lồ:** Đây là một trong những Component đồ sộ nạp nhiều logic nhất. Nó gánh hàng loạt biến State điều hướng người dùng như `viewMode` (Đang coi chữ hay coi lịch vạn niên), `timeFilter`, `startDate`.
+- **Reactive Triggers (Bẫy phản ứng):** Cứ mỗi khi người dùng táy máy đổi ngày lọc dữ liệu trên thanh Filter, Hook thiên lý nhãn `useEffect(..., [startDate, endDate])` sẽ bắt mạch được sự thay đổi tuổi thọ của State và ngay lập tức bóp cò gọi lại API `fetchSchedules(start, end)` để update danh sách mới tinh tươm.
+- **Kỹ thuật Rendering Thích ứng:** Dựa theo nút `viewMode`, nhánh Render sẽ rẽ qua nhánh vẽ giao diện 1 là Card Danh sách cuộn dọc, 2 là tự động nhào nặn ra nguyên một Khung Lịch Tháng Động (Calendar) cực mượt để học viên ngắm những dấu tick chấm điểm của PT.
+
+**3. Dashboard Cầm Tay Chỉ Việc HLV (`MemberProgressDetail.jsx`)**
+- **Kỹ thuật Kéo Dữ Liệu Song Song (Promise.all):** Để tiết kiệm thói quen bắt người dùng chờ đợi, thay vì gọi chậm chạp API lấy Lịch Sử (`getPtMemberHistory`) xong mới rụt rè gọi tiếp Lộ trình (`getPtMemberProgress`), Component này tinh tế dùng cú pháp gộp `Promise.all([...])` kéo song song 2 mảng bay qua mạng cùng lúc trước khi băm nhuyễn vào 2 Tabs màn hình.
+- **Thước đo Động cơ (Live Progress Bar):** Thanh chỉ số % hoàn thành lộ trình của học viên hoàn toàn KHÔNG NẰM lưu chữ cứng cáp nào ở trong Database Backend! Thực tế, Component thông minh tự đếm xem mảng lộ trình có bao nhiêu bài học thoả mãn cờ hiệu `isCompleted == true` đem chia tay ngang với tổng số Record mảng để tính ra % `progressPercentage = Math.round((completed / total) * 100)` bắn trực tiếp số liệu đồ hoạ lên Thanh UI!

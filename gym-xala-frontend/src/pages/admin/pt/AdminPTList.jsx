@@ -1,6 +1,8 @@
 import { useEffect, useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import AdminLayout from "../layout/AdminLayout";
 import { getAllPts, deletePt, downgradeToMember, createPt, getAllPositions, getAllLocations, getPtDetail, updatePt } from "../../../api/adminPtApi";
+import PtPerformanceModal from "./PtPerformanceModal";
 import "../member/adminMemberList.css"; // Reuse CSS
 
 const AdminPTList = () => {
@@ -16,12 +18,19 @@ const AdminPTList = () => {
     const [avatarFile, setAvatarFile] = useState(null);
     const [avatarPreview, setAvatarPreview] = useState("");
 
+    // Performance Modal States
+    const [showPerformanceModal, setShowPerformanceModal] = useState(false);
+    const [perfPtId, setPerfPtId] = useState(null);
+    const [perfPtName, setPerfPtName] = useState("");
+
     const [positions, setPositions] = useState([]);
     const [locations, setLocations] = useState([]);
     const [newPt, setNewPt] = useState({
         username: "", password: "", fullName: "", email: "", phone: "",
         ptSpecialty: "", positionId: "", gymLocationId: ""
     });
+
+    const navigate = useNavigate();
 
     const fetchPts = useCallback(async () => {
         try {
@@ -145,6 +154,18 @@ const AdminPTList = () => {
             }
         }
     };
+
+    const handleViewSchedule = (pt) => {
+        // Navigate to admin schedules page with PT name pre-filled and Calendar view mode
+        navigate(`/admin/schedules?ptName=${encodeURIComponent(pt.name)}&viewMode=CALENDAR`);
+    };
+
+    const handleViewPerformance = (pt) => {
+        setPerfPtId(pt.id);
+        setPerfPtName(pt.name);
+        setShowPerformanceModal(true);
+    };
+
     return (
         <AdminLayout>
             <div className="member-container">
@@ -205,6 +226,8 @@ const AdminPTList = () => {
                                     <td>{pt.ptRating ? `${pt.ptRating} ⭐` : "Chưa có"}</td>
                                     <td>
                                         <button className="action-btn" style={{ background: "#2196F3", color: "white" }} onClick={() => handleEditClick(pt.id)}>Chi tiết</button>
+                                        <button className="action-btn" style={{ background: "#4CAF50", color: "white" }} onClick={() => handleViewPerformance(pt)}>Hiệu suất</button>
+                                        <button className="action-btn" style={{ background: "#673AB7", color: "white" }} onClick={() => handleViewSchedule(pt)}>Lịch Dạy</button>
                                         <button className="action-btn" style={{ background: "orange", color: "white" }} onClick={() => handleDowngrade(pt.id)}>Hạ xuống Member</button>
                                         <button className="action-btn delete" onClick={() => handleDeleteCompletely(pt.id)}>Xóa hẳn</button>
                                     </td>
@@ -340,6 +363,15 @@ const AdminPTList = () => {
                             </div>
                         </div>
                     </div>
+                )}
+
+                {/* Performance Modal */}
+                {showPerformanceModal && (
+                    <PtPerformanceModal
+                        ptId={perfPtId}
+                        ptName={perfPtName}
+                        onClose={() => setShowPerformanceModal(false)}
+                    />
                 )}
             </div>
         </AdminLayout>

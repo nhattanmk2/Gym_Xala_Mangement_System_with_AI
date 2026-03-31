@@ -12,6 +12,7 @@ import java.util.List;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
+    boolean existsByGymPackageId(Long packageId);
 
     @Query("SELECT b FROM Booking b WHERE b.personalTrainer.id = :ptId " +
            "AND b.startTime < :endTime AND b.endTime > :startTime AND b.status != 'CANCELLED'")
@@ -23,19 +24,24 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     List<Booking> findByPersonalTrainerIdOrderByStartTimeAsc(Long ptId);
 
+    List<Booking> findByPersonalTrainerIdAndStatusOrderByStartTimeDesc(Long ptId, String status);
+
     List<Booking> findByPersonalTrainerIdAndStartTimeBetweenOrderByStartTimeAsc(
             Long ptId, LocalDateTime start, LocalDateTime end
     );
 
     @Query("SELECT b FROM Booking b " +
-           "JOIN b.personalTrainer u " +
+           "LEFT JOIN b.personalTrainer u " +
+           "LEFT JOIN b.member m " +
            "WHERE (:branchId IS NULL OR EXISTS (SELECT e FROM Employee e WHERE e.user.id = u.id AND e.gymLocation.id = :branchId)) " +
            "AND (:ptName IS NULL OR :ptName = '' OR u.fullName LIKE %:ptName%) " +
+           "AND (:memberName IS NULL OR :memberName = '' OR m.fullName LIKE %:memberName%) " +
            "AND (:status IS NULL OR :status = '' OR b.status = :status) " +
            "ORDER BY b.startTime DESC")
     List<Booking> searchSchedules(
             @Param("branchId") Integer branchId,
             @Param("ptName") String ptName,
+            @Param("memberName") String memberName,
             @Param("status") String status
     );
 

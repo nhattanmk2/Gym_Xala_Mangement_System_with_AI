@@ -3,6 +3,7 @@ package com.xala.gym.service;
 import com.xala.gym.dto.request.AdminCreatePtRequest;
 import com.xala.gym.dto.request.AdminUpdatePtRequest;
 import com.xala.gym.dto.response.AdminPtResponse;
+import com.xala.gym.dto.response.PtPerformanceDetailResponse;
 import java.util.List;
 
 public interface AdminPtService {
@@ -12,4 +13,5 @@ public interface AdminPtService {
     AdminPtResponse createPt(AdminCreatePtRequest request);
     AdminPtResponse getPtDetail(Long id);
     AdminPtResponse updatePt(Long id, AdminUpdatePtRequest request, byte[] avatarFile);
+    PtPerformanceDetailResponse getPtPerformanceDetail(Long ptId);
 }

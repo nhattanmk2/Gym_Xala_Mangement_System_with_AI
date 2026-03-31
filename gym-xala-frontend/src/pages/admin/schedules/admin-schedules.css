@@ -830,3 +830,315 @@
     white-space: pre-wrap;
     line-height: 1.5;
 }
+
+/* Member Assignment UI in Admin Modal */
+.member-assign-section {
+    background: #f1f5f9;
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+}
+
+.current-member-display {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    border: 1px solid #cbd5e1;
+    font-size: 14px;
+}
+
+.btn-clear-member {
+    background: #fee2e2;
+    color: #ef4444;
+    border: none;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-clear-member:hover {
+    background: #fca5a5;
+    color: white;
+}
+
+.member-search-box {
+    position: relative;
+}
+
+.member-search-box input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid #3b82f6 !important;
+    border-radius: 8px;
+    font-size: 14px;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.search-loading-tiny {
+    position: absolute;
+    right: 12px;
+    top: 10px;
+    font-size: 12px;
+    color: #3b82f6;
+    font-weight: 600;
+}
+
+.member-search-results-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    z-index: 50;
+    margin-top: 4px;
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    padding: 0;
+}
+
+.member-result-item {
+    padding: 10px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.member-result-item:hover {
+    background: #eff6ff;
+}
+
+.member-result-item .m-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.member-result-item .m-name {
+    font-weight: 700;
+    color: #1e293b;
+    font-size: 14px;
+}
+
+.member-result-item .m-sub {
+    font-size: 11px;
+    color: #64748b;
+}
+
+.btn-select-m {
+    background: #3b82f6;
+    color: white;
+    border: none;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.helper-text-admin {
+    font-size: 11px;
+    color: #ef4444;
+    font-style: italic;
+    margin-top: 8px;
+    font-weight: 500;
+}
+
+/* --- ADMIN CALENDAR VIEW --- */
+.admin-calendar-view {
+    margin-top: 20px;
+}
+
+.calendar-nav-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 25px;
+    margin-bottom: 20px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.current-month-label {
+    font-size: 1.4rem;
+    color: #1e293b;
+    margin: 0;
+    font-weight: 700;
+}
+
+.cal-btn {
+    padding: 8px 16px;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.cal-btn:hover {
+    background: #fff;
+    border-color: #3b82f6;
+    color: #3b82f6;
+    transform: translateY(-1px);
+}
+
+.cal-filtering-info {
+    font-size: 0.9rem;
+    color: #64748b;
+    background: #f1f5f9;
+    padding: 6px 12px;
+    border-radius: 20px;
+}
+
+.calendar-grid-admin {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    background: #e2e8f0;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: white;
+}
+
+.calendar-day-header-admin {
+    background: #f1f5f9;
+    padding: 12px;
+    text-align: center;
+    font-weight: 700;
+    color: #475569;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+}
+
+.calendar-day {
+    min-height: 120px;
+    background: #fff;
+    padding: 8px;
+    transition: background 0.2s;
+    border: 0.5px solid #f1f5f9;
+}
+
+.calendar-day.empty {
+    background: #f8fafc;
+}
+
+.calendar-day.today {
+    background: #eff6ff;
+}
+
+.calendar-day.today .day-number {
+    background: #3b82f6;
+    color: white;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.day-number {
+    font-weight: 600;
+    color: #64748b;
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+}
+
+.day-slots {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.cal-slot-badge {
+    padding: 4px 8px;
+    font-size: 0.75rem;
+    border-radius: 4px;
+    cursor: pointer;
+    background: #f1f5f9;
+    border-left: 3px solid #94a3b8;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.cal-slot-badge:hover {
+    transform: scale(1.02);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.cal-slot-badge .time {
+    font-weight: 700;
+}
+
+.cal-slot-badge .entity {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    opacity: 0.8;
+}
+
+/* Status Colors for Badges */
+.cal-slot-badge.available { border-left-color: #10b981; background: #ecfdf5; }
+.cal-slot-badge.confirmed { border-left-color: #3b82f6; background: #eff6ff; }
+.cal-slot-badge.pending { border-left-color: #f59e0b; background: #fffbeb; }
+.cal-slot-badge.completed { border-left-color: #8b5cf6; background: #f5f3ff; }
+.cal-slot-badge.cancelled { border-left-color: #ef4444; background: #fef2f2; }
+.cal-slot-badge.busy { border-left-color: #64748b; background: #f8fafc; opacity: 0.7; }
+
+/* --- VIEW TOGGLE --- */
+.view-mode-toggle-admin {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-left: auto;
+}
+
+.view-mode-toggle-admin .toggle-buttons {
+    display: flex;
+    background: #f1f5f9;
+    padding: 4px;
+    border-radius: 8px;
+    width: fit-content;
+}
+
+.mode-btn {
+    padding: 6px 12px;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #64748b;
+    transition: all 0.2s;
+}
+
+.mode-btn.active {
+    background: white;
+    color: #3b82f6;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+@media (max-width: 1024px) {
+    .calendar-grid-admin {
+        grid-template-columns: repeat(1, 1fr);
+    }
+    .calendar-day {
+        min-height: auto;
+    }
+}
+

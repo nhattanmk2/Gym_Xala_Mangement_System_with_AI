@@ -24,6 +24,8 @@ public class AdminPackageServiceImpl implements AdminPackageService {
     private final SessionExerciseRepository sessionExerciseRepository;
     private final ExerciseLevelRepository levelRepository;
     private final EmployeeRepository employeeRepository;
+    private final MembershipCardRepository membershipCardRepository;
+    private final BookingRepository bookingRepository;
 
     @Override
     public List<Package> getAllPackages() {
@@ -112,13 +114,30 @@ public class AdminPackageServiceImpl implements AdminPackageService {
         }
     }
 
-    @Override
     @Transactional
     public void deletePackage(Long id) {
+        // 1. Check for sensitive dependencies (Memberships or Bookings)
+        if (membershipCardRepository.existsByGymPackageId(id)) {
+            throw new RuntimeException("Gói tập đã có học viên đăng ký. Không thể xóa cứng, hãy chuyển sang trạng thái Ngừng kinh doanh.");
+        }
+        if (bookingRepository.existsByGymPackageId(id)) {
+            throw new RuntimeException("Gói tập đã có lịch hẹn đặt trước. Không thể xóa cứng, hãy chuyển sang trạng thái Ngừng kinh doanh.");
+        }
+
+        // 2. Safe delete (Clear PT links and Roadmaps)
+        Package pkg = getPackageById(id);
+        
+        // Clear PT associations (Join table package_pts)
+        if (pkg.getPersonalTrainers() != null) {
+            pkg.getPersonalTrainers().clear();
+            packageRepository.saveAndFlush(pkg);
+        }
+
+        // Delete Roadmaps (Cascades to sessions/exercises)
         List<WorkoutRoadmap> oldRoadmaps = roadmapRepository.findByGymPackageId(id);
         roadmapRepository.deleteAll(oldRoadmaps);
         
-        Package pkg = getPackageById(id);
+        // 3. Final delete
         packageRepository.delete(pkg);
     }
 

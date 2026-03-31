@@ -1,0 +1,167 @@
+.performance-modal {
+    width: 600px;
+    max-width: 95%;
+    padding: 0;
+    max-height: 90vh;
+    overflow-y: auto;
+    border-radius: 12px;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #eee;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: #333;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #666;
+}
+
+.performance-body {
+    padding: 24px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: #fff;
+    padding: 16px;
+    border-radius: 10px;
+    border: 1px solid #e0e0e0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2196F3;
+}
+
+.feedback-section h4 {
+    margin: 0 0 16px;
+    font-size: 1.1rem;
+    color: #333;
+    border-left: 4px solid #2196F3;
+    padding-left: 10px;
+}
+
+.feedback-list {
+    max-height: 300px;
+    overflow-y: auto;
+    padding-right: 8px;
+}
+
+.feedback-item {
+    background: #fcfcfc;
+    border: 1px solid #f0f0f0;
+    padding: 14px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+}
+
+.feedback-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.member-name {
+    font-weight: 600;
+    color: #444;
+}
+
+.star {
+    font-size: 1rem;
+    color: #ccc;
+}
+
+.star.filled {
+    color: #ffc107;
+}
+
+.feedback-comment {
+    margin: 0 0 10px;
+    font-size: 0.95rem;
+    font-style: italic;
+    color: #555;
+    line-height: 1.4;
+}
+
+.feedback-date {
+    font-size: 0.8rem;
+    color: #999;
+}
+
+.loading-spinner {
+    padding: 40px;
+    text-align: center;
+    color: #666;
+}
+
+.no-data {
+    color: #999;
+    font-style: italic;
+    text-align: center;
+    padding: 20px;
+}
+
+.error-message {
+    color: #f44336;
+    padding: 20px;
+    text-align: center;
+}
+
+.modal-actions {
+    padding: 16px 24px;
+    border-top: 1px solid #eee;
+    background: #fafafa;
+}
+
+/* Custom Scrollbar */
+.feedback-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.feedback-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.feedback-list::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 3px;
+}
+
+.feedback-list::-webkit-scrollbar-thumb:hover {
+    background: #999;
+}

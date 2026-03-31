@@ -56,6 +56,11 @@ public class MembershipCardServiceImpl implements MembershipCardService {
             throw new IllegalArgumentException("Bạn hiện đang có một gói tập đang hoạt động. Vui lòng hủy hoặc đợi gói cũ hết hạn trước khi đăng ký mới.");
         }
 
+        // Chặn đăng ký gói đã ngừng kinh doanh
+        if (gymPackage.getActive() != null && !gymPackage.getActive()) {
+            throw new IllegalArgumentException("Gói tập này hiện đã ngừng kinh doanh. Vui lòng chọn gói tập khác.");
+        }
+
         LocalDate endDate = request.getStartDate().plusDays(gymPackage.getDurationInDays());
 
         MembershipCard card = MembershipCard.builder()

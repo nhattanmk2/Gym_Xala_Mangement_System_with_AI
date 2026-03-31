@@ -14,4 +14,5 @@ public class PtScheduleRequest {
     private LocalDateTime endTime;
     private String status;
     private String adminNotes;
+    private Long memberId;
 }

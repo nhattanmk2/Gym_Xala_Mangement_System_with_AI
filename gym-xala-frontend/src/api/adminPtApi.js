@@ -47,3 +47,8 @@ export const updatePt = async (id, formData) => {
     });
     return res.data;
 };
+
+export const getPtPerformance = async (id) => {
+    const res = await axiosClient.get(`${BASE_URL}/${id}/performance`);
+    return res.data;
+};

@@ -11,6 +11,7 @@ import java.util.Optional;
 
 @Repository
 public interface MembershipCardRepository extends JpaRepository<MembershipCard, Long> {
+    boolean existsByGymPackageId(Long packageId);
     List<MembershipCard> findByMemberId(Long memberId);
     List<MembershipCard> findByMember_User_Id(Long userId);
     Optional<MembershipCard> findFirstByMemberIdAndStatusOrderByEndDateDesc(Long memberId, String status);

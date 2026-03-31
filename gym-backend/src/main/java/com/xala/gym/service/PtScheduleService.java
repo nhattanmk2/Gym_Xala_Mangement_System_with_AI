@@ -10,7 +10,7 @@ public interface PtScheduleService {
     List<PtScheduleResponse> batchAdd(List<PtScheduleRequest> requests);
     List<PtScheduleResponse> getMySchedule(java.time.LocalDate startDate, java.time.LocalDate endDate);
     List<PtScheduleResponse> getAvailableSlots(Long ptId);
-    List<PtScheduleResponse> getAdminSchedules(Integer branchId, String ptName, String status);
+    List<PtScheduleResponse> getAdminSchedules(Integer branchId, String ptName, String memberName, String status);
     void deleteSlot(Long id);
     PtScheduleResponse adminUpdateSlot(Long id, PtScheduleRequest request);
     void adminDeleteSlot(Long id);

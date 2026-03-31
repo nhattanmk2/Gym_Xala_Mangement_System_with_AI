@@ -2,18 +2,21 @@ import axiosClient from "./axiosClient";
 
 const BASE_URL = "/admin/schedules";
 
-export const getAllSchedules = async (filters = {}) => {    const { branchId, ptName, status } = filters;
+export const getAllSchedules = async (filters = {}) => {    const { branchId, ptName, memberName, status } = filters;
 
     const res = await axiosClient.get(BASE_URL, {
         params: {
             branchId: branchId || undefined,
             ptName: ptName || undefined,
+            memberName: memberName || undefined,
             status: status || undefined,
         }});
 
     return res.data;
 };
-export const updateSchedule = async (id, scheduleData) => {    const response = await axiosClient.put(`${BASE_URL}/${id}`, scheduleData);
+
+export const updateSchedule = async (id, scheduleData) => {
+    const response = await axiosClient.put(`${BASE_URL}/${id}`, scheduleData);
     return response.data;
 };
 

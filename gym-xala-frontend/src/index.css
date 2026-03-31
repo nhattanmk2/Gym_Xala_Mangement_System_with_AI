@@ -11,3 +11,14 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+input, select, textarea {
+  background-color: #ffffff !important;
+  border: 1px solid #cccccc !important;
+  padding: 8px 12px;
+  border-radius: 4px;
+  color: #000000 !important;
+  width: 100%;
+  box-sizing: border-box;
+}
+

@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import AdminLayout from "../layout/AdminLayout";
 import { getAllMembers, updateMember, updateMemberStatus, deleteMember, createMember, upgradeToPt } from "../../../api/adminMemberApi";
 import "./adminMemberList.css";
@@ -25,6 +26,8 @@ const AdminMemberList = () => {
   const [selectedMemberships, setSelectedMemberships] = useState([]);
   const [memberAiHistory, setMemberAiHistory] = useState([]);
   const [customPriceInput, setCustomPriceInput] = useState({});
+
+  const navigate = useNavigate();
 
   const fetchMembers = useCallback(async () => {
     try {
@@ -164,6 +167,11 @@ const AdminMemberList = () => {
     }
   };
 
+  const handleViewSchedule = (member) => {
+    // Navigate to admin schedules page with member name pre-filled
+    navigate(`/admin/schedules?memberName=${encodeURIComponent(member.name)}`);
+  };
+
   return (
     <AdminLayout>
       <div className="member-container">
@@ -239,6 +247,7 @@ const AdminMemberList = () => {
                     </button>
                     <button className="action-btn" style={{ background: "#673AB7", color: "white" }} onClick={() => handleUpgradeToPt(m.id)}>Nâng cấp PT</button>
                     <button className="action-btn" style={{ background: "#4caf50", color: "white" }} onClick={() => handleManageMemberships(m)}>Thẻ Tập</button>
+                    <button className="action-btn" style={{ background: "#2196F3", color: "white" }} onClick={() => handleViewSchedule(m)}>Lịch Tập</button>
                     <button className="action-btn delete" onClick={() => handleDelete(m.id)}>Xóa</button>
                   </td>
                 </tr>

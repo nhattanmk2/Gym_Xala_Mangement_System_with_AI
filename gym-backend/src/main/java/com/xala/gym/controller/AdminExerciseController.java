@@ -27,6 +27,11 @@ public class AdminExerciseController {
         return ResponseEntity.ok(exerciseService.createCategory(category));
     }
 
+    @PutMapping("/categories/{id}")
+    public ResponseEntity<ExerciseCategory> updateCategory(@PathVariable Long id, @RequestBody ExerciseCategory category) {
+        return ResponseEntity.ok(exerciseService.updateCategory(id, category));
+    }
+
     @DeleteMapping("/categories/{id}")
     public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
         exerciseService.deleteCategory(id);
@@ -46,6 +51,11 @@ public class AdminExerciseController {
         return ResponseEntity.ok(exerciseService.createExercise(categoryId, equipmentId, exercise));
     }
 
+    @PutMapping("/standards/{id}")
+    public ResponseEntity<StandardExercise> updateExercise(@PathVariable Long id, @RequestBody StandardExercise exercise) {
+        return ResponseEntity.ok(exerciseService.updateExercise(id, exercise));
+    }
+
     @DeleteMapping("/standards/{id}")
     public ResponseEntity<Void> deleteExercise(@PathVariable Long id) {
         exerciseService.deleteExercise(id);
@@ -60,6 +70,11 @@ public class AdminExerciseController {
     @PostMapping("/standards/{exerciseId}/levels")
     public ResponseEntity<ExerciseLevel> createLevel(@PathVariable Long exerciseId, @RequestBody ExerciseLevel level) {
         return ResponseEntity.ok(exerciseService.createLevel(exerciseId, level));
+    }
+
+    @PutMapping("/levels/{id}")
+    public ResponseEntity<ExerciseLevel> updateLevel(@PathVariable Long id, @RequestBody ExerciseLevel level) {
+        return ResponseEntity.ok(exerciseService.updateLevel(id, level));
     }
 
     @DeleteMapping("/levels/{id}")

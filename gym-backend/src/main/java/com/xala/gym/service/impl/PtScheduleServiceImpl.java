@@ -106,8 +106,8 @@ public class PtScheduleServiceImpl implements PtScheduleService {
     }
 
     @Override
-    public List<PtScheduleResponse> getAdminSchedules(Integer branchId, String ptName, String status) {
-        return bookingRepository.searchSchedules(branchId, ptName, status)
+    public List<PtScheduleResponse> getAdminSchedules(Integer branchId, String ptName, String memberName, String status) {
+        return bookingRepository.searchSchedules(branchId, ptName, memberName, status)
                 .stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
@@ -187,6 +187,72 @@ public class PtScheduleServiceImpl implements PtScheduleService {
         }
         if (request.getAdminNotes() != null) {
             slot.setAdminNotes(request.getAdminNotes());
+        }
+
+        // Xử lý thay đổi học viên (Member Assignment) từ Admin
+        Long newMemberId = request.getMemberId();
+        User currentMemberUser = slot.getMember();
+        
+        if (newMemberId != null) {
+            // Trường hợp gán member mới hoặc thay đổi member
+            if (currentMemberUser == null || !currentMemberUser.getId().equals(newMemberId)) {
+                
+                // 1. Hoàn lại buổi cho member cũ (nếu có)
+                if (currentMemberUser != null) {
+                    com.xala.gym.entity.Member oldMember = memberRepository.findByUser_Id(currentMemberUser.getId()).orElse(null);
+                    if (oldMember != null) {
+                        membershipCardRepository.findFirstByMemberIdAndStatusOrderByEndDateDesc(oldMember.getId(), "ACTIVE")
+                            .ifPresent(card -> {
+                                if (card.getRemainingSessions() != null) {
+                                    card.setRemainingSessions(card.getRemainingSessions() + 1);
+                                    membershipCardRepository.save(card);
+                                }
+                            });
+                    }
+                }
+
+                // 2. Trừ buổi cho member mới
+                User newMemberUser = userRepository.findById(newMemberId)
+                        .orElseThrow(() -> new RuntimeException("Học viên không tồn tại."));
+                com.xala.gym.entity.Member newMember = memberRepository.findByUser_Id(newMemberId)
+                        .orElseThrow(() -> new RuntimeException("Không tìm thấy hồ sơ hội viên cho tài khoản này."));
+                
+                MembershipCard activeCard = membershipCardRepository.findFirstByMemberIdAndStatusOrderByEndDateDesc(newMember.getId(), "ACTIVE")
+                        .orElseThrow(() -> new RuntimeException("Học viên này không có thẻ tập ACTIVE."));
+                
+                if (activeCard.getRemainingSessions() != null && activeCard.getRemainingSessions() <= 0) {
+                    throw new RuntimeException("Học viên này đã hết số buổi tập.");
+                }
+
+                if (activeCard.getRemainingSessions() != null) {
+                    activeCard.setRemainingSessions(activeCard.getRemainingSessions() - 1);
+                    membershipCardRepository.save(activeCard);
+                }
+
+                slot.setMember(newMemberUser);
+                slot.setGymPackage(activeCard.getGymPackage());
+                // Nếu đang rảnh mà gán member thì tự chuyển sang CONFIRMED
+                if ("AVAILABLE".equals(slot.getStatus())) {
+                    slot.setStatus("CONFIRMED");
+                }
+            }
+        } else if (currentMemberUser != null) {
+            // Trường hợp Admin gỡ học viên khỏi slot (set memberId = null)
+            com.xala.gym.entity.Member oldMember = memberRepository.findByUser_Id(currentMemberUser.getId()).orElse(null);
+            if (oldMember != null) {
+                membershipCardRepository.findFirstByMemberIdAndStatusOrderByEndDateDesc(oldMember.getId(), "ACTIVE")
+                    .ifPresent(card -> {
+                        if (card.getRemainingSessions() != null) {
+                            card.setRemainingSessions(card.getRemainingSessions() + 1);
+                            membershipCardRepository.save(card);
+                        }
+                    });
+            }
+            slot.setMember(null);
+            slot.setGymPackage(null);
+            if (!"BUSY".equals(slot.getStatus())) {
+                slot.setStatus("AVAILABLE");
+            }
         }
 
         // Kiểm tra sức chứa sau khi cập nhật (nếu là lịch đã có người đặt)

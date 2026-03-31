@@ -34,6 +34,15 @@ public class AdminExerciseServiceImpl implements AdminExerciseService {
     }
 
     @Override
+    public ExerciseCategory updateCategory(Long id, ExerciseCategory category) {
+        ExerciseCategory existing = categoryRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+        existing.setName(category.getName());
+        existing.setDescription(category.getDescription());
+        return categoryRepository.save(existing);
+    }
+
+    @Override
     @Transactional
     public void deleteCategory(Long categoryId) {
         List<StandardExercise> exercises = exerciseRepository.findByCategoryId(categoryId);
@@ -49,6 +58,7 @@ public class AdminExerciseServiceImpl implements AdminExerciseService {
     }
 
     @Override
+    @Transactional
     public StandardExercise createExercise(Long categoryId, Long equipmentId, StandardExercise exercise) {
         ExerciseCategory category = categoryRepository.findById(categoryId).orElseThrow();
         exercise.setCategory(category);
@@ -57,7 +67,40 @@ public class AdminExerciseServiceImpl implements AdminExerciseService {
             exercise.setEquipment(equipmentRepository.findById(equipmentId).orElse(null));
         }
         
-        return exerciseRepository.save(exercise);
+        StandardExercise savedExercise = exerciseRepository.save(exercise);
+        
+        // Auto-create 3 levels: LOW, MEDIUM, HIGH
+        levelRepository.save(ExerciseLevel.builder()
+                .standardExercise(savedExercise)
+                .levelName("LOW")
+                .sets(4)
+                .reps(10)
+                .build());
+        
+        levelRepository.save(ExerciseLevel.builder()
+                .standardExercise(savedExercise)
+                .levelName("MEDIUM")
+                .sets(4)
+                .reps(12)
+                .build());
+        
+        levelRepository.save(ExerciseLevel.builder()
+                .standardExercise(savedExercise)
+                .levelName("HIGH")
+                .sets(4)
+                .reps(15)
+                .build());
+        
+        return savedExercise;
+    }
+
+    @Override
+    public StandardExercise updateExercise(Long id, StandardExercise exercise) {
+        StandardExercise existing = exerciseRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Exercise not found"));
+        existing.setName(exercise.getName());
+        existing.setDescription(exercise.getDescription());
+        return exerciseRepository.save(existing);
     }
 
     @Override
@@ -78,6 +121,15 @@ public class AdminExerciseServiceImpl implements AdminExerciseService {
         StandardExercise exercise = exerciseRepository.findById(exerciseId).orElseThrow();
         level.setStandardExercise(exercise);
         return levelRepository.save(level);
+    }
+
+    @Override
+    public ExerciseLevel updateLevel(Long id, ExerciseLevel level) {
+        ExerciseLevel existing = levelRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Level not found"));
+        existing.setSets(level.getSets());
+        existing.setReps(level.getReps());
+        return levelRepository.save(existing);
     }
 
     @Override

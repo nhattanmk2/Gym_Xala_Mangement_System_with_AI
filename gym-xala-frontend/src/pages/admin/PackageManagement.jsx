@@ -62,31 +62,10 @@ const PackageManagement = () => {
     const initData = async () => {
       await fetchPackages();
       await fetchAuxData();
-      seedMarketPackages();
     };
     initData();
   }, []);
 
-  const seedMarketPackages = async () => {
-    try {
-      const data = await import("../../api/adminPackageApi").then(m => m.getAllPackages());
-      if (!data.find(p => p.name === "Premium Muscle Builder PRO")) {
-        const pkgs = [
-          { name: 'Basic Starter', description: 'Gói tập cơ bản dành cho người mới bắt đầu làm quen với Gym, duy trì sức khỏe.', price: '3000000', maxSessions: '12', durationInDays: '30', category: 'GENERAL', promotion: 'Tặng 1 buổi đo inbody', active: true },
-          { name: 'Premium Muscle Builder PRO', description: 'Gói tăng cơ cấp tốc cao cấp dưới sự hướng dẫn 1-1 sát sao. Chuyên sâu về hypertrophy và chế độ dinh dưỡng.', price: '25000000', maxSessions: '36', durationInDays: '90', category: 'MUSCLE', promotion: 'Tặng Whey Protein, giáo án dinh dưỡng độc quyền', active: true },
-          { name: 'Fat Loss VIP Transformation', description: 'Giảm mỡ chuyên sâu, cam kết giảm 3-5kg. Tập luyện kết hợp HIIT và Cardio cường độ cao.', price: '18000000', maxSessions: '30', durationInDays: '90', category: 'CARDIO', promotion: 'Tặng Combo Detox, Đánh giá sinh học cơ thể hàng tuần', active: true },
-          { name: 'Endurance & Core Master', description: 'Tăng cường độ bền bỉ, sức dẻo dai và core. Thích hợp cho người làm văn phòng cần cải thiện tư thế.', price: '10000000', maxSessions: '24', durationInDays: '60', category: 'YOGA', promotion: 'Tặng Yoga Thảm', active: true }
-        ];
-        
-        for (let p of pkgs) {
-            const fd = new FormData();
-            fd.append("data", new Blob([JSON.stringify(p)], { type: 'application/json' }));
-            await import("../../api/adminPackageApi").then(m => m.createPackage(fd));
-        }
-        fetchPackages(); // refresh
-      }
-    } catch (e) { console.error("Auto seed error", e); }
-  };
 
   const fetchAuxData = async () => {
     try {
@@ -120,16 +99,16 @@ const PackageManagement = () => {
     }
   };
 
-  const fetchPackages = async () => {
+  const fetchPackages = async (showLoader = true) => {
     try {
-      setLoading(true);
+      if (showLoader) setLoading(true);
       const data = await getAllPackages();
       setPackages(data);
     } catch (error) {
       console.error("Error fetching packages:", error);
       alert("Không thể tải danh sách gói tập.");
     } finally {
-      setLoading(false);
+      if (showLoader) setLoading(false);
     }
   };
 
@@ -242,14 +221,15 @@ const PackageManagement = () => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa gói tập này?")) {
+    if (window.confirm("Bạn có chắc chắn muốn xóa gói tập này? (Vui lòng ưu tiên 'Ngừng bán' nếu gói đã phát sinh dữ liệu học viên)")) {
       try {
         await deletePackage(id);
-        alert("Đã xóa gói tập.");
+        alert("Đã xóa gói tập thành công.");
         fetchPackages();
       } catch (error) {
         console.error("Error deleting package:", error);
-        alert(error.response?.data || "Lỗi khi xóa gói tập.");
+        const errorMsg = error.response?.data?.message || error.response?.data || "Lỗi khi xóa gói tập.";
+        alert(errorMsg);
       }
     }
   };
@@ -257,7 +237,7 @@ const PackageManagement = () => {
   const handleToggle = async (id) => {
     try {
       await togglePackageActive(id);
-      fetchPackages();
+      fetchPackages(false); // Refresh data silently without page flicker
     } catch (error) {
       console.error("Error toggling package:", error);
       alert("Lỗi khi thay đổi trạng thái.");
@@ -347,18 +327,10 @@ const PackageManagement = () => {
       <div style={{ position: "absolute", top: "10px", right: "10px", zIndex: 1 }}>
         <button
           onClick={() => handleToggle(pkg.id)}
-          style={{
-            background: pkg.active ? "#dcfce7" : "#fee2e2",
-            color: pkg.active ? "#166534" : "#991b1b",
-            border: "none",
-            padding: "4px 10px",
-            borderRadius: "20px",
-            fontSize: "0.7rem",
-            fontWeight: "700",
-            cursor: "pointer"
-          }}
+          className={`status-badge ${pkg.active ? 'status-active' : 'status-inactive'}`}
+          title={pkg.active ? "Nhấn để ngừng bán" : "Nhấn để mở bán lại"}
         >
-          {pkg.active ? "Đang hiện" : "Đang ẩn"}
+          {pkg.active ? "● Đang bán" : "○ Ngừng bán"}
         </button>
       </div>
       <div style={{ width: "100%", height: "160px", background: "#f8fafc" }}>
@@ -478,18 +450,10 @@ const PackageManagement = () => {
                       <td style={{ padding: "18px", textAlign: "center" }}>
                         <button
                           onClick={() => handleToggle(pkg.id)}
-                          style={{
-                            background: pkg.active ? "#dcfce7" : "#fee2e2",
-                            color: pkg.active ? "#166534" : "#991b1b",
-                            border: "none",
-                            padding: "5px 14px",
-                            borderRadius: "20px",
-                            fontSize: "0.75rem",
-                            fontWeight: "700",
-                            cursor: "pointer"
-                          }}
+                          className={`status-badge ${pkg.active ? 'status-active' : 'status-inactive'}`}
+                          title={pkg.active ? "Nhấn để chuyển sang Ngừng kinh doanh" : "Nhấn để Kích hoạt lại"}
                         >
-                          {pkg.active ? "● Hiện" : "○ Ẩn"}
+                          {pkg.active ? "● Đang kinh doanh" : "○ Ngừng bán"}
                         </button>
                       </td>
                       <td style={{ padding: "18px", textAlign: "center" }}>

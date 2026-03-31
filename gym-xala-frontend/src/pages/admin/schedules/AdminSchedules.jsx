@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
+import { useLocation } from "react-router-dom";
 import { getAllSchedules, updateSchedule, deleteSchedule, batchAddSchedule } from "../../../api/adminScheduleApi";
 import { getAllLocations } from "../../../api/locationApi";
+import { getAllMembers } from "../../../api/adminMemberApi";
 import "./admin-schedules.css";
 
 const AdminSchedules = () => {
@@ -9,12 +11,23 @@ const AdminSchedules = () => {
     const [locations, setLocations] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    const location = useLocation();
+    const queryParams = new URLSearchParams(location.search);
+    const initialMemberName = queryParams.get("memberName") || "";
+    const initialPtName = queryParams.get("ptName") || "";
+    const initialViewMode = queryParams.get("viewMode") || "LIST";
+
     // Filters
     const [filters, setFilters] = useState({
         branchId: "",
-        ptName: "",
+        ptName: initialPtName,
+        memberName: initialMemberName,
         status: ""
     });
+
+    // View mode
+    const [viewMode, setViewMode] = useState(initialViewMode); // 'LIST' or 'CALENDAR'
+    const [currentMonth, setCurrentMonth] = useState(new Date());
 
     // UI state
     const [expandedPtId, setExpandedPtId] = useState(null);
@@ -31,6 +44,12 @@ const AdminSchedules = () => {
     const [upcomingDates, setUpcomingDates] = useState([]);
     const [toast, setToast] = useState(null);
     const [modalError, setModalError] = useState(null);
+
+    // Member search for Edit Modal
+    const [memberSearchQuery, setMemberSearchQuery] = useState("");
+    const [memberSearchResults, setMemberSearchResults] = useState([]);
+    const [isSearchingMember, setIsSearchingMember] = useState(false);
+    const [selectedMemberName, setSelectedMemberName] = useState("");
 
     const showToast = (message) => {
         setToast(message);
@@ -150,8 +169,12 @@ const AdminSchedules = () => {
             startTime: formatTime(startD),
             endTime: formatTime(endD),
             status: firstSlot.status,
-            adminNotes: firstSlot.adminNotes || ""
+            adminNotes: firstSlot.adminNotes || "",
+            memberId: firstSlot.memberId || null
         });
+        setSelectedMemberName(firstSlot.memberName || "Chưa có học viên");
+        setMemberSearchQuery("");
+        setMemberSearchResults([]);
         setModalError(null);
         setSelectedExistingSlotIds(group.rawSlots.map(s => s.id));
         setSelectedNewDates([]);
@@ -226,6 +249,35 @@ const AdminSchedules = () => {
         });
     };
 
+    const handleSearchMember = async (query) => {
+        setMemberSearchQuery(query);
+        if (query.trim().length < 2) {
+            setMemberSearchResults([]);
+            return;
+        }
+        try {
+            setIsSearchingMember(true);
+            const members = await getAllMembers(query);
+            setMemberSearchResults(members);
+        } catch (error) {
+            console.error("Error searching members:", error);
+        } finally {
+            setIsSearchingMember(false);
+        }
+    };
+
+    const selectMemberForSlot = (member) => {
+        setEditFormData({ ...editFormData, memberId: member.id });
+        setSelectedMemberName(member.name);
+        setMemberSearchResults([]);
+        setMemberSearchQuery("");
+    };
+
+    const clearMemberFromSlot = () => {
+        setEditFormData({ ...editFormData, memberId: null });
+        setSelectedMemberName("Chưa có học viên (Rảnh)");
+    };
+
     const handleSaveEdit = async (e) => {
         e.preventDefault();
         if (selectedExistingSlotIds.length === 0 && selectedNewDates.length === 0) {
@@ -256,56 +308,122 @@ const AdminSchedules = () => {
         if (busyConflicts.length > 0) {
             setModalError(`Không thể lưu: PT đã có lịch BẬN CÁ NHÂN vào ngày ${busyConflicts.join(', ')} tại khung giờ này.`);
             return;
+            setModalError("Vui lòng chọn ít nhất một lịch hiện có hoặc một ngày mới để áp dụng thay đổi.");
+            return;
         }
-
+        
         try {
             setLoading(true);
-
+            
             const formatLocalISO = (dateStr, timeStr) => {
                 const datePart = dateStr.split('T')[0];
                 return `${datePart}T${timeStr}:00`;
             };
 
-            const updatePromises = editingGroup.rawSlots
-                .filter(slot => selectedExistingSlotIds.includes(slot.id))
+            // 1. Cập nhật các slot hiện có
+            const updatePromises = selectedExistingSlotIds
+                .map(id => allSchedules.find(s => s.id === id))
+                .filter(slot => !!slot)
                 .map(slot => {
                     return updateSchedule(slot.id, {
                         startTime: formatLocalISO(slot.startTime, editFormData.startTime),
                         endTime: formatLocalISO(slot.endTime, editFormData.endTime),
                         status: editFormData.status,
-                        adminNotes: editFormData.adminNotes
+                        adminNotes: editFormData.adminNotes,
+                        memberId: editFormData.memberId
                     });
                 });
 
-            // Logic mới: Xóa các slot bị bỏ chọn
+            // 2. Thêm các slot mới (nếu có chọn ngày mới trong modal)
+            const addPromises = selectedNewDates.map(date => {
+                return batchAddSchedule(editingGroup.rawSlots[0].ptId, [{
+                    startTime: `${date}T${editFormData.startTime}:00`,
+                    endTime: `${date}T${editFormData.endTime}:00`,
+                    status: editFormData.status,
+                    adminNotes: editFormData.adminNotes,
+                    memberId: editFormData.memberId
+                }]);
+            });
+
+            // 3. Xóa các slot bị bỏ chọn
             const deletePromises = editingGroup.rawSlots
                 .filter(slot => !selectedExistingSlotIds.includes(slot.id))
                 .map(slot => deleteSchedule(slot.id));
 
-            let newSlotsPromise = Promise.resolve();
-            if (selectedNewDates.length > 0) {
-                const newSlotsRequests = selectedNewDates.map(date => ({
-                    startTime: `${date}T${editFormData.startTime}:00`,
-                    endTime: `${date}T${editFormData.endTime}:00`,
-                    status: editFormData.status,
-                    adminNotes: editFormData.adminNotes
-                }));
-                newSlotsPromise = batchAddSchedule(editingGroup.rawSlots[0].ptId, newSlotsRequests);
-            }
-
-            await Promise.all([...updatePromises, ...deletePromises, newSlotsPromise]);
-
+            await Promise.all([...updatePromises, ...addPromises, ...deletePromises]);
+            showToast("Cập nhật lịch thành công!");
             setIsEditModalOpen(false);
-            showToast(`✨ Đã cập nhật, thêm mới và xóa các khung giờ bị bỏ chọn.`);
             fetchData();
         } catch (error) {
-            console.error("Save Edit Error:", error);
-            let msg = error.response?.data || error.message;
-            if (typeof msg === 'object') msg = msg.message || JSON.stringify(msg);
-            setModalError(msg);
+            console.error("Error updating/adding schedules:", error);
+            setModalError(error.response?.data?.message || error.response?.data || "Lỗi khi cập nhật lịch.");
         } finally {
             setLoading(false);
         }
+    };
+
+    // ----- CALENDAR LOGIC -----
+    const daysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
+    const firstDayOfMonth = (year, month) => {
+        let day = new Date(year, month, 1).getDay();
+        return day === 0 ? 6 : day - 1; // Convert to Monday=0
+    };
+
+    const prevMonth = () => {
+        setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
+    };
+
+    const nextMonth = () => {
+        setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
+    };
+
+    const renderCalendar = () => {
+        const year = currentMonth.getFullYear();
+        const month = currentMonth.getMonth();
+        const totalDays = daysInMonth(year, month);
+        const startDay = firstDayOfMonth(year, month);
+
+        let days = [];
+
+        // Trống trước ngày mùng 1
+        for (let i = 0; i < startDay; i++) {
+            days.push(<div key={`empty-${i}`} className="calendar-day empty"></div>);
+        }
+
+        // Các ngày trong tháng
+        for (let d = 1; d <= totalDays; d++) {
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+
+            // Lấy các slot của ngày dựa trên allSchedules (vì schedules có thể bị filter status)
+            const daySlots = allSchedules.filter(s => {
+                const sDate = new Date(s.startTime);
+                return sDate.getFullYear() === year &&
+                       sDate.getMonth() === month &&
+                       sDate.getDate() === d;
+            });
+
+            const isToday = new Date().toDateString() === new Date(year, month, d).toDateString();
+
+            days.push(
+                <div key={d} className={`calendar-day ${isToday ? 'today' : ''}`}>
+                    <div className="day-number">{d}</div>
+                    <div className="day-slots">
+                        {daySlots.map(slot => (
+                            <div
+                                key={slot.id}
+                                className={`cal-slot-badge ${slot.status.toLowerCase()}`}
+                                onClick={() => handleEditClick({ rawSlots: [slot] }, slot.ptName)}
+                            >
+                                <span className="time">{slot.startTime.split('T')[1].substring(0, 5)}</span>
+                                <span className="entity">{filters.memberName ? `PT: ${slot.ptName}` : (slot.memberName || "Rống")}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+
+        return days;
     };
 
     const getStatusLabel = (status) => {
@@ -358,6 +476,17 @@ const AdminSchedules = () => {
                     </div>
 
                     <div className="filter-item">
+                        <label>Tên Học Viên</label>
+                        <input
+                            type="text"
+                            name="memberName"
+                            placeholder="Nhập tên học viên..."
+                            value={filters.memberName}
+                            onChange={handleFilterChange}
+                        />
+                    </div>
+
+                    <div className="filter-item">
                         <label>Trạng thái</label>
                         <select
                             name="status"
@@ -365,12 +494,30 @@ const AdminSchedules = () => {
                             onChange={handleFilterChange}
                         >
                             <option value="">Tất cả trạng thái</option>
-                            <option value="AVAILABLE">Rảnh (Sẵn sàng)</option>
-                            <option value="CONFIRMED">Đã đặt</option>
-                            <option value="PENDING">Chờ duyệt</option>
-                            <option value="CANCELLED">Đã hủy</option>
+                            <option value="AVAILABLE">Rảnh</option>
+                            <option value="CONFIRMED">Đã đặt (Confirmed)</option>
+                            <option value="PENDING">Chờ duyệt (Pending)</option>
                             <option value="COMPLETED">Hoàn thành</option>
+                            <option value="BUSY">PT Bận</option>
                         </select>
+                    </div>
+
+                    <div className="view-mode-toggle-admin">
+                        <label>Chế độ xem</label>
+                        <div className="toggle-buttons">
+                            <button 
+                                className={`mode-btn ${viewMode === 'LIST' ? 'active' : ''}`}
+                                onClick={() => setViewMode('LIST')}
+                            >
+                                📋 Danh sách
+                            </button>
+                            <button 
+                                className={`mode-btn ${viewMode === 'CALENDAR' ? 'active' : ''}`}
+                                onClick={() => setViewMode('CALENDAR')}
+                            >
+                                📅 Lịch tập
+                            </button>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -380,25 +527,24 @@ const AdminSchedules = () => {
 
                 {loading && schedules.length === 0 ? (
                     <div className="loading-spinner">Đang tải dữ liệu...</div>
-                ) : Object.keys(groupedByPT).length === 0 ? (
-                    <div className="empty-state card">Không tìm thấy PT nào có lịch phù hợp.</div>
-                ) : (
-                    <div className="pt-cards-grid">
-                        {Object.entries(groupedByPT).map(([ptId, data]) => {
-                            const timeGroupedSlots = groupSlotsByTime(data.slots);
-                            return (
-                                <div key={ptId} className={`pt-group-card ${expandedPtId === ptId ? 'expanded' : ''}`}>
+                ) : viewMode === 'LIST' ? (
+                    <div className="pt-cards-grid slide-up">
+                        {Object.keys(groupedByPT).length === 0 ? (
+                            <div className="empty-state card">
+                                <p>Không có lịch tập nào phù hợp với bộ lọc.</p>
+                            </div>
+                        ) : (
+                            Object.entries(groupedByPT).map(([ptId, data]) => (
+                                <div key={ptId} className={`pt-group-card ${expandedPtId === ptId ? "expanded" : ""}`}>
                                     <div className="pt-group-header" onClick={() => toggleExpand(ptId)}>
                                         <div className="pt-main-info">
-                                            <div className="pt-avatar-circle">
-                                                {data.ptName.charAt(0).toUpperCase()}
-                                            </div>
+                                            <div className="pt-avatar-circle">PT</div>
                                             <div className="pt-text">
                                                 <h3>{data.ptName}</h3>
                                                 <div className="pt-sub-info">
+                                                    <span className="pt-specialty-tag">{data.ptSpecialty}</span>
+                                                    <span className="pt-phone-tag">{data.ptPhone}</span>
                                                     <span className="branch-tag">{data.branchName}</span>
-                                                    <span className="pt-specialty-tag">🎓 {data.ptSpecialty}</span>
-                                                    <span className="pt-phone-tag">📞 {data.ptPhone}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -407,9 +553,7 @@ const AdminSchedules = () => {
                                                 <span className="stat-value">{data.slots.length}</span>
                                                 <span className="stat-label">Khung giờ</span>
                                             </div>
-                                            <div className="expand-icon">
-                                                {expandedPtId === ptId ? "−" : "+"}
-                                            </div>
+                                            <div className="expand-icon">{expandedPtId === ptId ? "−" : "+"}</div>
                                         </div>
                                     </div>
 
@@ -418,31 +562,39 @@ const AdminSchedules = () => {
                                             <table className="admin-table detail-table">
                                                 <thead>
                                                     <tr>
-                                                        <th>Khung giờ</th>
-                                                        <th>Các ngày</th>
+                                                        <th>Thời gian</th>
+                                                        <th>Ngày áp dụng</th>
                                                         <th>Học viên</th>
-                                                        <th>Trạng thái</th>
-                                                        <th>Nội dung</th>
-                                                        <th>Thao tác</th>
+                                                        <th>Ghi chú Admin</th>
+                                                        <th>Hành động</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    {timeGroupedSlots.map((group, idx) => (
+                                                    {groupSlotsByTime(data.slots).map((group, idx) => (
                                                         <tr key={idx}>
                                                             <td className="time-range-cell">{group.timeRange}</td>
                                                             <td className="dates-cell">
                                                                 <div className="dates-list">
-                                                                    {group.dates.map((date, dIdx) => (
-                                                                        <span key={dIdx} className="date-pill">{date}</span>
+                                                                    {group.dates.map((d, i) => (
+                                                                        <span key={i} className="date-pill">{d}</span>
                                                                     ))}
                                                                 </div>
                                                             </td>
-                                                            <td>{group.memberName || <span className="text-muted">Chưa có</span>}</td>
-                                                            <td>{getStatusLabel(group.status)}</td>
+                                                            <td>
+                                                                {group.memberName ? (
+                                                                    <span className={`badge badge-${group.status.toLowerCase()}`}>
+                                                                        {group.memberName} ({group.status})
+                                                                    </span>
+                                                                ) : (
+                                                                    <span className="badge badge-secondary">Rảnh</span>
+                                                                )}
+                                                            </td>
                                                             <td className="notes-cell" onClick={() => handleEditClick(group, data.ptName)}>
-                                                                <div className="notes-content-truncate" title="Nhấn để viết nội dung buổi tập">
-                                                                    {group.adminNotes || <span className="text-muted">✎ Thêm nội dung...</span>}
-                                                                </div>
+                                                                {group.adminNotes && (
+                                                                    <div className="notes-content-truncate" title={group.adminNotes}>
+                                                                        {group.adminNotes}
+                                                                    </div>
+                                                                )}
                                                             </td>
                                                             <td className="action-cell">
                                                                 {group.status !== 'BUSY' ? (
@@ -472,8 +624,31 @@ const AdminSchedules = () => {
                                         </div>
                                     )}
                                 </div>
-                            );
-                        })}
+                            ))
+                        )}
+                    </div>
+                ) : (
+                    <div className="admin-calendar-view slide-up">
+                        <div className="calendar-nav-header card">
+                            <button className="cal-btn" onClick={prevMonth}>◀ Tháng trước</button>
+                            <h2 className="current-month-label">
+                                Tháng {currentMonth.getMonth() + 1}, {currentMonth.getFullYear()}
+                            </h2>
+                            <button className="cal-btn" onClick={nextMonth}>Tháng sau ▶</button>
+                            
+                            {(filters.memberName || filters.ptName) && (
+                                <div className="cal-filtering-info">
+                                    🔍 Đang xem lịch của: <strong>{filters.memberName || filters.ptName}</strong>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="calendar-grid-admin card">
+                            {['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'].map(day => (
+                                <div key={day} className="calendar-day-header-admin">{day}</div>
+                            ))}
+                            {renderCalendar()}
+                        </div>
                     </div>
                 )}
             </main>
@@ -576,6 +751,41 @@ const AdminSchedules = () => {
                                         <option value="COMPLETED">Hoàn thành</option>
                                         <option value="ABSENT">Vắng mặt</option>
                                     </select>
+                                </div>
+
+                                {/* Member Assignment Section */}
+                                <div className="form-group-pt member-assign-section">
+                                    <label>Gán Học Viên Cho Buổi Tập</label>
+                                    <div className="current-member-display">
+                                        👤 <strong>{selectedMemberName}</strong>
+                                        {editFormData.memberId && (
+                                            <button type="button" className="btn-clear-member" onClick={clearMemberFromSlot}>Gỡ học viên</button>
+                                        )}
+                                    </div>
+                                    
+                                    <div className="member-search-box">
+                                        <input 
+                                            type="text" 
+                                            placeholder="🔍 Tìm kiếm học viên để gán..."
+                                            value={memberSearchQuery}
+                                            onChange={(e) => handleSearchMember(e.target.value)}
+                                        />
+                                        {isSearchingMember && <div className="search-loading-tiny">Đang tìm...</div>}
+                                        {memberSearchResults.length > 0 && (
+                                            <div className="member-search-results-dropdown card">
+                                                {memberSearchResults.map(m => (
+                                                    <div key={m.id} className="member-result-item" onClick={() => selectMemberForSlot(m)}>
+                                                        <div className="m-info">
+                                                            <span className="m-name">{m.name}</span>
+                                                            <span className="m-sub">{m.phone} | {m.email}</span>
+                                                        </div>
+                                                        <button type="button" className="btn-select-m">Chọn</button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <p className="helper-text-admin">* Lưu ý: Khi gán học viên mới, hệ thống sẽ tự động trừ 1 buổi tập từ thẻ của họ.</p>
                                 </div>
 
                                 <div className="form-group-pt">

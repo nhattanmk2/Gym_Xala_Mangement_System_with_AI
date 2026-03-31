@@ -3,6 +3,7 @@ package com.xala.gym.service.impl;
 import com.xala.gym.dto.request.AdminCreatePtRequest;
 import com.xala.gym.dto.request.AdminUpdatePtRequest;
 import com.xala.gym.dto.response.AdminPtResponse;
+import com.xala.gym.dto.response.PtPerformanceDetailResponse;
 import com.xala.gym.entity.*;
 import com.xala.gym.entity.enums.UserRole;
 import com.xala.gym.repository.*;
@@ -28,6 +29,7 @@ public class AdminPtServiceImpl implements AdminPtService {
     private final MemberRepository memberRepository;
     private final PositionRepository positionRepository;
     private final GymLocationRepository gymLocationRepository;
+    private final BookingRepository bookingRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -236,5 +238,44 @@ public class AdminPtServiceImpl implements AdminPtService {
         employeeRepository.save(employee);
 
         return mapToAdminPtResponse(employee);
+    }
+
+    @Override
+    public PtPerformanceDetailResponse getPtPerformanceDetail(Long ptId) {
+        Employee employee = employeeRepository.findById(ptId)
+                .orElseThrow(() -> new RuntimeException("Huấn luyện viên không tồn tại"));
+        User ptUser = employee.getUser();
+
+        List<Booking> completedBookings = bookingRepository.findByPersonalTrainerIdAndStatusOrderByStartTimeDesc(ptUser.getId(), "COMPLETED");
+
+        long uniqueStudents = completedBookings.stream()
+                .map(b -> b.getMember().getId())
+                .distinct()
+                .count();
+
+        double avgRating = completedBookings.stream()
+                .filter(b -> b.getRating() != null)
+                .mapToDouble(Booking::getRating)
+                .average()
+                .orElse(ptUser.getAverageRating() != null ? ptUser.getAverageRating() : 0.0);
+
+        List<PtPerformanceDetailResponse.FeedbackDto> feedbacks = completedBookings.stream()
+                .filter(b -> b.getFeedback() != null && !b.getFeedback().isEmpty())
+                .map(b -> PtPerformanceDetailResponse.FeedbackDto.builder()
+                        .memberName(b.getMember().getFullName())
+                        .rating(b.getRating())
+                        .comment(b.getFeedback())
+                        .date(b.getStartTime())
+                        .build())
+                .toList();
+
+        return PtPerformanceDetailResponse.builder()
+                .ptId(ptId)
+                .ptName(ptUser.getFullName())
+                .totalStudents((int) uniqueStudents)
+                .totalSessions(completedBookings.size())
+                .averageRating(avgRating)
+                .feedbacks(feedbacks)
+                .build();
     }
 }
