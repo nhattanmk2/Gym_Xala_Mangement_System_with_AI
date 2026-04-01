@@ -66,5 +66,12 @@ public class MemberController {
     public ResponseEntity<com.xala.gym.dto.response.WeeklyStatsResponse> getMemberWeeklyStats() {
         return ResponseEntity.ok(ptScheduleService.getMemberWeeklyStats());
     }
+
+    // ✅ API Cập nhật thông tin cá nhân
+    @PutMapping("/profile")
+    public ResponseEntity<?> updateMyProfile(@org.springframework.web.bind.annotation.RequestBody com.xala.gym.dto.request.UserUpdateProfileRequest request) {
+        memberService.updateMyProfile(request);
+        return ResponseEntity.ok("Cập nhật thông tin thành công");
+    }
 }
 

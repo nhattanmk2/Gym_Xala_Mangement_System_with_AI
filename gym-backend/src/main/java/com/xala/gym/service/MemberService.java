@@ -12,4 +12,6 @@ public interface MemberService {
 
     // ✅ Thêm dòng này
     void updateAvatar(MultipartFile file);
+
+    void updateMyProfile(com.xala.gym.dto.request.UserUpdateProfileRequest request);
 }

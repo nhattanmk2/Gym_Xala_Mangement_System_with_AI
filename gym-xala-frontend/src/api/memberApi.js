@@ -8,3 +8,10 @@ export const getProfile = async () => {
 
   return res.data;
 };
+
+// UPDATE PROFILE
+export const updateProfile = async (data) => {
+  const res = await axiosClient.put(`${BASE_URL}/profile`, data);
+
+  return res.data;
+};

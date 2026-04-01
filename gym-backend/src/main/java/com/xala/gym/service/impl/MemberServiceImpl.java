@@ -103,4 +103,37 @@ public class MemberServiceImpl implements MemberService {
             throw new RuntimeException("Upload avatar thất bại: " + e.getMessage());
         }
     }
+
+    @Override
+    @org.springframework.transaction.annotation.Transactional
+    public void updateMyProfile(com.xala.gym.dto.request.UserUpdateProfileRequest request) {
+        // ✅ 1. Lấy username từ JWT (SecurityContext)
+        String username = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
+
+        // ✅ 2. Query User
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() ->
+                        new RuntimeException("User not found: " + username)
+                );
+
+        // ✅ 3. Query Member theo user_id
+        Member member = memberRepository.findByUser_Id(user.getId())
+                .orElseThrow(() ->
+                        new RuntimeException("Member profile not found")
+                );
+
+        // ✅ 4. Cập nhật thông tin
+        user.setFullName(request.getFullName());
+        
+        member.setPhone(request.getPhone());
+        member.setCccd(request.getCccd());
+        member.setSex(request.getSex());
+
+        // ✅ 5. Lưu DB
+        userRepository.save(user);
+        memberRepository.save(member);
+    }
 }

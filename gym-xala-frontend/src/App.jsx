@@ -25,6 +25,7 @@ import MemberBooking from "./pages/member/booking/MemberBooking";
 import MemberPackages from "./pages/member/packages/MemberPackages";
 import PackageDetail from "./pages/member/packages/PackageDetail";
 import MemberProfile from "./pages/member/profile/MemberProfile";
+import MemberProfileEdit from "./pages/member/profile/MemberProfileEdit";
 import MemberSchedule from "./pages/member/schedule/MemberSchedule";
 import WorkoutProgress from "./pages/member/schedule/WorkoutProgress";
 import MyPackage from "./pages/member/packages/MyPackage";
@@ -178,6 +179,7 @@ function App() {
           <Route path="packages" element={<MemberPackages />} />
           <Route path="packages/:id" element={<PackageDetail />} />
           <Route path="profile" element={<MemberProfile />} />
+          <Route path="profile/edit" element={<MemberProfileEdit />} />
           <Route path="schedule" element={<MemberSchedule />} />
           <Route path="roadmap" element={<WorkoutProgress />} />
           <Route path="my-package" element={<MyPackage />} />
