@@ -34,7 +34,7 @@ const SortableSessionItem = ({ sess, roadmapId, setEditSession, deleteSession, f
         transform: CSS.Transform.toString(transform),
         transition,
         opacity: isDragging ? 0.5 : 1,
-        zIndex: isDragging ? 100 : 1,
+        zIndex: isDragging ? 100 : (showExPicker === sess.id ? 50 : 1),
     };
 
     return (
@@ -86,10 +86,14 @@ const SortableSessionItem = ({ sess, roadmapId, setEditSession, deleteSession, f
 const SortableRoadmapItem = ({ rm, setEditRoadmap, handleAddSession, deleteRoadmap, fetchRoadmaps, setEditSession, deleteSession, removeExerciseFromSession, setShowExPicker, showExPicker, selectedCat, handleCatChange, pickerData, selectedEx, handleExChange, handleAddExerciseToSession, handleDragEndSessions, sensors }) => {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: rm.id });
 
+    const hasActivePicker = rm.sessions?.some(s => s.id === showExPicker);
+
     const style = {
         transform: CSS.Transform.toString(transform),
         transition,
         opacity: isDragging ? 0.5 : 1,
+        zIndex: isDragging ? 100 : (hasActivePicker ? 50 : 1),
+        position: 'relative'
     };
 
     return (

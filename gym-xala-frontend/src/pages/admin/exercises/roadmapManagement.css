@@ -111,14 +111,20 @@
 .sess-head {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
+    align-items: flex-start;
+    margin-bottom: 15px;
+    min-height: 55px;
 }
 
-.sess-head h3 {
+.sess-head h3, .sess-head h4 {
     margin: 0;
     color: #1e293b;
     font-size: 1.1rem;
+    line-height: 1.4;
+}
+
+.sess-head .drag-handle, .sess-head .del-small {
+    margin-top: 2px;
 }
 
 .ex-tag {
