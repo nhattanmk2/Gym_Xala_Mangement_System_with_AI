@@ -1,0 +1,35 @@
+@startuml
+skinparam component {
+  BackgroundColor White
+  BorderColor Black
+  FontSize 12
+}
+
+skinparam database {
+  BackgroundColor White
+  BorderColor Black
+  FontSize 12>
+}
+
+package "Nguoi dung" {
+  [Admin] as admin
+  [PT] as pt
+  [Hoc vien] as member
+}
+
+package "Server (Spring Boot)" {
+  [Controller Layer] as controller
+  [Service Layer] as service
+  [Repository Layer] as repo
+}
+
+database "Database (MySQL)" as db
+
+admin - controller
+pt - controller
+member - controller
+
+controller - service
+service - repo
+repo - db
+@enduml
