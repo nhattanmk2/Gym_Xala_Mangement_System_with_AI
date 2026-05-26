@@ -161,6 +161,36 @@ export default function MemberProfile() {
           <b>{profile.sex}</b>
         </div>
 
+        {/* AI Info */}
+        {(profile.height || profile.weight || profile.goalType) && (
+          <>
+            <div className="profile-row">
+              <span>Chiều cao:</span>
+              <b>{profile.height ? `${profile.height} cm` : "Chưa cập nhật"}</b>
+            </div>
+            <div className="profile-row">
+              <span>Cân nặng:</span>
+              <b>{profile.weight ? `${profile.weight} kg` : "Chưa cập nhật"}</b>
+            </div>
+            {profile.bmi && (
+              <div className="profile-row">
+                <span>Chỉ số BMI:</span>
+                <b>{profile.bmi.toFixed(1)}</b>
+              </div>
+            )}
+            <div className="profile-row">
+              <span>Mục tiêu tập luyện:</span>
+              <b style={{ color: "#d0fd3e" }}>
+                {profile.goalType === "GIAM_CAN" && "Giảm cân, đốt mỡ"}
+                {profile.goalType === "TANG_CO" && "Tăng cơ, tăng cân"}
+                {profile.goalType === "GIU_DANG" && "Giữ dáng"}
+                {profile.goalType === "SUC_KHOE" && "Nâng cao sức khỏe"}
+                {!profile.goalType && "Chưa cập nhật"}
+              </b>
+            </div>
+          </>
+        )}
+
         {/* <div className="profile-row">
           <span>Trạng thái:</span>
           <b className={profile.status === "ACTIVE" ? "active" : "inactive"}>
