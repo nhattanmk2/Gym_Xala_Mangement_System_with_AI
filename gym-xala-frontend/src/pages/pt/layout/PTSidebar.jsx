@@ -1,10 +1,12 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, Link } from "react-router-dom";
 import "./ptSidebar.css";
 
 const PTSidebar = () => {
   return (
     <div className="pt-sidebar">
-      <h2 className="logo">GYM XALA</h2>
+      <h2 className="logo">
+        <Link to="/pt/dashboard" style={{ color: 'inherit', textDecoration: 'none' }}>GYM XALA</Link>
+      </h2>
 
       <nav className="sidebar-nav">
         <NavLink to="/pt/dashboard" className={({ isActive }) => isActive ? "active" : ""}>

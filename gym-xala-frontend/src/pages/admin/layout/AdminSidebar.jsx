@@ -4,7 +4,9 @@ import "./adminSidebar.css";
 const AdminSidebar = () => {
   return (
     <div className="admin-sidebar">
-      <h2 className="logo">GYM XALA</h2>
+      <h2 className="logo">
+        <Link to="/admin/dashboard" style={{ color: 'inherit', textDecoration: 'none' }}>GYM XALA</Link>
+      </h2>
 
       <nav>
         <Link to="/admin/dashboard">Dashboard</Link>

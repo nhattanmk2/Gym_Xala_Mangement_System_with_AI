@@ -1,4 +1,4 @@
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, Link } from "react-router-dom";
 import { logout } from "../../utils/auth";
 import { useEffect, useState, useRef } from "react";
 import { getMyNotifications, getUnreadCount, markAsRead, markAllAsRead } from "../../api/notificationApi";
@@ -71,7 +71,9 @@ export default function MemberLayout() {
     <div className="member-layout">
       {/* SIDEBAR */}
       <aside className="member-sidebar">
-        <h2 className="logo">GYM XALA</h2>
+        <h2 className="logo">
+          <Link to="/member/dashboard" style={{ color: 'inherit', textDecoration: 'none' }}>GYM XALA</Link>
+        </h2>
 
         <nav className="member-nav">
           <NavLink
