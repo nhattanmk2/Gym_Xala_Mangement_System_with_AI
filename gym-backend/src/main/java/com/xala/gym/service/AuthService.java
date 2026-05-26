@@ -70,11 +70,12 @@ public class AuthService {
         user.setPhone(request.getPhone());
 
         // ===== VERIFICATION CODE =====
-        int verificationCode = 123456; // Fixed OTP 123456 for local testing bypass
+        Random random = new Random();
+        int verificationCode = 100000 + random.nextInt(900000); // Sinh OTP 6 số ngẫu nhiên
         user.setVerificationCode(verificationCode);
         user.setEnabled(false);
 
-        log.info("VERIFY CODE | username={} | fixed_code={}",
+        log.info("VERIFY CODE | username={} | code={}",
                 user.getUsername(),
                 verificationCode);
 

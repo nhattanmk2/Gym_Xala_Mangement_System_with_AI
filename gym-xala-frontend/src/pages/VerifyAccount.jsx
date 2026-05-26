@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import { verifyAccount } from "../api/authApi";
 import { useNavigate } from "react-router-dom";
 
 const VerifyAccount = () => {
@@ -13,7 +13,7 @@ const VerifyAccount = () => {
     setError("");
 
     try {
-      await axios.post("http://localhost:8080/api/auth/register/verify", {
+      await verifyAccount({
         username,
         verificationCode: Number(code),
       });

@@ -1,25 +1,46 @@
-
-## BẢNG KIỂM THỬ HỆ THỐNG (SYSTEM TEST CASES)
-
-Dưới đây là bảng tổng hợp các ca kiểm thử (Test Cases) cốt lõi dựa trên luồng nghiệp vụ của hệ thống Gym Xala:
-
-| ID | Chức năng (Feature) | Các bước thực hiện (Test Steps) | Kết quả mong muốn (Expected Result) | Trạng thái |
-|---|---|---|---|---|
-| **TC-01** | Đăng nhập hệ thống | 1. Truy cập trang Đăng nhập<br>2. Nhập Username & Password hợp lệ<br>3. Bấm "Login" | Hệ thống cấp phát JWT Token. Điều hướng đúng giao diện theo Role (Admin, PT, Member). | Pass |
-| **TC-02** | Phân quyền bảo mật | 1. Đăng nhập tài khoản Member<br>2. Cố tình truy cập URL của Admin (`/admin/...`) | Hệ thống chặn quyền truy cập, hiển thị trang lỗi 403 (Permission Denied). | Pass |
-| **TC-03** | Tư vấn AI (Chatbot) | 1. Member vào chức năng Tư vấn AI<br>2. Nhập Chiều cao, Cân nặng, Mục tiêu<br>3. Gửi yêu cầu | Trả về chỉ số BMI chính xác, lời khuyên và danh sách các Gói tập phù hợp nhất. | Pass |
-| **TC-04** | Đăng ký Gói tập | 1. Member chọn 1 Gói tập đang mở bán<br>2. Bấm "Đăng ký" | Tạo thành công thẻ `MembershipCard` với trạng thái `PENDING`. | Pass |
-| **TC-05** | Đặt lịch tập (Booking) | 1. Member xem lịch rảnh của PT đã chọn<br>2. Chọn khung giờ trống (OPEN) và Đặt lịch | Yêu cầu gửi tới PT, trạng thái khung giờ chuyển thành `PENDING` chờ PT xác nhận. | Pass |
-| **TC-06** | PT Xử lý lịch tập | 1. PT vào Quản lý lịch biểu<br>2. Bấm "Accept" (Duyệt) yêu cầu của học viên | Khung giờ chuyển thành `CONFIRMED`. Member thấy lịch đã chốt thành công. | Pass |
-| **TC-07** | Cập nhật tiến độ (PT) | 1. PT chọn lịch học viên đang diễn ra<br>2. Tích chọn "Hoàn thành" cho các bài tập (Session) | Hệ thống lưu vào cơ sở dữ liệu, tự động tăng chỉ số % tiến độ của học viên trên giao diện. | Pass |
-| **TC-08** | Đánh giá (Feedback) | 1. Buổi tập đã hoàn thành<br>2. Member viết đánh giá và chấm điểm (Rate) cho PT | Cập nhật điểm Rate vào CSDL để hệ thống ưu tiên đề xuất PT này ở những lần AI match sau. | Pass |
-| **TC-09** | Quản lý Gói tập (Admin)| 1. Admin vào Quản lý Package<br>2. Thêm Gói tập mới kèm danh sách PT phụ trách | Gói tập mới xuất hiện ở trang chủ, chỉ các PT được chọn mới hiển thị khi Member mua gói này. | Pass |
-| **TC-10** | Xử lý Token hết hạn| 1. Để Access Token hết hạn (hết giờ)<br>2. Thực hiện thao tác gọi API bất kỳ | Axios tự động lấy Token mới qua `/api/auth/refresh` và chạy tiếp luồng mà không bị văng. | Pass |
-| **TC-11** | Cập nhật hồ sơ (Profile) | 1. Member/PT vào trang Cá nhân<br>2. Thay đổi Avatar và cập nhật Bio/SĐT<br>3. Bấm Lưu | Dữ liệu được lưu thành công, ảnh đại diện mới được upload hiển thị ngay lập tức. | Pass |
-| **TC-12** | Đăng ký lịch rảnh (PT) | 1. PT vào Quản lý Lịch làm việc<br>2. Chọn nhiều khung giờ và lưu | Backend xử lý thêm hàng loạt (batch) các khung giờ có trạng thái OPEN thành công. | Pass |
-| **TC-13** | Hủy lịch tập | 1. Member vào Lịch tập sắp tới<br>2. Bấm nút Hủy lịch trước giờ tập | Trạng thái khung giờ chuyển thành CANCELLED, lịch được giải phóng để PT nhận khách khác. | Pass |
-| **TC-14** | Admin duyệt gói tập | 1. Admin vào Quản lý Hóa đơn/Giao dịch<br>2. Tìm thẻ đang PENDING và ấn Duyệt | Trạng thái thẻ chuyển thành ACTIVE, hệ thống mở quyền cho Member bắt đầu được chọn PT. | Pass |
-| **TC-15** | Tạo lộ trình (Roadmap) | 1. Admin vào chi tiết Gói tập<br>2. Thêm mới 1 giai đoạn (Roadmap) và các bài tập | Lộ trình được lưu thành công và sẽ làm khuôn mẫu chung hiển thị trên tiến độ của các học viên. | Pass |
-| **TC-16** | Xem lịch sử tư vấn AI | 1. Member vào màn hình Tư vấn AI<br>2. Chọn tab "Lịch sử" | Liệt kê danh sách các lần chat trước đó kèm kết quả BMI và gói tập cũ đã được AI khuyến nghị. | Pass |
-| **TC-17** | Chống trùng lặp lịch | 1. PT tạo khung giờ từ 8h-9h<br>2. Cố tình tạo thêm khung giờ 8h30-9h30 | Hệ thống báo lỗi chặn "Overlapping schedule", không cho phép tạo các khung giờ bị đè lên nhau. | Pass |
-| **TC-18** | Xác thực Email Đăng ký | 1. Khách điền Form Đăng ký tài khoản<br>2. Nhập mã Code gửi tự động về Email | Xác thực thành công, tài khoản kích hoạt trạng thái ACTIVE và có thể Login ngay lập tức. | Pass |
+\begin{longtable}{| p{3.5cm} | p{11.5cm} |}
+    \caption{Đặc tả Use Case: Đăng ký gói tập}
+    \label{tab:usecase_register_package} \\
+    \hline
+    \textbf{Thuộc tính} & \textbf{Chi tiết} \\
+    \hline
+    \endfirsthead
+    
+    \hline
+    \textbf{Thuộc tính} & \textbf{Chi tiết} \\
+    \hline
+    \endhead
+    
+    \textbf{Tên ca sử dụng} & Đăng ký gói tập \\
+    \hline
+    \textbf{Tác nhân} & Hội viên (Member), Lễ tân / Quản trị viên (Admin) \\
+    \hline
+    \textbf{Mô tả} & Cho phép Hội viên (tự thao tác online) hoặc Lễ tân (thao tác hộ tại quầy) chọn mua các gói dịch vụ tập luyện của phòng tập (ví dụ: Gói 1 tháng, Gói 1 năm, Gói VIP) để bắt đầu sử dụng dịch vụ. \\
+    \hline
+    \textbf{Tiền điều kiện} & 
+    -- Hệ thống đang hoạt động và đã cấu hình sẵn danh sách các gói tập kèm giá bán. \newline
+    -- Hội viên phải có tài khoản trên hệ thống (đã đăng nhập). \\
+    \hline
+    \textbf{Luồng chính} & 
+    1. Người dùng truy cập vào trang ``Danh sách gói tập'' hoặc ``Bảng giá''. \newline
+    2. Hệ thống hiển thị các gói tập hiện có cùng với thông tin chi tiết (tên gói, mức giá, thời hạn, các quyền lợi đi kèm). \newline
+    3. Người dùng chọn một gói tập phù hợp và nhấn nút ``Đăng ký'' hoặc ``Mua ngay''. \newline
+    4. Hệ thống hiển thị giao diện xác nhận thông tin đơn hàng, cho phép người dùng nhập mã giảm giá (nếu có). \newline
+    5. Người dùng kiểm tra lại thông tin và nhấn nút ``Tiến hành thanh toán''. \newline
+    6. Hệ thống tự động tạo một Hóa đơn (Invoice) với trạng thái ``Chờ thanh toán'' và chuyển hướng người dùng sang giao diện của ca sử dụng ``Thanh toán''. \newline
+    7. Sau khi quá trình thanh toán hoàn tất thành công, hệ thống tiếp nhận phản hồi giao dịch. \newline
+    8. Hệ thống kích hoạt gói tập cho Hội viên (cập nhật ngày bắt đầu và ngày hết hạn) và gửi email/thông báo xác nhận đăng ký thành công. \\
+    \hline
+    \textbf{Luồng thay thế} & 
+    \textbf{4a. Mã giảm giá sai/hết hạn:} Nếu mã khuyến mãi không hợp lệ, hệ thống sẽ báo lỗi màu đỏ ``Mã giảm giá không hợp lệ hoặc đã hết hạn'' và không áp dụng mức giảm. \newline
+    \textbf{5a. Hủy đăng ký giữa chừng:} Nếu người dùng nhấn ``Trở lại'' hoặc thoát trang xác nhận, hệ thống sẽ hủy bỏ phiên làm việc và không tạo hóa đơn. \newline
+    \textbf{7a. Thanh toán thất bại:} Nếu quá trình ở ca sử dụng Thanh toán không thành công, gói tập sẽ không được kích hoạt. Hóa đơn vẫn được lưu trong mục ``Lịch sử giao dịch'' với trạng thái ``Chờ thanh toán'' để Hội viên có thể thanh toán lại sau. \\
+    \hline
+    \textbf{Hậu điều kiện} & 
+    -- \textbf{Thành công:} Gói tập được thêm/kích hoạt vào tài khoản của Hội viên. Hóa đơn được ghi nhận là Đã thanh toán. \newline
+    -- \textbf{Thất bại:} Quyền lợi của Hội viên không thay đổi, gói tập chưa có hiệu lực. \\
+    \hline
+    \textbf{Mở rộng} & 
+    -- \textbf{Cộng dồn thời gian (Gia hạn):} Nếu Hội viên đang sử dụng một gói tập vẫn còn hạn (ví dụ còn 10 ngày) và mua tiếp gói tập mới, hệ thống sẽ tự động cộng dồn thời gian của gói mới nối tiếp vào ngày hết hạn hiện tại, giúp Hội viên không bị mất ngày sử dụng. \\
+    \hline
+\end{longtable}

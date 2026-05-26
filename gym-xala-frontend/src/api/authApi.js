@@ -19,3 +19,9 @@ export const registerMember = async (data) => {
   const res = await axiosClient.post(`/auth/register/member`, data);
   return res.data;
 };
+
+// VERIFY ACCOUNT
+export const verifyAccount = async (data) => {
+  const res = await axiosClient.post(`/auth/register/verify`, data);
+  return res.data;
+};
